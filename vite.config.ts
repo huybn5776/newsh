@@ -22,4 +22,14 @@ export default defineConfig({
   resolve: {
     alias: readAliasFromTsConfig(),
   },
+  server: {
+    proxy: {
+      '/news.google.com': {
+        target: 'https://news.google.com',
+        rewrite(urlPath) { return urlPath.replace(/^\/news.google.com/, ''); },
+        changeOrigin: true,
+        followRedirects: true,
+      },
+    },
+  },
 });
