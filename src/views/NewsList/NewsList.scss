@@ -1,0 +1,14 @@
+.news-list {
+  max-width: 1000px;
+}
+
+.news-topic-section {
+  & + & {
+    margin-top: 32px;
+  }
+}
+
+.news-topic-title {
+  margin: 16px 0;
+  font-size: 24px;
+}
