@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/news.google.com/:match*", "destination": "https://news.google.com/:match*" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
