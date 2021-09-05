@@ -10,9 +10,9 @@
 
       <div v-if="hasRelatedNews" class="related-news-list">
         <a
-          v-for="relatedNews of news.relatedNewsItems"
+          v-for="(relatedNews, index) of news.relatedNewsItems"
           :key="relatedNews.url"
-          v-show="expanded"
+          v-show="expanded || (!isMobile && index === 0)"
           class="related-news-link"
           target="_blank"
           :href="relatedNews.url"
@@ -30,19 +30,26 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, ref, computed } from 'vue';
+import { defineEmits, defineProps, ref, computed, onUpdated } from 'vue';
 
 import NewsInfoBar from '@views/NewsList/NewsInfoBar/NewsInfoBar.vue';
 
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
+import { useIsMobile } from '@compositions/use-is-mobile';
 import { NewsItem } from '@interfaces/news-item';
 
-const props = defineProps<{ news: NewsItem }>();
+const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();
+const emits = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean): void }>();
 
 const expandedDirection = ref<'up' | 'down'>(props.relatedExpanded ? 'up' : 'down');
 
 const expanded = computed(() => expandedDirection.value === 'up');
 const hasRelatedNews = computed(() => props.news.relatedNewsItems?.length);
+const isMobile = useIsMobile();
+
+onUpdated(() => {
+  emits('update:relatedExpanded', expanded.value);
+});
 </script>
 
 <style lang="scss" scoped>

@@ -1,12 +1,22 @@
 <template>
   <div class="page-content news-list">
     <NCollapse @item-header-click="onNewsTopicToggleExpand" :default-expanded-names="topicsToShow">
-      <NCollapseItem v-for="topic of newsTopicList" :key="topic.name" class="news-topic-section" :name="topic.type">
+      <NCollapseItem
+        v-for="(topic, topicIndex) of newsTopicList"
+        :key="topic.name"
+        class="news-topic-section"
+        :name="topic.type"
+      >
         <!--suppress HtmlUnknownAttribute -->
         <template #header>
           <h2 class="news-topic-title">{{ topic.name }}</h2>
         </template>
-        <NewsItemCard v-for="news of topic.newsItems" :key="news.url" :news="news" />
+        <NewsItemCard
+          v-for="(news, newsIndex) of topic.newsItems"
+          :key="news.url"
+          :news="news"
+          :related-expanded="!isMobile && topicIndex === 0 && newsIndex === 0"
+        />
       </NCollapseItem>
     </NCollapse>
   </div>
@@ -21,6 +31,7 @@ import { NCollapse, NCollapseItem } from 'naive-ui';
 import { useRoute, useRouter } from 'vue-router';
 
 import { getNews, requestTopics } from '@api/google-news-api';
+import { useIsMobile } from '@compositions/use-is-mobile';
 import { NewsTopicType } from '@enums/news-topic-type';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
@@ -35,6 +46,7 @@ const newsTopicList = computed(() =>
 
 const route = useRoute();
 const router = useRouter();
+const isMobile = useIsMobile();
 const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();
 
 function onNewsTopicToggleExpand({ name: topicType, expanded }: { name: NewsTopicType; expanded: boolean }): void {
