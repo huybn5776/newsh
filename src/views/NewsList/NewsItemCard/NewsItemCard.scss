@@ -1,4 +1,7 @@
 .news-item-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 16px;
   padding: 16px;
   border: 1px solid #5f6368;
   border-radius: 8px;
@@ -60,4 +63,10 @@
   padding: 0;
   font-weight: 500;
   font-size: 16px;
+}
+
+.news-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
 }
