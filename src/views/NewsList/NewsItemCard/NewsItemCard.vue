@@ -8,10 +8,11 @@
         <NewsInfoBar :news="news" />
       </a>
 
-      <div v-if="news.relatedNewsItems?.length" class="related-news-list">
+      <div v-if="hasRelatedNews" class="related-news-list">
         <a
           v-for="relatedNews of news.relatedNewsItems"
           :key="relatedNews.url"
+          v-show="expanded"
           class="related-news-link"
           target="_blank"
           :href="relatedNews.url"
@@ -23,17 +24,25 @@
         </a>
       </div>
     </div>
+
+    <ChevronArrow v-if="hasRelatedNews" class="news-expand-arrow" v-model:direction="expandedDirection" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineProps } from 'vue';
+import { defineProps, ref, computed } from 'vue';
 
 import NewsInfoBar from '@views/NewsList/NewsInfoBar/NewsInfoBar.vue';
 
+import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
 import { NewsItem } from '@interfaces/news-item';
 
-defineProps<{ news: NewsItem }>();
+const props = defineProps<{ news: NewsItem }>();
+
+const expandedDirection = ref<'up' | 'down'>(props.relatedExpanded ? 'up' : 'down');
+
+const expanded = computed(() => expandedDirection.value === 'up');
+const hasRelatedNews = computed(() => props.news.relatedNewsItems?.length);
 </script>
 
 <style lang="scss" scoped>

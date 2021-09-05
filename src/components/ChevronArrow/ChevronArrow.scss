@@ -1,0 +1,85 @@
+.chevron-arrow-container {
+  position: relative;
+  display: inline;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  padding: 10px;
+  cursor: pointer;
+
+  @keyframes blink-left {
+    from,
+    90%,
+    94% {
+      opacity: 1;
+      clip-path: ellipse(6% 6% at 30% 22%);
+    }
+
+    92%,
+    96%,
+    to {
+      opacity: 1;
+      clip-path: ellipse(7% 2% at 30% 22%);
+    }
+  }
+
+  @keyframes blink-right {
+    from,
+    90%,
+    94% {
+      opacity: 1;
+      clip-path: ellipse(6% 6% at 70% 22%);
+    }
+
+    92%,
+    96%,
+    to {
+      opacity: 1;
+      clip-path: ellipse(7% 2% at 70% 22%);
+    }
+  }
+
+  // limit to non touch devices
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::before {
+      animation-name: blink-left;
+    }
+
+    &:hover::after {
+      animation-name: blink-right;
+    }
+  }
+
+  &::before,
+  &::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0;
+    animation-duration: 3s;
+    animation-delay: 3s;
+    animation-iteration-count: infinite;
+    content: '';
+  }
+}
+
+.chevron-arrow {
+  position: relative;
+  display: block;
+  width: 12px;
+  height: 12px;
+  background: white;
+  transition: clip-path .3s;
+  transition-timing-function: cubic-bezier(.5, -.9, .25, 1);
+
+  &.down {
+    clip-path: polygon(0 15%, 50% 56.95%, 100% 15%, 100% 39.5%, 50% 81.45%, 0 39.5%);
+  }
+
+  &.up {
+    clip-path: polygon(0 60.5%, 50% 18.55%, 100% 60.5%, 100% 85%, 50% 43.05%, 0 85%);
+  }
+}
