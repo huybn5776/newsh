@@ -1,6 +1,6 @@
 <template>
   <div class="news-item-card">
-    <img class="news-image" :src="news.image" :alt="news.excerpt" />
+    <img v-if="news.image" class="news-image" :src="news.image" :alt="news.excerpt" />
 
     <div class="news-item">
       <a :href="news.url" class="news-link" target="_blank">
