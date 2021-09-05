@@ -1,5 +1,7 @@
 <template>
   <div class="news-item-card">
+    <img class="news-image" :src="news.image" :alt="news.excerpt" />
+
     <div class="news-item">
       <a :href="news.url" class="news-link" target="_blank">
         <h3 class="news-title">{{ news.title }}</h3>
@@ -8,11 +10,11 @@
 
       <div v-if="news.relatedNewsItems?.length" class="related-news-list">
         <a
-            v-for="relatedNews of news.relatedNewsItems"
-            :key="relatedNews.url"
-            class="related-news-link"
-            target="_blank"
-            :href="relatedNews.url"
+          v-for="relatedNews of news.relatedNewsItems"
+          :key="relatedNews.url"
+          class="related-news-link"
+          target="_blank"
+          :href="relatedNews.url"
         >
           <div class="related-news-container">
             <h4 class="related-news-title">{{ relatedNews.title }}</h4>
@@ -21,8 +23,6 @@
         </a>
       </div>
     </div>
-
-    <img class="news-image" :src="news.image" :alt="news.excerpt" />
   </div>
 </template>
 
