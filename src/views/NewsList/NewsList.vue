@@ -26,8 +26,8 @@ onMounted(async () => {
   const topic = route.params.topic as string;
   if (!topic) {
     await fetchTopStories();
-  } else if ((topics as string[]).includes(topic)) {
-    newsTopics.value = await getNews(topic as typeof topics[number]);
+  } else if ((requestTopics as string[]).includes(topic)) {
+    newsTopics.value = await getNews(topic as typeof requestTopics[number]);
   } else {
     await router.push({ name: 'news' });
   }

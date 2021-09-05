@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { NewsTopicType } from '@enums/news-topic-type';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 
@@ -47,7 +48,7 @@ const requestBodies = {
     ],
   ],
 };
-export const topics = Object.keys(requestBodies) as (keyof typeof requestBodies)[];
+export const requestTopics = Object.keys(requestBodies) as (keyof typeof requestBodies)[];
 
 type NewsObjectRaw = [number] & [unknown, NewsObjectRaw | NewsObjectRaw[] | string];
 type ValueOf<T> = T[keyof T];
@@ -83,6 +84,7 @@ function extractNewsTopicObjects(responseArray: NewsObjectRaw): NewsObjectRaw[] 
 
 function parseNewsTopic(newsTopicObject: NewsObjectRaw): NewsTopicItem {
   const topicName = newsTopicObject[2];
+  const topicType = parseTopicType(newsTopicObject);
 
   const newsObjects: NewsObjectRaw[] = newsTopicObject[3];
   const newsItems: NewsItem[] = [];
@@ -106,7 +108,24 @@ function parseNewsTopic(newsTopicObject: NewsObjectRaw): NewsTopicItem {
     newsItems.push(newsItem);
   }
 
-  return { name: topicName, newsItems };
+  return { name: topicName, type: topicType, newsItems };
+}
+
+function parseTopicType(newsTopicObject: NewsObjectRaw): NewsTopicType {
+  const topicIdToTopicTypeMap: Record<string, NewsTopicType> = {
+    CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.Headline,
+    CAAqJQgKIh9DQkFTRVFvSUwyMHZNRFptTXpJU0JYcG9MVlJYS0FBUAE: NewsTopicType.Nation,
+    CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx1YlY4U0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.World,
+    CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx6TVdZU0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.Business,
+    CAAqLAgKIiZDQkFTRmdvSkwyMHZNR1ptZHpWbUVnVjZhQzFVVnhvQ1ZGY29BQVAB: NewsTopicType.TechnologyAndScience,
+    CAAqKggKIiRDQkFTRlFvSUwyMHZNREpxYW5RU0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.Entertainment,
+    CAAqKggKIiRDQkFTRlFvSUwyMHZNRFp1ZEdvU0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.Sports,
+    CAAqJQgKIh9DQkFTRVFvSUwyMHZNR3QwTlRFU0JYcG9MVlJYS0FBUAE: NewsTopicType.Health,
+    'CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ/sections/CAQqLggAKioICiIkQ0JBU0ZRb0lMMjB2TURWcWFHY1NCWHBvTFZSWEdnSlVWeWdBUAE':
+      NewsTopicType.HeadlineDetail,
+  };
+  const topicId = `${newsTopicObject[13]?.[1] || newsTopicObject[21]}`.split('topics/')[1];
+  return topicIdToTopicTypeMap[topicId];
 }
 
 function parseNewsItem(newsNode: NewsObjectRaw): NewsItem {
