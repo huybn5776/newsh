@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <ChevronArrow v-if="hasRelatedNews" class="news-expand-arrow" v-model:direction="expandedDirection" />
+    <ChevronArrow v-if="expandable" class="news-expand-arrow" v-model:direction="expandedDirection" />
   </div>
 </template>
 
@@ -46,6 +46,9 @@ const expandedDirection = ref<'up' | 'down'>(props.relatedExpanded ? 'up' : 'dow
 const expanded = computed(() => expandedDirection.value === 'up');
 const hasRelatedNews = computed(() => props.news.relatedNewsItems?.length);
 const isMobile = useIsMobile();
+const expandable = computed(
+  () => hasRelatedNews.value && ((props.news.relatedNewsItems?.length || 0) > 1 || isMobile.value),
+);
 
 onUpdated(() => {
   emits('update:relatedExpanded', expanded.value);
