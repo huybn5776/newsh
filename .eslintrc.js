@@ -37,7 +37,7 @@ module.exports = {
             position: 'before',
           },
           {
-            pattern: '@+(api|components|enums|interfaces)/**',
+            pattern: '@+(api|components|enums|interfaces|utils)/**',
             group: 'internal',
           },
           {

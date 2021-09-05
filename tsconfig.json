@@ -16,6 +16,7 @@
       "@components/*": ["src/components/*"],
       "@enums/*": ["src/enums/*"],
       "@interfaces/*": ["src/interfaces/*"],
+      "@utils/*": ["src/utils/*"],
       "@views/*": ["src/views/*"]
     }
   },

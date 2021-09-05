@@ -4,11 +4,12 @@
 
 .news-topic-section {
   & + & {
-    margin-top: 32px;
+    margin-top: 16px;
+    border-top: 0;
   }
 }
 
 .news-topic-title {
-  margin: 16px 0;
+  margin: 0;
   font-size: 24px;
 }

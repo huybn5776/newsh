@@ -1,26 +1,49 @@
 <template>
   <div class="page-content news-list">
-    <div v-for="topic of newsTopics" :key="topic.name" class="news-topic-section">
-      <h2 class="news-topic-title">{{ topic.name }}</h2>
-      <NewsItemCard v-for="news of topic.newsItems" :key="news.url" :news="news" />
-    </div>
+    <NCollapse @item-header-click="onNewsTopicToggleExpand" :default-expanded-names="topicsToShow">
+      <NCollapseItem v-for="topic of newsTopicList" :key="topic.name" class="news-topic-section" :name="topic.type">
+        <!--suppress HtmlUnknownAttribute -->
+        <template #header>
+          <h2 class="news-topic-title">{{ topic.name }}</h2>
+        </template>
+        <NewsItemCard v-for="news of topic.newsItems" :key="news.url" :news="news" />
+      </NCollapseItem>
+    </NCollapse>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
+import { useTopicsToShow } from '@views/NewsList/use-topics-to-show';
+import { NCollapse, NCollapseItem } from 'naive-ui';
 import { useRoute, useRouter } from 'vue-router';
 
-import { getNews, topics } from '@api/google-news-api';
+import { getNews, requestTopics } from '@api/google-news-api';
+import { NewsTopicType } from '@enums/news-topic-type';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
+const newsTopicList = computed(() =>
+  newsTopics.value.map((newsTopic) => {
+    const toExpand = !topicsToShow.value.length || topicsToShow.value.includes(newsTopic.type);
+    return { ...newsTopic, newsItems: toExpand ? newsTopic.newsItems : [] };
+  }),
+);
 
 const route = useRoute();
 const router = useRouter();
+const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();
+
+function onNewsTopicToggleExpand({ name: topicType, expanded }: { name: NewsTopicType; expanded: boolean }): void {
+  if (expanded) {
+    addTopicToShow(topicType as NewsTopicType);
+  } else {
+    deleteTopicToShow(topicType as NewsTopicType);
+  }
+}
 
 onMounted(async () => {
   const topic = route.params.topic as string;
