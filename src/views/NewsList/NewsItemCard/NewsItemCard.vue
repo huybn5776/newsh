@@ -1,25 +1,35 @@
 <template>
   <div class="news-item-card">
-    <a :href="news.url" target="_blank">
+    <a :href="news.url" class="news-link" target="_blank">
       <h3 class="news-title">{{ news.title }}</h3>
+      <NewsInfoBar :news="news" />
     </a>
 
-    <div v-if="news.relatedNewsItems?.length" class="related-news-container">
-      <a v-for="relatedNews of news.relatedNewsItems" :key="relatedNews.url" :href="relatedNews.url" target="_blank">
-        <h4 class="related-news-title">{{ relatedNews.title }}</h4>
+    <div v-if="news.relatedNewsItems?.length" class="related-news-list">
+      <a
+        v-for="relatedNews of news.relatedNewsItems"
+        :key="relatedNews.url"
+        class="related-news-link"
+        target="_blank"
+        :href="relatedNews.url"
+      >
+        <div class="related-news-container">
+          <h4 class="related-news-title">{{ relatedNews.title }}</h4>
+          <NewsInfoBar :news="relatedNews" />
+        </div>
       </a>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineProps, PropType } from 'vue';
+import { defineProps } from 'vue';
+
+import NewsInfoBar from '@views/NewsList/NewsInfoBar/NewsInfoBar.vue';
 
 import { NewsItem } from '@interfaces/news-item';
 
-defineProps({
-  news: { type: Object as PropType<NewsItem>, required: true },
-});
+defineProps<{ news: NewsItem }>();
 </script>
 
 <style lang="scss" scoped>
