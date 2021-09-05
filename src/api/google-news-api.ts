@@ -141,6 +141,8 @@ function parseNewsItem(newsNode: NewsObjectRaw): NewsItem {
     return {
       title: newsNode[2],
       excerpt: newsNode[3],
+      publication: newsNode[10][2],
+      timestamp: newsNode[4][0] * 1000,
       url,
       image,
     };
