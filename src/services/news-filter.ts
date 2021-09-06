@@ -12,26 +12,45 @@ export function collapseRelatedNewsExcept(
 }
 
 export function removeYoutubeNews(): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
+  return removeNewsOfTopicBy((news) => news.url.includes('youtube'));
+}
+
+function removeNewsOfTopicBy(
+  predicate: (newsItem: NewsItem) => boolean,
+): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
+  const filter = removeNewsBy(predicate);
+
   return (newsTopicItem: NewsTopicItem) => {
     const newsItems: NewsItem[] = newsTopicItem.newsItems;
-    const filterNewsItems: NewsItem[] = [];
+    const filteredNewsItems: NewsItem[] = [];
     newsItems.forEach((newsItem) => {
-      const filteredRelatedNewsItems = (newsItem.relatedNewsItems || []).filter(
-        (relatedNews) => !relatedNews.url.includes('youtube'),
-      );
-      if (newsItem.url.includes('youtube') && !filteredRelatedNewsItems.length) {
-        return;
+      const updatedNewsItem = filter(newsItem);
+      if (updatedNewsItem) {
+        filteredNewsItems.push(updatedNewsItem);
       }
-
-      let filteredNewsItem: NewsItem;
-      if (newsItem.url.includes('youtube')) {
-        filteredNewsItem = { ...filteredRelatedNewsItems[0], relatedNewsItems: filteredRelatedNewsItems.slice(1) };
-      } else {
-        filteredNewsItem = { ...newsItem, relatedNewsItems: filteredRelatedNewsItems };
-      }
-      filterNewsItems.push(filteredNewsItem);
     });
 
-    return { ...newsTopicItem, newsItems: filterNewsItems };
+    return { ...newsTopicItem, newsItems: filteredNewsItems };
+  };
+}
+
+function removeNewsBy(predicate: (newsItem: NewsItem) => boolean): (newsItem: NewsItem) => NewsItem | null {
+  return (newsItem: NewsItem) => {
+    const updatedNewsItem = { ...newsItem };
+
+    if (updatedNewsItem.relatedNewsItems?.length) {
+      updatedNewsItem.relatedNewsItems = updatedNewsItem.relatedNewsItems.filter((news) => !predicate(news));
+    }
+
+    if (predicate(updatedNewsItem)) {
+      if (updatedNewsItem.relatedNewsItems?.length) {
+        const [replacedNewsItem, ...relatedNewsItems] = updatedNewsItem.relatedNewsItems;
+        replacedNewsItem.relatedNewsItems = relatedNewsItems;
+        return replacedNewsItem;
+      }
+      return null;
+    }
+
+    return updatedNewsItem;
   };
 }
