@@ -15,6 +15,10 @@ export function removeYoutubeNews(): (newsTopicItem: NewsTopicItem) => NewsTopic
   return removeNewsOfTopicBy((news) => news.url.includes('youtube'));
 }
 
+export function removeByNewsSource(publications: string[]): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
+  return removeNewsOfTopicBy((news) => publications.includes(news.publication));
+}
+
 function removeNewsOfTopicBy(
   predicate: (newsItem: NewsItem) => boolean,
 ): (newsTopicItem: NewsTopicItem) => NewsTopicItem {

@@ -8,3 +8,12 @@ export function getSettingFromStorage<T>(key: SettingKey): T | null {
 export function saveSettingToStorage<T>(key: SettingKey, value: T): void {
   localStorage.setItem(key.toString(), JSON.stringify(value));
 }
+
+export function updateSettingFromStorage<T>(key: SettingKey, updater: (value: T | null) => T | null): void {
+  const settingValue = getSettingFromStorage<T>(key);
+  const updatedValue = updater(settingValue);
+  if (settingValue === updatedValue) {
+    return;
+  }
+  saveSettingToStorage(key, updatedValue);
+}

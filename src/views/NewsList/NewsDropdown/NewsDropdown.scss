@@ -1,0 +1,12 @@
+.menu-icon {
+  width: 24px;
+  height: 24px;
+  background: url('/src/assets/svg/dots-vertical.svg') no-repeat center;
+  background-size: 16px 16px;
+  border-radius: 50%;
+  transition: background-color .2s;
+
+  &:hover {
+    background-color: rgba(white, .1);
+  }
+}

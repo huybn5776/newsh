@@ -36,7 +36,7 @@ import { NewsTopicType } from '@enums/news-topic-type';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { collapseRelatedNewsExcept, removeYoutubeNews } from '@services/news-filter';
+import { collapseRelatedNewsExcept, removeYoutubeNews, removeByNewsSource } from '@services/news-filter';
 import { getSettingFromStorage } from '@utils/storage-utils';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
@@ -44,6 +44,10 @@ const newsTopicList = computed(() => {
   let newsTopicItems = newsTopics.value.map(collapseRelatedNewsExcept(topicsToShow.value));
   if (getSettingFromStorage(SettingKey.FilterOutYoutube)) {
     newsTopicItems = newsTopicItems.map(removeYoutubeNews());
+  }
+  const hiddenSources = getSettingFromStorage<string[]>(SettingKey.HiddenSources);
+  if (hiddenSources?.length) {
+    newsTopicItems = newsTopicItems.map(removeByNewsSource(hiddenSources));
   }
   return newsTopicItems;
 });

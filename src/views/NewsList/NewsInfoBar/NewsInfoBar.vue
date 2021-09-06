@@ -2,11 +2,14 @@
   <div class="news-info-bar-container">
     <i v-if="isYoutube" class="youtube-icon" />
     <span>{{ news.publication }}．{{ timeAgo }}</span>
+    <NewsDropdown class="news-info-dropdown" :news="news" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { defineProps, computed } from 'vue';
+
+import NewsDropdown from '@views/NewsList/NewsDropdown/NewsDropdown.vue';
 
 import { NewsItem } from '@interfaces/news-item';
 import { formatToTimeAgo } from '@utils/time-ago';
