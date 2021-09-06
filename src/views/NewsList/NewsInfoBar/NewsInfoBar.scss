@@ -1,12 +1,30 @@
 .news-info-bar-container {
-  display: flex;
+  display: grid;
+  grid-gap: 0 4px;
+  grid-template-columns: [youtube-icon] max-content [publication] minmax(auto, max-content) [time] max-content [dropdown] max-content;
+  align-items: center;
   font-size: 12px;
   opacity: .7;
 }
 
 .youtube-icon {
+  grid-column-start: youtube-icon;
   width: 18px;
   height: 18px;
-  margin-right: 4px;
   background: url('/src/assets/svg/youtube.svg');
+}
+
+.news-info-publication {
+  grid-column-start: publication;
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.news-info-time-ago {
+  grid-column-start: time;
+}
+
+.news-info-dropdown {
+  grid-column-start: dropdown;
 }

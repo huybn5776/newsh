@@ -1,7 +1,8 @@
 <template>
   <div class="news-info-bar-container">
     <i v-if="isYoutube" class="youtube-icon" />
-    <span>{{ news.publication }}．{{ timeAgo }}</span>
+    <span class="news-info-publication">{{ news.publication }}．</span>
+    <span class="news-info-time-ago">{{ timeAgo }}</span>
     <NewsDropdown class="news-info-dropdown" :news="news" />
   </div>
 </template>
