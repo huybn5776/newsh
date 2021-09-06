@@ -33,12 +33,20 @@ import { useRoute, useRouter } from 'vue-router';
 import { getNews, requestTopics } from '@api/google-news-api';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { NewsTopicType } from '@enums/news-topic-type';
+import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { collapseRelatedNewsExcept } from '@services/news-filter';
+import { collapseRelatedNewsExcept, removeYoutubeNews } from '@services/news-filter';
+import { getSettingFromStorage } from '@utils/storage-utils';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
-const newsTopicList = computed(() => newsTopics.value.map(collapseRelatedNewsExcept(topicsToShow.value)));
+const newsTopicList = computed(() => {
+  let newsTopicItems = newsTopics.value.map(collapseRelatedNewsExcept(topicsToShow.value));
+  if (getSettingFromStorage(SettingKey.FilterOutYoutube)) {
+    newsTopicItems = newsTopicItems.map(removeYoutubeNews());
+  }
+  return newsTopicItems;
+});
 
 const route = useRoute();
 const router = useRouter();
