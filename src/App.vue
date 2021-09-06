@@ -1,6 +1,7 @@
 <template>
   <div class="app">
-    <NConfigProvider :theme="darkTheme">
+    <NConfigProvider class="page-layout" :theme="darkTheme">
+      <NavBar />
       <router-view />
     </NConfigProvider>
   </div>
@@ -8,6 +9,8 @@
 
 <script lang="ts" setup>
 import { darkTheme, NConfigProvider } from 'naive-ui';
+
+import NavBar from '@components/NavBar/NavBar.vue';
 </script>
 
 <style lang="scss">
