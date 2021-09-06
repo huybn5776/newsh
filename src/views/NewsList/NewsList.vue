@@ -35,14 +35,10 @@ import { useIsMobile } from '@compositions/use-is-mobile';
 import { NewsTopicType } from '@enums/news-topic-type';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
+import { collapseRelatedNewsExcept } from '@services/news-filter';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
-const newsTopicList = computed(() =>
-  newsTopics.value.map((newsTopic) => {
-    const toExpand = !topicsToShow.value.length || topicsToShow.value.includes(newsTopic.type);
-    return { ...newsTopic, newsItems: toExpand ? newsTopic.newsItems : [] };
-  }),
-);
+const newsTopicList = computed(() => newsTopics.value.map(collapseRelatedNewsExcept(topicsToShow.value)));
 
 const route = useRoute();
 const router = useRouter();
