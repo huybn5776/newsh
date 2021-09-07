@@ -27,7 +27,7 @@ import { ref, onMounted, computed } from 'vue';
 
 import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
 import { useTopicsToShow } from '@views/NewsList/use-topics-to-show';
-import { NCollapse, NCollapseItem } from 'naive-ui';
+import { NCollapse, NCollapseItem, useLoadingBar } from 'naive-ui';
 import { useRoute, useRouter } from 'vue-router';
 
 import { getNews, requestTopics } from '@api/google-news-api';
@@ -60,6 +60,7 @@ const route = useRoute();
 const router = useRouter();
 const isMobile = useIsMobile();
 const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();
+const loadingBar = useLoadingBar();
 
 function onNewsTopicToggleExpand({ name: topicType, expanded }: { name: NewsTopicType; expanded: boolean }): void {
   if (expanded) {
@@ -72,12 +73,15 @@ function onNewsTopicToggleExpand({ name: topicType, expanded }: { name: NewsTopi
 onMounted(async () => {
   const topic = route.params.topic as string;
   if (!topic) {
+    loadingBar.start();
     await fetchTopStories();
   } else if ((requestTopics as string[]).includes(topic)) {
+    loadingBar.start();
     newsTopics.value = await getNews(topic as typeof requestTopics[number]);
   } else {
     await router.push({ name: 'news' });
   }
+  loadingBar.finish();
 });
 
 async function fetchTopStories(): Promise<void> {
