@@ -2,8 +2,10 @@
   <div class="app">
     <NConfigProvider class="page-layout" :theme="darkTheme">
       <NMessageProvider placement="bottom-left">
-        <NavBar />
-        <router-view />
+        <SiteHeader />
+        <div class="page-content-container">
+          <router-view />
+        </div>
       </NMessageProvider>
     </NConfigProvider>
   </div>
@@ -12,7 +14,7 @@
 <script lang="ts" setup>
 import { darkTheme, NConfigProvider, NMessageProvider } from 'naive-ui';
 
-import NavBar from '@components/NavBar/NavBar.vue';
+import SiteHeader from '@components/SiteHeader/SiteHeader.vue';
 </script>
 
 <style lang="scss">

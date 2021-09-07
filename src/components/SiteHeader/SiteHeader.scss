@@ -1,0 +1,33 @@
+.site-header {
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 8px 16px;
+  background-color: rgba(white, .04);
+  border-bottom: 1px solid rgba(white, .1);
+}
+
+.site-header-content-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1000px;
+
+  & > *:first-child {
+    margin-left: 16px;
+  }
+
+  & > *:last-child {
+    margin-right: 16px;
+  }
+}
+
+.site-logo-link {
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.site-logo {
+  margin: 0 auto 0 0;
+}
