@@ -8,9 +8,6 @@
   margin: 0 0 8px 0;
 }
 
-.setting-title {
-}
-
 .setting-section {
   & + &::before {
     display: block;
@@ -29,12 +26,6 @@
 
   & + & {
     margin-top: 16px;
-  }
-}
-
-.hidden-source-tag {
-  & + & {
-    margin-left: 8px;
   }
 }
 

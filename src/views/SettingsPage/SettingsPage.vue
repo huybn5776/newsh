@@ -14,18 +14,7 @@
       <h3>Hidden news</h3>
       <div class="setting-row">
         <span>Sources: </span>
-        <div class="setting-hidden-site-list">
-          <NTag
-            v-for="source of hiddenSources"
-            :key="source"
-            closable
-            class="hidden-source-tag"
-            @close="deleteHiddenSite(source)"
-          >
-            {{ source }}
-          </NTag>
-          <p v-if="!hiddenSources?.length">(Empty)</p>
-        </div>
+        <NDynamicTags v-model:value="hiddenSources" />
       </div>
 
       <div class="setting-row">
@@ -41,18 +30,14 @@
 </template>
 
 <script lang="ts" setup>
-import { NSwitch, NTag, NDynamicTags } from 'naive-ui';
+import { NSwitch, NDynamicTags } from 'naive-ui';
 
-import { useSyncSetting, useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
+import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
 import { SettingKey } from '@enums/setting-key';
 
 const filterOutYoutube = useSyncSettingMapUndefined<boolean>(SettingKey.FilterOutYoutube);
-const hiddenSources = useSyncSetting<string[]>(SettingKey.HiddenSources);
+const hiddenSources = useSyncSettingMapNullArray<string[]>(SettingKey.HiddenSources);
 const excludeTerms = useSyncSettingMapNullArray<string[]>(SettingKey.ExcludeTerms);
-
-function deleteHiddenSite(source: string): void {
-  hiddenSources.value = hiddenSources.value?.filter((s) => s !== source) || [];
-}
 </script>
 
 <style lang="scss" scoped>
