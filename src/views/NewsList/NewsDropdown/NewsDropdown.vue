@@ -1,6 +1,6 @@
 <template>
   <!--suppress RequiredAttributes -->
-  <NDropdown trigger="click" placement="bottom-start" :options="menuOptions" @select="onDropdownSelect">
+  <NDropdown trigger="click" placement="bottom" :options="menuOptions" @select="onDropdownSelect">
     <i class="menu-icon" @click.prevent />
   </NDropdown>
 </template>
