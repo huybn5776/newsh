@@ -1,3 +1,9 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 12px;
+}
+
 .setting-page-title {
   margin: 0 0 8px 0;
 }
@@ -20,5 +26,23 @@
 .hidden-source-tag {
   & + & {
     margin-left: 8px;
+  }
+}
+
+.github-logo {
+  align-self: center;
+  width: 36px;
+  height: 36px;
+  margin-top: auto;
+  padding: 8px;
+  font-size: 0;
+  background: url('/src/assets/svg/github.svg') no-repeat center;
+  background-size: 36px 36px;
+  opacity: .6;
+  transition: opacity .2s, transform .5s;
+
+  &:hover {
+    transform: translateY(-1px);
+    opacity: 1;
   }
 }

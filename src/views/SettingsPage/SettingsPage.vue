@@ -1,5 +1,5 @@
 <template>
-  <div class="page-content">
+  <div class="page-content settings-page">
     <h1 class="setting-page-title">Settings</h1>
     <div class="setting-section">
       <h3>General settings</h3>
@@ -25,6 +25,8 @@
         <p v-if="!hiddenSources?.length">(Empty)</p>
       </div>
     </div>
+
+    <a class="github-logo" href="https://github.com/huybn5776/newsh" target="_blank">GitHub</a>
   </div>
 </template>
 
