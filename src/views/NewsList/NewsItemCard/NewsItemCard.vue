@@ -32,11 +32,10 @@
 <script lang="ts" setup>
 import { defineEmits, defineProps, ref, computed, onUpdated } from 'vue';
 
-import NewsInfoBar from '@views/NewsList/NewsInfoBar/NewsInfoBar.vue';
-
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { NewsItem } from '@interfaces/news-item';
+import NewsInfoBar from '@views/NewsList/NewsInfoBar/NewsInfoBar.vue';
 
 const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();
 const emits = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean): void }>();

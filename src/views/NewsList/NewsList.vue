@@ -25,8 +25,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
 
-import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
-import { useTopicsToShow } from '@views/NewsList/use-topics-to-show';
 import { NCollapse, NCollapseItem, useLoadingBar } from 'naive-ui';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -38,6 +36,8 @@ import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { collapseRelatedNewsExcept, removeYoutubeNews, removeByNewsSource, removeByTerms } from '@services/news-filter';
 import { getSettingFromStorage } from '@utils/storage-utils';
+import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
+import { useTopicsToShow } from '@views/NewsList/use-topics-to-show';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
 const newsTopicList = computed(() => {
