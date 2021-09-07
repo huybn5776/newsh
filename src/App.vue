@@ -1,19 +1,16 @@
 <template>
   <div class="app">
-    <NConfigProvider class="page-layout" :theme="darkTheme">
-      <NMessageProvider placement="bottom-left">
-        <SiteHeader />
-        <div class="page-content-container">
-          <router-view />
-        </div>
-      </NMessageProvider>
-    </NConfigProvider>
+    <ProvidersWrapper>
+      <SiteHeader />
+      <div class="page-content-container">
+        <router-view />
+      </div>
+    </ProvidersWrapper>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { darkTheme, NConfigProvider, NMessageProvider } from 'naive-ui';
-
+import ProvidersWrapper from '@components/ProvidersWrapper/ProvidersWrapper.vue';
 import SiteHeader from '@components/SiteHeader/SiteHeader.vue';
 </script>
 
