@@ -9,7 +9,6 @@
 }
 
 .setting-title {
-  margin-left: 8px;
 }
 
 .setting-section {
@@ -20,6 +19,16 @@
     margin: 32px 0 16px 0;
     background: rgba(white, .3);
     content: '';
+  }
+}
+
+.setting-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  & + & {
+    margin-top: 16px;
   }
 }
 

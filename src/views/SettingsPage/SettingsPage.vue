@@ -11,18 +11,28 @@
     </div>
 
     <div class="setting-section">
-      <h3>Hidden news sources</h3>
-      <div class="setting-hidden-site-list">
-        <NTag
-          v-for="source of hiddenSources"
-          :key="source"
-          closable
-          class="hidden-source-tag"
-          @close="deleteHiddenSite(source)"
-        >
-          {{ source }}
-        </NTag>
-        <p v-if="!hiddenSources?.length">(Empty)</p>
+      <h3>Hidden news</h3>
+      <div class="setting-row">
+        <span>Sources: </span>
+        <div class="setting-hidden-site-list">
+          <NTag
+            v-for="source of hiddenSources"
+            :key="source"
+            closable
+            class="hidden-source-tag"
+            @close="deleteHiddenSite(source)"
+          >
+            {{ source }}
+          </NTag>
+          <p v-if="!hiddenSources?.length">(Empty)</p>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <span>Terms: </span>
+        <div class="setting-hidden-site-list">
+          <NDynamicTags v-model:value="excludeTerms" />
+        </div>
       </div>
     </div>
 
@@ -31,13 +41,14 @@
 </template>
 
 <script lang="ts" setup>
-import { NSwitch, NTag } from 'naive-ui';
+import { NSwitch, NTag, NDynamicTags } from 'naive-ui';
 
-import { useSyncSetting, useSyncSettingMapUndefined } from '@compositions/use-sync-setting';
+import { useSyncSetting, useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
 import { SettingKey } from '@enums/setting-key';
 
 const filterOutYoutube = useSyncSettingMapUndefined<boolean>(SettingKey.FilterOutYoutube);
 const hiddenSources = useSyncSetting<string[]>(SettingKey.HiddenSources);
+const excludeTerms = useSyncSettingMapNullArray<string[]>(SettingKey.ExcludeTerms);
 
 function deleteHiddenSite(source: string): void {
   hiddenSources.value = hiddenSources.value?.filter((s) => s !== source) || [];

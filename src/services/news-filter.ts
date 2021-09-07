@@ -19,6 +19,10 @@ export function removeByNewsSource(publications: string[]): (newsTopicItem: News
   return removeNewsOfTopicBy((news) => publications.includes(news.publication));
 }
 
+export function removeByTerms(terms: string[]): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
+  return removeNewsOfTopicBy((news) => terms.some((term) => news.title.includes(term)));
+}
+
 function removeNewsOfTopicBy(
   predicate: (newsItem: NewsItem) => boolean,
 ): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
