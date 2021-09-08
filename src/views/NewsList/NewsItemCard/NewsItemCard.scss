@@ -17,6 +17,8 @@
 }
 
 .news-link {
+  display: block;
+
   &:hover {
     text-decoration: none;
 
@@ -68,6 +70,14 @@
   padding: 0;
   font-weight: 500;
   font-size: 16px;
+}
+
+.seen-news {
+  opacity: .6;
+
+  .news-title {
+    font-weight: normal;
+  }
 }
 
 .news-image {

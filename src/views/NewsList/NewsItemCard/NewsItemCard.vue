@@ -3,7 +3,13 @@
     <img v-if="news.image" class="news-image" :src="news.image" :alt="news.excerpt" />
 
     <div class="news-item">
-      <a :href="news.url" class="news-link" target="_blank">
+      <a
+        :href="news.url"
+        class="news-link"
+        target="_blank"
+        v-intersection="{ enter: () => onNewsEnter(news), leave: () => onNewsLeave(news) }"
+        :class="seenNewsUrlMap[news.url] ? 'seen-news' : ''"
+      >
         <h3 class="news-title">{{ news.title }}</h3>
         <NewsInfoBar :news="news" />
       </a>
@@ -15,7 +21,9 @@
           v-show="expanded || (!isMobile && index === 0)"
           class="related-news-link"
           target="_blank"
+          v-intersection="{ enter: () => onNewsEnter(relatedNews), leave: () => onNewsLeave(relatedNews) }"
           :href="relatedNews.url"
+          :class="seenNewsUrlMap[relatedNews.url] ? 'seen-news' : ''"
         >
           <div class="related-news-container">
             <h4 class="related-news-title">{{ relatedNews.title }}</h4>
@@ -25,22 +33,29 @@
       </div>
     </div>
 
+    <!--suppress RequiredAttributes -->
     <ChevronArrow v-if="expandable" class="news-expand-arrow" v-model:direction="expandedDirection" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineEmits, defineProps, ref, computed, onUpdated } from 'vue';
+import { defineEmits, defineProps, ref, computed, onUpdated, inject } from 'vue';
 
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
+import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
 import { NewsItem } from '@interfaces/news-item';
 import NewsInfoBar from '@views/NewsList/NewsInfoBar/NewsInfoBar.vue';
+import { useMarkNewsAsSeen } from '@views/NewsList/NewsItemCard/use-mark-news-as-seen';
+import { provideSeenNewsUrlMap, provideHiddenSeenNewsSetting } from '@views/NewsList/use-provide-seen-news';
 
 const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();
 const emits = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean): void }>();
+const vIntersection = intersectionDirectiveFactory({ threshold: 1 });
 
 const expandedDirection = ref<'up' | 'down'>(props.relatedExpanded ? 'up' : 'down');
+const hideSeenNewsEnabled = inject(provideHiddenSeenNewsSetting);
+const seenNewsUrlMap = inject(provideSeenNewsUrlMap) as Record<string, boolean>;
 
 const expanded = computed(() => expandedDirection.value === 'up');
 const hasRelatedNews = computed(() => props.news.relatedNewsItems?.length);
@@ -48,6 +63,20 @@ const isMobile = useIsMobile();
 const expandable = computed(
   () => hasRelatedNews.value && ((props.news.relatedNewsItems?.length || 0) > 1 || isMobile.value),
 );
+
+const markNewsSeenCallback = useMarkNewsAsSeen(seenNewsUrlMap);
+
+function onNewsEnter(newsItem: NewsItem): void {
+  if (hideSeenNewsEnabled) {
+    markNewsSeenCallback.onNewsEnter(newsItem);
+  }
+}
+
+function onNewsLeave(newsItem: NewsItem): void {
+  if (hideSeenNewsEnabled) {
+    markNewsSeenCallback.onNewsLeave(newsItem);
+  }
+}
 
 onUpdated(() => {
   emits('update:relatedExpanded', expanded.value);

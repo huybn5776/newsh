@@ -8,6 +8,11 @@
         <NSwitch v-model:value="filterOutYoutube" />
         <span class="setting-title">Filter out youtube news.</span>
       </p>
+
+      <p class="setting-row">
+        <NSwitch v-model:value="hideSeenNews" />
+        <span class="setting-title">Gray out the news that seen within one day.</span>
+      </p>
     </div>
 
     <div class="setting-section">
@@ -30,14 +35,27 @@
 </template>
 
 <script lang="ts" setup>
+import { watch } from 'vue';
+
 import { NSwitch, NDynamicTags } from 'naive-ui';
 
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
 import { SettingKey } from '@enums/setting-key';
+import { deleteSettingFromStorage } from '@utils/storage-utils';
 
 const filterOutYoutube = useSyncSettingMapUndefined<boolean>(SettingKey.FilterOutYoutube);
+const hideSeenNews = useSyncSettingMapUndefined<boolean>(SettingKey.HideSeenNews);
 const hiddenSources = useSyncSettingMapNullArray<string[]>(SettingKey.HiddenSources);
 const excludeTerms = useSyncSettingMapNullArray<string[]>(SettingKey.ExcludeTerms);
+
+watch(
+  () => hideSeenNews.value,
+  () => {
+    if (hideSeenNews.value === false) {
+      deleteSettingFromStorage(SettingKey.SeenNewsItems);
+    }
+  },
+);
 </script>
 
 <style lang="scss" scoped>

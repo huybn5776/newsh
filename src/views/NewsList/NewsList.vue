@@ -37,6 +37,7 @@ import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { collapseRelatedNewsExcept, removeYoutubeNews, removeByNewsSource, removeByTerms } from '@services/news-filter';
 import { getSettingFromStorage } from '@utils/storage-utils';
 import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
+import { useProvideSeenNews } from '@views/NewsList/use-provide-seen-news';
 import { useTopicsToShow } from '@views/NewsList/use-topics-to-show';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
@@ -61,6 +62,7 @@ const router = useRouter();
 const isMobile = useIsMobile();
 const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();
 const loadingBar = useLoadingBar();
+useProvideSeenNews(newsTopics);
 
 function onNewsTopicToggleExpand({ name: topicType, expanded }: { name: NewsTopicType; expanded: boolean }): void {
   if (expanded) {

@@ -15,6 +15,7 @@
       "@api/*": ["src/api/*"],
       "@components/*": ["src/components/*"],
       "@compositions/*": ["src/compositions/*"],
+      "@directives/*": ["src/directives/*"],
       "@enums/*": ["src/enums/*"],
       "@services/*": ["src/services/*"],
       "@interfaces/*": ["src/interfaces/*"],

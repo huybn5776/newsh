@@ -17,3 +17,7 @@ export function updateSettingFromStorage<T>(key: SettingKey, updater: (value: T 
   }
   saveSettingToStorage(key, updatedValue);
 }
+
+export function deleteSettingFromStorage(key: SettingKey): void {
+  localStorage.removeItem(key);
+}
