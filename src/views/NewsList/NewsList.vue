@@ -9,7 +9,9 @@
       >
         <!--suppress HtmlUnknownAttribute -->
         <template #header>
-          <h2 class="news-topic-title">{{ topic.name }}</h2>
+          <h2 class="news-topic-title" v-intersection="{ enter: () => onNewsTopicEnter(topic.type) }">
+            {{ topic.name }}
+          </h2>
         </template>
         <NewsItemCard
           v-for="(news, newsIndex) of topic.newsItems"
@@ -30,6 +32,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { getNews, requestTopics } from '@api/google-news-api';
 import { useIsMobile } from '@compositions/use-is-mobile';
+import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
 import { NewsTopicType } from '@enums/news-topic-type';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
@@ -39,6 +42,8 @@ import { getSettingFromStorage } from '@utils/storage-utils';
 import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
 import { useProvideSeenNews } from '@views/NewsList/use-provide-seen-news';
 import { useTopicsToShow } from '@views/NewsList/use-topics-to-show';
+
+const vIntersection = intersectionDirectiveFactory();
 
 const newsTopics = ref<NewsTopicItem[]>([]);
 const newsTopicList = computed(() => {
@@ -72,29 +77,38 @@ function onNewsTopicToggleExpand({ name: topicType, expanded }: { name: NewsTopi
   }
 }
 
-onMounted(async () => {
+onMounted(() => {
   const topic = route.params.topic as string;
   if (!topic) {
-    loadingBar.start();
-    await fetchTopStories();
+    newsLoaders.value = [
+      () => getNews('topStories'),
+      () => getNews('worldAndNation'),
+      () => getNews('others'),
+      () => getHeadlineNewsWithoutDuplicated(),
+    ];
+    loadNextTopic();
   } else if ((requestTopics as string[]).includes(topic)) {
-    loadingBar.start();
-    newsTopics.value = await getNews(topic as typeof requestTopics[number]);
+    newsLoaders.value = [() => getNews(topic as typeof requestTopics[number])];
+    loadNextTopic();
   } else {
-    await router.push({ name: 'news' });
+    router.push({ name: 'news' });
   }
-  loadingBar.finish();
 });
 
-async function fetchTopStories(): Promise<void> {
-  newsTopics.value = await getNews('topStories');
-  newsTopics.value = [
-    ...newsTopics.value,
-    ...(await Promise.all([await getNews('worldAndNation'), await getNews('others')])).flatMap(
-      (newsTopicArray) => newsTopicArray,
-    ),
-  ];
+const loadedNewsTopicIndex = ref(-1);
+const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);
 
+async function loadNextTopic(): Promise<void> {
+  loadedNewsTopicIndex.value++;
+  const loader = newsLoaders.value[loadedNewsTopicIndex.value];
+  if (loader) {
+    loadingBar.start();
+    newsTopics.value = [...newsTopics.value, ...(await loader())];
+    loadingBar.finish();
+  }
+}
+
+async function getHeadlineNewsWithoutDuplicated(): Promise<NewsTopicItem[]> {
   const allNewsUrl = newsTopics.value.flatMap((topic) => [
     ...topic.newsItems.map((news) => news.url),
     ...topic.newsItems.flatMap((news) =>
@@ -104,7 +118,19 @@ async function fetchTopStories(): Promise<void> {
 
   const headlineNewsTopic = (await getNews('headline'))[0];
   headlineNewsTopic.newsItems = headlineNewsTopic.newsItems.filter((news) => !allNewsUrl.includes(news.url));
-  newsTopics.value = [...newsTopics.value, headlineNewsTopic];
+  return [headlineNewsTopic];
+}
+
+function onNewsTopicEnter(topicType: string): void {
+  const loadThreshold = 2;
+  const completeLoaded = loadedNewsTopicIndex.value === newsLoaders.value.length - 1;
+  if (completeLoaded) {
+    return;
+  }
+  const index = newsTopicList.value.findIndex((newsTopic) => newsTopic.type === topicType);
+  if (index + loadThreshold >= newsTopicList.value.length) {
+    loadNextTopic();
+  }
 }
 </script>
 
