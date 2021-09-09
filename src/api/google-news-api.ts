@@ -16,36 +16,20 @@ enum NewsObjectType {
 
 const requestBodies = {
   topStories: [
-    [
-      [
-        'A3Zed',
-        '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
-      ],
-    ],
+    'A3Zed',
+    '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
   ],
   worldAndNation: [
-    [
-      [
-        'xBjcpf',
-        '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
-      ],
-    ],
+    'xBjcpf',
+    '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
   ],
   others: [
-    [
-      [
-        'N0vcJe',
-        '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
-      ],
-    ],
+    'N0vcJe',
+    '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
   ],
   headline: [
-    [
-      [
-        'Ntv0se',
-        '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480],"CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ"]',
-      ],
-    ],
+    'Ntv0se',
+    '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480],"CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ"]',
   ],
 };
 export const requestTopics = Object.keys(requestBodies) as (keyof typeof requestBodies)[];
@@ -63,7 +47,7 @@ async function fetchNews(requestBody: ValueOf<typeof requestBodies>): Promise<Ne
   const response = await axios.post(
     '/news.google.com/_/DotsSplashUi/data/batchexecute',
     new URLSearchParams({
-      'f.req': JSON.stringify(requestBody),
+      'f.req': JSON.stringify([[requestBody]]),
     }),
     { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, responseType: 'text' },
   );
