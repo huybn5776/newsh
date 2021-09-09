@@ -1,6 +1,6 @@
 <template>
   <div class="news-item-card">
-    <img v-if="news.image" class="news-image" :src="news.image" :alt="news.excerpt" />
+    <Image class="news-image" :src="news.image" :alt="news.excerpt" />
 
     <div class="news-item">
       <a
@@ -42,6 +42,7 @@
 import { ref, computed, onUpdated, inject } from 'vue';
 
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
+import Image from '@components/Image/Image.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
 import { NewsItem } from '@interfaces/news-item';
