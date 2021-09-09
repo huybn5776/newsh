@@ -14,22 +14,44 @@ enum NewsObjectType {
   SingleTopic = 11,
 }
 
+const topicTypToTopicIdMap: Record<NewsTopicType, string> = {
+  [NewsTopicType.Headline]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
+  [NewsTopicType.Nation]: 'CAAqJQgKIh9DQkFTRVFvSUwyMHZNRFptTXpJU0JYcG9MVlJYS0FBUAE',
+  [NewsTopicType.World]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx1YlY4U0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
+  [NewsTopicType.Business]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx6TVdZU0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
+  [NewsTopicType.TechnologyAndScience]: 'CAAqLAgKIiZDQkFTRmdvSkwyMHZNR1ptZHpWbUVnVjZhQzFVVnhvQ1ZGY29BQVAB',
+  [NewsTopicType.Entertainment]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNREpxYW5RU0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
+  [NewsTopicType.Sports]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNRFp1ZEdvU0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
+  [NewsTopicType.Health]: 'CAAqJQgKIh9DQkFTRVFvSUwyMHZNR3QwTlRFU0JYcG9MVlJYS0FBUAE',
+  [NewsTopicType.HeadlineDetail]:
+    'CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ/sections/CAQqLggAKioICiIkQ0JBU0ZRb0lMMjB2TURWcWFHY1NCWHBvTFZSWEdnSlVWeWdBUAE',
+};
+const topicIdToTopicTypeMap = Object.fromEntries(
+  Object.entries(topicTypToTopicIdMap).map(([id, type]) => [type, id]),
+) as Record<string, NewsTopicType>;
+
+function requestBodyByTopic(topicId: string): [string, string][] {
+  return [
+    [
+      'Ntv0se',
+      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480],"${topicId}"]`,
+    ],
+    [
+      'YOVgSd',
+      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480],"${topicId}"]`,
+    ],
+  ];
+}
+
 const requestBodies = {
   topStories: [
-    'A3Zed',
-    '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
+    ['A3Zed', '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]'],
   ],
   worldAndNation: [
-    'xBjcpf',
-    '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
+    ['xBjcpf', '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]'],
   ],
   others: [
-    'N0vcJe',
-    '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]',
-  ],
-  headline: [
-    'Ntv0se',
-    '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480],"CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ"]',
+    ['N0vcJe', '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]'],
   ],
 };
 export const requestTopics = Object.keys(requestBodies) as (keyof typeof requestBodies)[];
@@ -37,33 +59,47 @@ export const requestTopics = Object.keys(requestBodies) as (keyof typeof request
 type NewsObjectRaw = [number] & [unknown, NewsObjectRaw | NewsObjectRaw[] | string];
 type ValueOf<T> = T[keyof T];
 
-export async function getNews(topic: keyof typeof requestBodies): Promise<NewsTopicItem[]> {
+export async function getSingleTopicNews(topicType: NewsTopicType): Promise<NewsTopicItem> {
+  const responseArray = await fetchNews(requestBodyByTopic(topicTypToTopicIdMap[topicType]));
+  const newsArray = JSON.parse(
+    responseArray.find((array: string[]) => array[1] === 'Ntv0se')?.[2] || '[]',
+  )[1][2] as NewsObjectRaw;
+  const infoArray = JSON.parse(
+    responseArray.find((array: string[]) => array[1] === 'YOVgSd')?.[2] || '[]',
+  )[1][1] as NewsObjectRaw;
+
+  const responseType = newsArray[0];
+  if (responseType !== NewsObjectType.SingleTopic) {
+    throw new Error(`Incorrect response type, expect ${topicType} to have single topics response.`);
+  }
+  const newsTopicObject = newsArray as NewsObjectRaw;
+  const newsTopicItem = parseNewsTopic(newsTopicObject);
+  newsTopicItem.name = infoArray?.[2] || newsTopicItem.name;
+  return newsTopicItem;
+}
+
+export async function getMultiTopicNews(topic: keyof typeof requestBodies): Promise<NewsTopicItem[]> {
   const responseArray = await fetchNews(requestBodies[topic]);
-  const newsTopicObjects = extractNewsTopicObjects(responseArray);
+  const newsObjects = JSON.parse(responseArray[0][2])[1][2];
+  const responseType = newsObjects[0];
+  if (responseType !== NewsObjectType.MultiTopics) {
+    throw new Error(`Incorrect response type, expect ${topic} to have multi topics response.`);
+  }
+  const newsTopicObjects = (newsObjects[3] as NewsObjectRaw[]).map(
+    (newsObject: NewsObjectRaw) => newsObject[2],
+  ) as NewsObjectRaw[];
   return newsTopicObjects.map(parseNewsTopic);
 }
 
-async function fetchNews(requestBody: ValueOf<typeof requestBodies>): Promise<NewsObjectRaw> {
+async function fetchNews(requestBody: ValueOf<typeof requestBodies>): Promise<NewsObjectRaw[]> {
   const response = await axios.post(
     '/news.google.com/_/DotsSplashUi/data/batchexecute',
     new URLSearchParams({
-      'f.req': JSON.stringify([[requestBody]]),
+      'f.req': JSON.stringify([requestBody]),
     }),
     { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, responseType: 'text' },
   );
-  let responseArray = JSON.parse(response.data.split('\n')[2]);
-  responseArray = JSON.parse(responseArray[0][2])[1][2];
-  return responseArray;
-}
-
-function extractNewsTopicObjects(responseArray: NewsObjectRaw): NewsObjectRaw[] {
-  const responseType = responseArray[0];
-  if (responseType === NewsObjectType.MultiTopics) {
-    return (responseArray[3] as NewsObjectRaw[]).map((newsObject: NewsObjectRaw) => newsObject[2]);
-  } else if (responseType === NewsObjectType.SingleTopic) {
-    return [responseArray as NewsObjectRaw];
-  }
-  return [];
+  return JSON.parse(response.data.split('\n')[2]);
 }
 
 function parseNewsTopic(newsTopicObject: NewsObjectRaw): NewsTopicItem {
@@ -96,19 +132,7 @@ function parseNewsTopic(newsTopicObject: NewsObjectRaw): NewsTopicItem {
 }
 
 function parseTopicType(newsTopicObject: NewsObjectRaw): NewsTopicType {
-  const topicIdToTopicTypeMap: Record<string, NewsTopicType> = {
-    CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.Headline,
-    CAAqJQgKIh9DQkFTRVFvSUwyMHZNRFptTXpJU0JYcG9MVlJYS0FBUAE: NewsTopicType.Nation,
-    CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx1YlY4U0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.World,
-    CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx6TVdZU0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.Business,
-    CAAqLAgKIiZDQkFTRmdvSkwyMHZNR1ptZHpWbUVnVjZhQzFVVnhvQ1ZGY29BQVAB: NewsTopicType.TechnologyAndScience,
-    CAAqKggKIiRDQkFTRlFvSUwyMHZNREpxYW5RU0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.Entertainment,
-    CAAqKggKIiRDQkFTRlFvSUwyMHZNRFp1ZEdvU0JYcG9MVlJYR2dKVVZ5Z0FQAQ: NewsTopicType.Sports,
-    CAAqJQgKIh9DQkFTRVFvSUwyMHZNR3QwTlRFU0JYcG9MVlJYS0FBUAE: NewsTopicType.Health,
-    'CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ/sections/CAQqLggAKioICiIkQ0JBU0ZRb0lMMjB2TURWcWFHY1NCWHBvTFZSWEdnSlVWeWdBUAE':
-      NewsTopicType.HeadlineDetail,
-  };
-  const topicId = `${newsTopicObject[13]?.[1] || newsTopicObject[21]}`.split('topics/')[1];
+  const topicId = `${newsTopicObject[13]?.[1] || newsTopicObject[21]}`.split('/')[1];
   return topicIdToTopicTypeMap[topicId];
 }
 
