@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineEmits, defineProps, ref, computed, onUpdated, inject } from 'vue';
+import { ref, computed, onUpdated, inject } from 'vue';
 
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';

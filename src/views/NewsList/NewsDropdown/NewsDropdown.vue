@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, ref, onUnmounted } from 'vue';
+import { ref, onUnmounted } from 'vue';
 
 import { NDropdown, useMessage, DialogReactive } from 'naive-ui';
 import { DropdownMixedOption } from 'naive-ui/lib/dropdown/src/interface';

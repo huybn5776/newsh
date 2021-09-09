@@ -25,6 +25,12 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'import', 'jsx-a11y', 'react'],
   ignorePatterns: ['dist/**', '.eslintrc.js', 'config-overrides.js'],
+  globals: {
+    defineProps: 'readonly',
+    defineEmits: 'readonly',
+    defineExpose: 'readonly',
+    withDefaults: 'readonly',
+  },
   rules: {
     'import/order': [
       2,

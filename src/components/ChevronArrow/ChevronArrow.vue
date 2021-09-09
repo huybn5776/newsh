@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineEmits, defineProps, PropType, ref } from 'vue';
+import { PropType, ref } from 'vue';
 
 const props = defineProps({
   direction: {
