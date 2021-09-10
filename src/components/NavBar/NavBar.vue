@@ -1,7 +1,7 @@
 <template>
   <nav class="nav-bar">
-    <router-link to="news" class="nav-bar-link">News</router-link>
-    <router-link to="settings" class="nav-bar-link">Settings</router-link>
+    <router-link :to="{ name: 'news' }" class="nav-bar-link">News</router-link>
+    <router-link :to="{ name: 'settings' }" class="nav-bar-link">Settings</router-link>
   </nav>
 </template>
 
