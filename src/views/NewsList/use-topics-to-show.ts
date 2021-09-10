@@ -1,39 +1,39 @@
 import { ref, Ref } from 'vue';
 
-import { NewsTopicType } from '@enums/news-topic-type';
 import { SettingKey } from '@enums/setting-key';
 import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
 export function useTopicsToShow(): {
-  topicsToShow: Ref<NewsTopicType[]>;
-  addTopicToShow: (topicType: NewsTopicType) => void;
-  deleteTopicToShow: (topicType: NewsTopicType) => void;
+  topicsToShow: Ref<string[]>;
+  addTopicToShow: (topicId: string) => void;
+  deleteTopicToShow: (topicId: string) => void;
 } {
-  const topicsToShow = ref<NewsTopicType[]>(getTopicsToShow());
+  const topicsToShow = ref<string[]>(getTopicsToShow());
 
   return {
     topicsToShow,
-    addTopicToShow(topicType: NewsTopicType) {
-      topicsToShow.value = [...topicsToShow.value, topicType as NewsTopicType];
+    addTopicToShow(topicId:string ) {
+      topicsToShow.value = [...topicsToShow.value, topicId];
       saveTopicsToShowSetting(topicsToShow.value);
     },
-    deleteTopicToShow(topicType: NewsTopicType) {
-      topicsToShow.value = topicsToShow.value.filter((topic) => topic !== (topicType as NewsTopicType));
+    deleteTopicToShow(topicId:string ) {
+      topicsToShow.value = topicsToShow.value.filter((topic) => topic !== (topicId));
       saveTopicsToShowSetting(topicsToShow.value);
     },
   };
 }
 
-function getTopicsToShow(): NewsTopicType[] {
-  const allTopicTypes = Object.values(NewsTopicType);
-  const collapsedTopics = getSettingFromStorage<NewsTopicType[]>(SettingKey.CollapsedTopics);
+function getTopicsToShow(): string[] {
+  const allTopicsId = getSettingFromStorage<string[]>(SettingKey.AllTopicsId) || [];
+  const collapsedTopics = getSettingFromStorage<string[]>(SettingKey.CollapsedTopics);
   if (!collapsedTopics?.length) {
-    return allTopicTypes;
+    return allTopicsId;
   }
-  return allTopicTypes.filter((topic) => !collapsedTopics.includes(topic));
+  return allTopicsId.filter((topicId) => !collapsedTopics.includes(topicId));
 }
 
-function saveTopicsToShowSetting(topicTypes: NewsTopicType[]): void {
-  const collapsedTopics = Object.values(NewsTopicType).filter((topic) => !topicTypes.includes(topic));
+function saveTopicsToShowSetting(topicsId: string[]): void {
+  const allTopicsId = getSettingFromStorage<string[]>(SettingKey.AllTopicsId) || [];
+  const collapsedTopics = allTopicsId.filter((topicId) => !topicsId.includes(topicId));
   saveSettingToStorage(SettingKey.CollapsedTopics, collapsedTopics);
 }

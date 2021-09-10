@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-import { NewsTopicType } from '@enums/news-topic-type';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 
@@ -14,53 +13,30 @@ enum NewsObjectType {
   SingleTopic = 11,
 }
 
-const topicTypToTopicIdMap: Record<NewsTopicType, string> = {
-  [NewsTopicType.Headline]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
-  [NewsTopicType.Nation]: 'CAAqJQgKIh9DQkFTRVFvSUwyMHZNRFptTXpJU0JYcG9MVlJYS0FBUAE',
-  [NewsTopicType.World]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx1YlY4U0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
-  [NewsTopicType.Business]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx6TVdZU0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
-  [NewsTopicType.TechnologyAndScience]: 'CAAqLAgKIiZDQkFTRmdvSkwyMHZNR1ptZHpWbUVnVjZhQzFVVnhvQ1ZGY29BQVAB',
-  [NewsTopicType.Entertainment]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNREpxYW5RU0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
-  [NewsTopicType.Sports]: 'CAAqKggKIiRDQkFTRlFvSUwyMHZNRFp1ZEdvU0JYcG9MVlJYR2dKVVZ5Z0FQAQ',
-  [NewsTopicType.Health]: 'CAAqJQgKIh9DQkFTRVFvSUwyMHZNR3QwTlRFU0JYcG9MVlJYS0FBUAE',
-  [NewsTopicType.HeadlineDetail]:
-    'CAAqKggKIiRDQkFTRlFvSUwyMHZNRFZxYUdjU0JYcG9MVlJYR2dKVVZ5Z0FQAQ/sections/CAQqLggAKioICiIkQ0JBU0ZRb0lMMjB2TURWcWFHY1NCWHBvTFZSWEdnSlVWeWdBUAE',
-};
-const topicIdToTopicTypeMap = Object.fromEntries(
-  Object.entries(topicTypToTopicIdMap).map(([id, type]) => [type, id]),
-) as Record<string, NewsTopicType>;
-
-function requestBodyByTopic(topicId: string): [string, string][] {
+function requestBodyByTopic(topicId: string, languageAndRegion: string): [string, string][] {
   return [
     [
       'Ntv0se',
-      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480],"${topicId}"]`,
+      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"${languageAndRegion}",null,480],"${topicId}"]`,
     ],
     [
       'YOVgSd',
-      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480],"${topicId}"]`,
+      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"${languageAndRegion}",null,480],"${topicId}"]`,
     ],
   ];
 }
 
-const requestBodies = {
-  topStories: [
-    ['A3Zed', '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]'],
-  ],
-  worldAndNation: [
-    ['xBjcpf', '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]'],
-  ],
-  others: [
-    ['N0vcJe', '["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"TW:zh-Hant",null,480]]'],
-  ],
+const multiTopicRequestCode = {
+  topStories: 'A3Zed',
+  worldAndNation: 'xBjcpf',
+  others: 'N0vcJe',
 };
-export const requestTopics = Object.keys(requestBodies) as (keyof typeof requestBodies)[];
+export const requestTopics = Object.keys(multiTopicRequestCode) as (keyof typeof multiTopicRequestCode)[];
 
 type NewsObjectRaw = [number] & [unknown, NewsObjectRaw | NewsObjectRaw[] | string];
-type ValueOf<T> = T[keyof T];
 
-export async function getSingleTopicNews(topicType: NewsTopicType): Promise<NewsTopicItem> {
-  const responseArray = await fetchNews(requestBodyByTopic(topicTypToTopicIdMap[topicType]));
+export async function getSingleTopicNews(topicId: string, languageAndRegion: string): Promise<NewsTopicItem> {
+  const responseArray = await fetchNews(requestBodyByTopic(topicId, languageAndRegion));
   const newsArray = JSON.parse(
     responseArray.find((array: string[]) => array[1] === 'Ntv0se')?.[2] || '[]',
   )[1][2] as NewsObjectRaw;
@@ -70,7 +46,7 @@ export async function getSingleTopicNews(topicType: NewsTopicType): Promise<News
 
   const responseType = newsArray[0];
   if (responseType !== NewsObjectType.SingleTopic) {
-    throw new Error(`Incorrect response type, expect ${topicType} to have single topics response.`);
+    throw new Error(`Incorrect response type, expect '${topicId}' to have single topics response.`);
   }
   const newsTopicObject = newsArray as NewsObjectRaw;
   const newsTopicItem = parseNewsTopic(newsTopicObject);
@@ -78,8 +54,18 @@ export async function getSingleTopicNews(topicType: NewsTopicType): Promise<News
   return newsTopicItem;
 }
 
-export async function getMultiTopicNews(topic: keyof typeof requestBodies): Promise<NewsTopicItem[]> {
-  const responseArray = await fetchNews(requestBodies[topic]);
+export async function getMultiTopicNews(
+  topic: keyof typeof multiTopicRequestCode,
+  languageAndRegion: string,
+): Promise<NewsTopicItem[]> {
+  const requestCode = multiTopicRequestCode[topic];
+  const requestBody = [
+    [
+      requestCode,
+      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"${languageAndRegion}",null,480]]`,
+    ],
+  ];
+  const responseArray = await fetchNews(requestBody);
   const newsObjects = JSON.parse(responseArray[0][2])[1][2];
   const responseType = newsObjects[0];
   if (responseType !== NewsObjectType.MultiTopics) {
@@ -91,7 +77,7 @@ export async function getMultiTopicNews(topic: keyof typeof requestBodies): Prom
   return newsTopicObjects.map(parseNewsTopic);
 }
 
-async function fetchNews(requestBody: ValueOf<typeof requestBodies>): Promise<NewsObjectRaw[]> {
+async function fetchNews(requestBody: unknown): Promise<NewsObjectRaw[]> {
   const response = await axios.post(
     '/news.google.com/_/DotsSplashUi/data/batchexecute',
     new URLSearchParams({
@@ -104,7 +90,7 @@ async function fetchNews(requestBody: ValueOf<typeof requestBodies>): Promise<Ne
 
 function parseNewsTopic(newsTopicObject: NewsObjectRaw): NewsTopicItem {
   const topicName = newsTopicObject[2];
-  const topicType = parseTopicType(newsTopicObject);
+  const topicId = `${newsTopicObject[13]?.[1] || newsTopicObject[21]}`.split('/')[1];
 
   const newsObjects: NewsObjectRaw[] = newsTopicObject[3];
   const newsItems: NewsItem[] = [];
@@ -128,12 +114,7 @@ function parseNewsTopic(newsTopicObject: NewsObjectRaw): NewsTopicItem {
     newsItems.push(newsItem);
   }
 
-  return { name: topicName, type: topicType, newsItems };
-}
-
-function parseTopicType(newsTopicObject: NewsObjectRaw): NewsTopicType {
-  const topicId = `${newsTopicObject[13]?.[1] || newsTopicObject[21]}`.split('/')[1];
-  return topicIdToTopicTypeMap[topicId];
+  return { id: topicId, name: topicName, newsItems };
 }
 
 function parseNewsItem(newsNode: NewsObjectRaw): NewsItem {

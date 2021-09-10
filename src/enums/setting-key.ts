@@ -5,4 +5,7 @@ export enum SettingKey {
   SeenNewsItems = 'seenNewsItems',
   HiddenSources = 'hiddenSources',
   ExcludeTerms = 'excludeTerms',
+  LanguageAndRegion = 'languageAndRegion',
+  AllTopicsId = 'allTopicsId',
+  HeadlineTopicId = 'headlineTopicId',
 }

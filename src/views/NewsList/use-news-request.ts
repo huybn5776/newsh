@@ -3,16 +3,27 @@ import { ref, computed, watch, Ref, readonly, DeepReadonly, onUnmounted } from '
 import { useLoadingBar } from 'naive-ui';
 
 import { getSingleTopicNews, getMultiTopicNews } from '@api/google-news-api';
-import { NewsTopicType } from '@enums/news-topic-type';
+import { SettingKey } from '@enums/setting-key';
+import { NewsTopicItem } from '@interfaces/news-topic-item';
+import { getSettingFromStorage } from '@utils/storage-utils';
 
 export function useNewsRequest(): {
-  getSingleTopicNews: typeof getSingleTopicNews;
-  getMultiTopicNews: typeof getMultiTopicNews;
-  loadingTopics: DeepReadonly<Ref<Record<NewsTopicType, true>>>;
+  getSingleTopicNews: (topic: Parameters<typeof getSingleTopicNews>[0]) => Promise<NewsTopicItem>;
+  getMultiTopicNews: (topic: Parameters<typeof getMultiTopicNews>[0]) => Promise<NewsTopicItem[]>;
+  loadingBar: ReturnType<typeof useLoadingBar>;
+  loadingTopics: DeepReadonly<Ref<Record<string, true>>>;
 } {
   const pendingRequests = ref<Promise<unknown>[]>([]);
-  const loadingTopics = ref<Record<NewsTopicType, true>>({} as Record<NewsTopicType, true>);
+  const loadingTopics = ref<Record<string, true>>({} as Record<string, true>);
   const isLoading = computed(() => !!pendingRequests.value.length);
+  const languageAndRegion = computed(() => {
+    const value = getSettingFromStorage<string>(SettingKey.LanguageAndRegion);
+    if (!value) {
+      throw new Error('No country and language setting from storage');
+    }
+    return value;
+  });
+
   const loadingBar = useLoadingBar();
 
   function withPushPendingRequest<T extends Array<unknown>, U extends Promise<unknown>>(
@@ -27,13 +38,21 @@ export function useNewsRequest(): {
   }
 
   function withPushLoadingTopic<U extends Promise<unknown>>(
-    fn: (newsTopicType: NewsTopicType) => U,
-  ): (newsTopicType: NewsTopicType) => U {
-    return function (newsTopicType: NewsTopicType) {
-      const request = fn(newsTopicType);
-      loadingTopics.value = { ...loadingTopics.value, [newsTopicType]: true };
-      request.then(() => delete loadingTopics.value[newsTopicType]);
+    fn: (newsTopicId: string) => U,
+  ): (newsTopicId: string) => U {
+    return function (newsTopicId: string) {
+      const request = fn(newsTopicId);
+      loadingTopics.value = { ...loadingTopics.value, [newsTopicId]: true };
+      request.then(() => delete loadingTopics.value[newsTopicId]);
       return request;
+    };
+  }
+
+  function withLanguageAndRegion<U extends Promise<unknown>, T extends string>(
+    fn: (topic: T, languageAndRegion: string) => U,
+  ): (topic: T) => U {
+    return function (topic: T) {
+      return fn(topic, languageAndRegion.value);
     };
   }
 
@@ -44,8 +63,9 @@ export function useNewsRequest(): {
   });
 
   return {
-    getSingleTopicNews: withPushLoadingTopic(withPushPendingRequest(getSingleTopicNews)),
-    getMultiTopicNews: withPushPendingRequest(getMultiTopicNews),
+    getSingleTopicNews: withPushLoadingTopic(withPushPendingRequest(withLanguageAndRegion(getSingleTopicNews))),
+    getMultiTopicNews: withPushPendingRequest(withLanguageAndRegion(getMultiTopicNews)),
+    loadingBar,
     loadingTopics: readonly(loadingTopics),
   };
 }

@@ -1,7 +1,9 @@
+import { getMultiTopicNews } from '@api/google-news-api';
+import { getUserLanguageAndRegionFromRss } from '@api/google-news-rss-api';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
-import { getSettingFromStorage, updateSettingFromStorage } from '@utils/storage-utils';
+import { getSettingFromStorage, updateSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
 export function getSeenNewsUrlMap(newsTopicItems: NewsTopicItem[]): Record<string, boolean> {
   const seenNewsItems = getSettingFromStorage<SeenNewsItem[]>(SettingKey.SeenNewsItems);
@@ -25,5 +27,45 @@ export function trimSeenNewsItems(): void {
   updateSettingFromStorage<SeenNewsItem[]>(
     SettingKey.SeenNewsItems,
     (seenNewsItems) => seenNewsItems?.filter((news) => now - news.seenAt < millisecondsPerDay) || [],
+  );
+}
+
+export async function prepareNewsInfo(): Promise<void> {
+  if (validateIsNewsInfoSettings()) {
+    return;
+  }
+
+  const languageAndRegion = await getUserLanguageAndRegionFromRss();
+  if (!languageAndRegion) {
+    throw new Error('Fail to detect language and region');
+  }
+  saveSettingToStorage(SettingKey.LanguageAndRegion, languageAndRegion);
+
+  const topicItems: NewsTopicItem[] = (
+    await Promise.all([
+      await getMultiTopicNews('topStories', languageAndRegion),
+      await getMultiTopicNews('worldAndNation', languageAndRegion),
+      await getMultiTopicNews('others', languageAndRegion),
+    ])
+  ).flatMap((topics) => topics);
+
+  const allTopicsId = topicItems.map((topicItem) => topicItem.id);
+  saveSettingToStorage(SettingKey.AllTopicsId, allTopicsId);
+
+  const [headlineTopic] = topicItems;
+  saveSettingToStorage(SettingKey.HeadlineTopicId, headlineTopic.id);
+}
+
+export function validateIsNewsInfoSettings(): boolean {
+  const languageAndRegion = getSettingFromStorage<string>(SettingKey.LanguageAndRegion);
+  const allTopicsId = getSettingFromStorage<string[]>(SettingKey.AllTopicsId);
+  const headlineTopicId = getSettingFromStorage<string>(SettingKey.HeadlineTopicId);
+
+  return !(
+    !languageAndRegion ||
+    !allTopicsId?.length ||
+    !headlineTopicId ||
+    languageAndRegion.length < 4 ||
+    !languageAndRegion.includes(':')
   );
 }

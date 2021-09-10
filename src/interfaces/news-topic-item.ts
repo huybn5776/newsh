@@ -1,9 +1,7 @@
-import { NewsTopicType } from '@enums/news-topic-type';
-
 import { NewsItem } from './news-item';
 
 export interface NewsTopicItem {
+  id: string;
   name: string;
-  type: NewsTopicType;
   newsItems: NewsItem[];
 }

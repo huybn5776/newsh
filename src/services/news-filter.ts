@@ -1,12 +1,11 @@
-import { NewsTopicType } from '@enums/news-topic-type';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 
 export function collapseRelatedNewsExcept(
-  topicsToShow: NewsTopicType[],
+  topicsToShow: string[],
 ): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
   return (newsTopicItem: NewsTopicItem) => {
-    const toCollapse = topicsToShow.length && !topicsToShow.includes(newsTopicItem.type);
+    const toCollapse = topicsToShow.length && !topicsToShow.includes(newsTopicItem.id);
     return { ...newsTopicItem, newsItems: toCollapse ? [] : newsTopicItem.newsItems };
   };
 }
