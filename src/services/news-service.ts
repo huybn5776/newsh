@@ -1,5 +1,4 @@
 import { getMultiTopicNews } from '@api/google-news-api';
-import { getUserLanguageAndRegionFromRss } from '@api/google-news-rss-api';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
@@ -30,17 +29,7 @@ export function trimSeenNewsItems(): void {
   );
 }
 
-export async function prepareNewsInfo(): Promise<void> {
-  if (validateIsNewsInfoSettings()) {
-    return;
-  }
-
-  const languageAndRegion = await getUserLanguageAndRegionFromRss();
-  if (!languageAndRegion) {
-    throw new Error('Fail to detect language and region');
-  }
-  saveSettingToStorage(SettingKey.LanguageAndRegion, languageAndRegion);
-
+export async function prepareNewsInfo(languageAndRegion: string): Promise<void> {
   const topicItems: NewsTopicItem[] = (
     await Promise.all([
       await getMultiTopicNews('topStories', languageAndRegion),

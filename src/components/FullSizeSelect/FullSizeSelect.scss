@@ -1,0 +1,47 @@
+.full-size-select {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+}
+
+.full-size-select-title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.full-size-select-subtitle {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.selections-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  padding-right: 8px;
+  overflow-y: auto;
+  scrollbar-color: rgba(white, .3) transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(white, .3);
+    -webkit-border-radius: 1ex;
+
+    &:hover {
+      background: rgba(white, .5);
+    }
+  }
+}
+
+.selection {
+  padding: 12px 8px;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: rgba(white, .1);
+  }
+}

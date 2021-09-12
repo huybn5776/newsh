@@ -10,7 +10,6 @@ import { getSettingFromStorage } from '@utils/storage-utils';
 export function useNewsRequest(): {
   getSingleTopicNews: (topic: Parameters<typeof getSingleTopicNews>[0]) => Promise<NewsTopicItem>;
   getMultiTopicNews: (topic: Parameters<typeof getMultiTopicNews>[0]) => Promise<NewsTopicItem[]>;
-  loadingBar: ReturnType<typeof useLoadingBar>;
   loadingTopics: DeepReadonly<Ref<Record<string, true>>>;
 } {
   const pendingRequests = ref<Promise<unknown>[]>([]);
@@ -65,7 +64,6 @@ export function useNewsRequest(): {
   return {
     getSingleTopicNews: withPushLoadingTopic(withPushPendingRequest(withLanguageAndRegion(getSingleTopicNews))),
     getMultiTopicNews: withPushPendingRequest(withLanguageAndRegion(getMultiTopicNews)),
-    loadingBar,
     loadingTopics: readonly(loadingTopics),
   };
 }

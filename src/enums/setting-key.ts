@@ -6,6 +6,7 @@ export enum SettingKey {
   HiddenSources = 'hiddenSources',
   ExcludeTerms = 'excludeTerms',
   LanguageAndRegion = 'languageAndRegion',
+  LanguageAndRegionLabel = 'languageAndRegionLabel',
   AllTopicsId = 'allTopicsId',
   HeadlineTopicId = 'headlineTopicId',
 }

@@ -48,7 +48,6 @@ import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { removeYoutubeNews, removeByNewsSource, removeByTerms } from '@services/news-filter';
-import { prepareNewsInfo, validateIsNewsInfoSettings } from '@services/news-service';
 import { getSettingFromStorage } from '@utils/storage-utils';
 import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
 import { useNewsRequest } from '@views/NewsList/use-news-request';
@@ -82,14 +81,9 @@ const router = useRouter();
 const isMobile = useIsMobile();
 const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();
 useProvideSeenNews(newsTopics);
-const { getSingleTopicNews, getMultiTopicNews, loadingBar, loadingTopics } = useNewsRequest();
+const { getSingleTopicNews, getMultiTopicNews, loadingTopics } = useNewsRequest();
 
 onMounted(async () => {
-  if (!validateIsNewsInfoSettings()) {
-    loadingBar.start();
-    await prepareNewsInfo();
-    topicsToShow.value = getSettingFromStorage<string[]>(SettingKey.AllTopicsId) || [];
-  }
   await loadNews();
 });
 

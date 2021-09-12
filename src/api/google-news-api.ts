@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
+import { RegionItem } from '@interfaces/region-item';
 
 enum NewsObjectType {
   MultiNewsGroup = 2,
@@ -139,4 +140,24 @@ function parseNewsItem(newsNode: NewsObjectRaw): NewsItem {
     (error as Error & { newsNode: NewsObjectRaw }).newsNode = newsNode;
     throw error;
   }
+}
+
+export async function getRegionList(): Promise<RegionItem[]> {
+  const response = await axios.post(
+    '/news.google.com/_/DotsSplashUi/data/batchexecute',
+    new URLSearchParams({
+      'f.req': JSON.stringify([[['upfWee', '["waareq",["","",["",""],null,[],1,1,"US:en"]]']]]),
+    }),
+    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, responseType: 'text' },
+  );
+  const responseArray = JSON.parse(response.data.split('\n')[2]);
+  const responseData = JSON.parse(responseArray[0][2]);
+  return responseData[1][2][3]
+    .map((array: string[]) => array[11])
+    .map((array: string[]) => ({
+      languageAndRegion: array[0],
+      label: array[1],
+      country: array[2],
+      language: array[3],
+    }));
 }
