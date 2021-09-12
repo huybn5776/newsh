@@ -4,10 +4,10 @@ import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
 import { getSettingFromStorage, updateSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
-export function getSeenNewsUrlMap(newsTopicItems: NewsTopicItem[]): Record<string, boolean> {
-  const seenNewsItems = getSettingFromStorage<SeenNewsItem[]>(SettingKey.SeenNewsItems);
-  const seenNewsItemsUrl = (seenNewsItems || []).map((news) => news.url);
-
+export function getSeenNewsUrlMap(
+  seenNewsItemsUrl: string[],
+  newsTopicItems: NewsTopicItem[],
+): Record<string, boolean> {
   const seenNewsUrlMap: Record<string, boolean> = {};
   const allNewsItems = newsTopicItems
     .flatMap((newsTopic) => newsTopic.newsItems)
