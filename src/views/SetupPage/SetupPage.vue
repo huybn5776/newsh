@@ -1,25 +1,21 @@
 <template>
   <div class="page-content setup-page">
-    <FullSizeSelect
-      title="Language & region of interest"
-      subtitle="See news from the selected language and region pair"
-      :items="regionSelections"
+    <RegionSelection
       v-model="selectedRegion"
+      :region-selections="regionSelections"
+      @negativeClick="toNextPage"
+      @positiveClick="updateRegionAndNewsInfo"
     />
-    <footer class="setup-page-footer">
-      <NButton v-if="originalRegion" @click="toNextPage">Cancel</NButton>
-      <NButton type="primary" :disabled="!selectedRegion" @click="updateRegionAndNewsInfo">Ok</NButton>
-    </footer>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted, ref, onUnmounted } from 'vue';
 
-import { NButton, useMessage, useLoadingBar } from 'naive-ui';
+import { useMessage, useLoadingBar } from 'naive-ui';
 import { useRouter, useRoute } from 'vue-router';
 
-import FullSizeSelect from '@components/FullSizeSelect/FullSizeSelect.vue';
+import RegionSelection from '@components/RegionSelection/RegionSelection.vue';
 import { SettingKey } from '@enums/setting-key';
 import { SelectionItem } from '@interfaces/selection-item';
 import { prepareNewsInfo } from '@services/news-service';

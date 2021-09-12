@@ -1,0 +1,16 @@
+.region-selection {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 16px;
+  height: 100%;
+  padding-bottom: 16px;
+}
+
+.region-selection-footer {
+  display: flex;
+  gap: 16px;
+
+  & > * {
+    width: 100%;
+  }
+}
