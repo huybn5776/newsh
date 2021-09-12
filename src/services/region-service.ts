@@ -5,7 +5,11 @@ import { getRegionList } from '@api/google-news-api';
 import { RegionItem } from '@interfaces/region-item';
 import { SelectionItem } from '@interfaces/selection-item';
 
-export async function getRegionSelections(): Promise<SelectionItem[]> {
+export async function getRegionSelections(): Promise<{
+  selections: SelectionItem[];
+  suggestedRegions?: SelectionItem[];
+  otherRegions?: SelectionItem[];
+}> {
   const [userCountry, regions] = await Promise.all([getUserCountry(), await getRegionList()]);
 
   const country = userCountry.toLowerCase();
@@ -15,15 +19,21 @@ export async function getRegionSelections(): Promise<SelectionItem[]> {
       regions || [],
     );
 
-    return [
-      { key: 'suggested', label: 'Suggested', type: 'separator' },
-      ...suggestedRegions.map(mapRegionToSelection),
-      { key: 'all', label: 'All language & regions', type: 'separator' },
-      ...otherRegions.map(mapRegionToSelection),
-    ];
+    const suggestedRegionSelections = suggestedRegions.map(mapRegionToSelection);
+    const otherRegionSelections = otherRegions.map(mapRegionToSelection);
+    return {
+      selections: [
+        { key: 'suggested', label: 'Suggested', type: 'separator' },
+        ...suggestedRegionSelections,
+        { key: 'all', label: 'All language & regions', type: 'separator' },
+        ...otherRegionSelections,
+      ],
+      suggestedRegions: suggestedRegionSelections,
+      otherRegions: otherRegionSelections,
+    };
   }
 
-  return regions.map(mapRegionToSelection) || [];
+  return { selections: regions.map(mapRegionToSelection) };
 }
 
 function mapRegionToSelection(region: RegionItem): SelectionItem {

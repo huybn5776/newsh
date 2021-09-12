@@ -9,8 +9,10 @@
       @update:modelValue="emits('update:modelValue', $event)"
     />
     <footer class="region-selection-footer">
-      <NButton v-if="modelValue" @click="emits('negativeClick')">Cancel</NButton>
-      <NButton type="primary" :disabled="!selectedRegion" @click="emits('positiveClick')">Ok</NButton>
+      <NButton v-if="cancelable" @click="emits('negativeClick')">Cancel</NButton>
+      <NButton type="primary" :disabled="disableOkButton || !selectedRegion" @click="emits('positiveClick')">
+        Ok
+      </NButton>
     </footer>
   </div>
 </template>
@@ -23,13 +25,17 @@ import { NButton } from 'naive-ui';
 import FullSizeSelect from '@components/FullSizeSelect/FullSizeSelect.vue';
 import { SelectionItem } from '@interfaces/selection-item';
 
-const props = defineProps<{ modelValue?: string; regionSelections: SelectionItem[] }>();
-const emits =
-  defineEmits<{
-    (e: 'update:modelValue', value: string): void;
-    (e: 'negativeClick'): void;
-    (e: 'positiveClick'): void;
-  }>();
+const props = defineProps<{
+  modelValue?: string;
+  regionSelections: SelectionItem[];
+  cancelable: boolean;
+  disableOkButton: boolean;
+}>();
+const emits = defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+  (e: 'negativeClick'): void;
+  (e: 'positiveClick'): void;
+}>();
 
 const selectedRegion = ref(props.modelValue);
 </script>
