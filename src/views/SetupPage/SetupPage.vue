@@ -3,7 +3,7 @@
     <FullSizeSelect
       title="Language & region of interest"
       subtitle="See news from the selected language and region pair"
-      :items="selectionItems"
+      :items="regionSelections"
       v-model="selectedRegion"
     />
     <footer class="setup-page-footer">
@@ -14,21 +14,20 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, computed, onUnmounted } from 'vue';
+import { onMounted, ref, onUnmounted } from 'vue';
 
 import { NButton, useMessage, useLoadingBar } from 'naive-ui';
 import { useRouter, useRoute } from 'vue-router';
 
-import { getRegionList } from '@api/google-news-api';
 import FullSizeSelect from '@components/FullSizeSelect/FullSizeSelect.vue';
 import { SettingKey } from '@enums/setting-key';
-import { RegionItem } from '@interfaces/region-item';
 import { SelectionItem } from '@interfaces/selection-item';
 import { prepareNewsInfo } from '@services/news-service';
+import { getRegionSelections } from '@services/region-service';
 import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
 const originalRegion = ref(getSettingFromStorage<string>(SettingKey.LanguageAndRegion) || undefined);
-const regions = ref<RegionItem[]>();
+const regionSelections = ref<SelectionItem[]>([]);
 const selectedRegion = ref(originalRegion.value);
 
 const route = useRoute();
@@ -36,20 +35,16 @@ const router = useRouter();
 const message = useMessage();
 const loadingBar = useLoadingBar();
 
-const selectionItems = computed<SelectionItem[]>(
-  () => regions.value?.map((region: RegionItem) => ({ key: region.languageAndRegion, label: region.label })) || [],
-);
-
 onMounted(async () => {
   loadingBar.start();
-  regions.value = await getRegionList();
+  regionSelections.value = await getRegionSelections();
   loadingBar.finish();
 });
 
 onUnmounted(() => loadingBar.finish());
 
 function toNextPage(): void {
-  const fromRoute = route.query.from;
+  const fromRoute = route.query.from as string;
   router.push({ name: fromRoute ?? 'news' });
 }
 
@@ -63,8 +58,8 @@ async function updateRegionAndNewsInfo(): Promise<void> {
   messageRef.destroy();
 
   saveSettingToStorage(SettingKey.LanguageAndRegion, selectedRegion.value);
-  const regionLabel = regions.value?.find(
-    (region: RegionItem) => region.languageAndRegion === selectedRegion.value,
+  const regionLabel = regionSelections.value?.find(
+    (selection: SelectionItem) => selection.key === selectedRegion.value,
   )?.label;
   saveSettingToStorage(SettingKey.LanguageAndRegionLabel, regionLabel);
 

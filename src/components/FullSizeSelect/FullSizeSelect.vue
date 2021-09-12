@@ -15,10 +15,13 @@
       v-model:value="selectedValue"
       @update-value="emits('update:modelValue', $event)"
     >
-      <!--suppress RequiredAttributes -->
-      <NRadio v-for="item of filteredItems" :key="item.key" class="selection" :value="item.key">
-        {{ item.label }}
-      </NRadio>
+      <template v-for="item of filteredItems" :key="item.key">
+        <p v-if="item.type === 'separator'" class="selection-separator">{{ item.label }}</p>
+        <!--suppress RequiredAttributes -->
+        <NRadio v-else class="selection" :value="item.key">
+          {{ item.label }}
+        </NRadio>
+      </template>
     </NRadioGroup>
   </div>
 </template>
