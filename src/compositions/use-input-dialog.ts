@@ -32,7 +32,7 @@ export function useInputDialog(): {
         content: () =>
           h(NInput, {
             placeholder,
-            value: inputValue as unknown as string,
+            value: inputValue.value,
             'onUpdate-value': (newValue: string) => (inputValue.value = newValue),
             style: { marginTop: '8px' },
           }),
