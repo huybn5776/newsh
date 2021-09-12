@@ -1,6 +1,6 @@
 <template>
   <NConfigProvider class="page-layout" :theme="darkTheme">
-    <NMessageProvider placement="bottom-left">
+    <NMessageProvider placement="top-right" :container-style="{ marginTop: '62px' }">
       <NDialogProvider>
         <NLoadingBarProvider>
           <slot />

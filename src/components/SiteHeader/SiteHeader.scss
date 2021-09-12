@@ -2,6 +2,7 @@
   display: flex;
   justify-content: center;
   box-sizing: border-box;
+  height: 62px;
   padding: 8px 16px;
   background-color: rgba(white, .04);
   border-bottom: 1px solid rgba(white, .1);
@@ -23,6 +24,9 @@
 }
 
 .site-logo-link {
+  display: flex;
+  align-items: center;
+
   &:hover {
     text-decoration: none;
   }
