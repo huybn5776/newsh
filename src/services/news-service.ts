@@ -1,5 +1,6 @@
 import { getMultiTopicNews } from '@api/google-news-api';
 import { SettingKey } from '@enums/setting-key';
+import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
 import { getSettingFromStorage, updateSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
@@ -38,8 +39,8 @@ export async function prepareNewsInfo(languageAndRegion: string): Promise<void> 
     ])
   ).flatMap((topics) => topics);
 
-  const allTopicsId = topicItems.map((topicItem) => topicItem.id);
-  saveSettingToStorage(SettingKey.AllTopicsId, allTopicsId);
+  const allTopicsInfo: NewsTopicInfo[] = topicItems.map((topicItem) => ({ id: topicItem.id, name: topicItem.name }));
+  saveSettingToStorage(SettingKey.AllTopicsInfo, allTopicsInfo);
 
   const [headlineTopic] = topicItems;
   saveSettingToStorage(SettingKey.HeadlineTopicId, headlineTopic.id);
@@ -47,12 +48,12 @@ export async function prepareNewsInfo(languageAndRegion: string): Promise<void> 
 
 export function validateIsNewsInfoSettings(): boolean {
   const languageAndRegion = getSettingFromStorage<string>(SettingKey.LanguageAndRegion);
-  const allTopicsId = getSettingFromStorage<string[]>(SettingKey.AllTopicsId);
+  const allTopicsInfo = getSettingFromStorage<NewsTopicInfo[]>(SettingKey.AllTopicsInfo);
   const headlineTopicId = getSettingFromStorage<string>(SettingKey.HeadlineTopicId);
 
   return !(
     !languageAndRegion ||
-    !allTopicsId?.length ||
+    !allTopicsInfo?.length ||
     !headlineTopicId ||
     languageAndRegion.length < 4 ||
     !languageAndRegion.includes(':')

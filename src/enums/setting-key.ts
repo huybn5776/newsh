@@ -7,6 +7,6 @@ export enum SettingKey {
   ExcludeTerms = 'excludeTerms',
   LanguageAndRegion = 'languageAndRegion',
   LanguageAndRegionLabel = 'languageAndRegionLabel',
-  AllTopicsId = 'allTopicsId',
+  AllTopicsInfo = 'allTopicsInfo',
   HeadlineTopicId = 'headlineTopicId',
 }

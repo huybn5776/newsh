@@ -106,9 +106,9 @@ function onNewsTopicToggleExpand({ name: topicId, expanded }: { name: string; ex
 }
 
 async function loadNews(): Promise<void> {
-  const allTopicsId = getSettingFromStorage<string[]>(SettingKey.AllTopicsId);
+  const allTopicsInfo = getSettingFromStorage<string[]>(SettingKey.AllTopicsInfo);
   const headlineTopicId = getSettingFromStorage<string>(SettingKey.HeadlineTopicId);
-  if (!allTopicsId?.length || !headlineTopicId) {
+  if (!allTopicsInfo?.length || !headlineTopicId) {
     throw new Error('News info is not ready.');
   }
 
@@ -121,7 +121,7 @@ async function loadNews(): Promise<void> {
       async () => [await getNonDuplicatedNewsTopic(headlineTopicId)],
     ];
     await loadNextTopic();
-  } else if (allTopicsId.includes(topicId)) {
+  } else if (allTopicsInfo.some((topic) => topic.id === topicId)) {
     newsLoaders.value = [async () => [await getSingleTopicNews(topicId)]];
     await loadNextTopic();
     fullLoadedTopics.value = newsTopics.value.map((newsTopic) => newsTopic.id);
