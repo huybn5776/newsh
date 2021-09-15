@@ -48,11 +48,11 @@ import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@composi
 import { SettingKey } from '@enums/setting-key';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@utils/storage-utils';
 
-const filterOutYoutube = useSyncSettingMapUndefined<boolean>(SettingKey.FilterOutYoutube);
-const languageAndRegionLabel = ref(getSettingFromStorage<string>(SettingKey.LanguageAndRegionLabel));
-const hideSeenNews = useSyncSettingMapUndefined<boolean>(SettingKey.HideSeenNews);
-const hiddenSources = useSyncSettingMapNullArray<string[]>(SettingKey.HiddenSources);
-const excludeTerms = useSyncSettingMapNullArray<string[]>(SettingKey.ExcludeTerms);
+const filterOutYoutube = useSyncSettingMapUndefined(SettingKey.FilterOutYoutube);
+const languageAndRegionLabel = ref(getSettingFromStorage(SettingKey.LanguageAndRegionLabel));
+const hideSeenNews = useSyncSettingMapUndefined(SettingKey.HideSeenNews);
+const hiddenSources = useSyncSettingMapNullArray(SettingKey.HiddenSources);
+const excludeTerms = useSyncSettingMapNullArray(SettingKey.ExcludeTerms);
 
 watch(
   () => hideSeenNews.value,

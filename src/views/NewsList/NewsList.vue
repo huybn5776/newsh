@@ -68,11 +68,11 @@ const newsTopicList = computed(() => {
   if (getSettingFromStorage(SettingKey.FilterOutYoutube)) {
     newsTopicItems = newsTopicItems.map(removeYoutubeNews());
   }
-  const hiddenSources = getSettingFromStorage<string[]>(SettingKey.HiddenSources);
+  const hiddenSources = getSettingFromStorage(SettingKey.HiddenSources);
   if (hiddenSources?.length) {
     newsTopicItems = newsTopicItems.map(removeByNewsSource(hiddenSources));
   }
-  const excludedTerms = getSettingFromStorage<string[]>(SettingKey.ExcludeTerms);
+  const excludedTerms = getSettingFromStorage(SettingKey.ExcludeTerms);
   if (excludedTerms?.length) {
     newsTopicItems = newsTopicItems.map(removeByTerms(excludedTerms));
   }
@@ -110,8 +110,8 @@ function onNewsTopicToggleExpand({ name: topicId, expanded }: { name: string; ex
 }
 
 async function loadNews(): Promise<void> {
-  const allTopicsInfo = getSettingFromStorage<string[]>(SettingKey.AllTopicsInfo);
-  const headlineTopicId = getSettingFromStorage<string>(SettingKey.HeadlineTopicId);
+  const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
+  const headlineTopicId = getSettingFromStorage(SettingKey.HeadlineTopicId);
   if (!allTopicsInfo?.length || !headlineTopicId) {
     throw new Error('News info is not ready.');
   }

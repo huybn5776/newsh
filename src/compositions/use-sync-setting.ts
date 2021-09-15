@@ -1,24 +1,30 @@
 import { Ref, ref, watch, UnwrapRef } from 'vue';
 
-import { SettingKey } from '@enums/setting-key';
+import { SettingKey, SettingValueType } from '@enums/setting-key';
 import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
-export function useSyncSetting<T>(key: SettingKey): Ref<UnwrapRef<T | null>> {
-  const settingRef = ref(getSettingFromStorage<T>(key));
-  watch(settingRef, () => saveSettingToStorage(key, settingRef.value));
+export function useSyncSetting<K extends SettingKey, T extends SettingValueType[K]>(key: K): Ref<UnwrapRef<T | null>> {
+  const settingRef = ref(getSettingFromStorage<K, T>(key));
+  watch(settingRef, () => saveSettingToStorage(key, settingRef.value as T));
   return settingRef;
 }
 
-export function useSyncSettingMapUndefined<T>(key: SettingKey): Ref<UnwrapRef<T | undefined>> {
-  const settingValue = getSettingFromStorage<T>(key);
+export function useSyncSettingMapUndefined<K extends SettingKey, T extends SettingValueType[K]>(
+  key: K,
+): Ref<UnwrapRef<T | undefined>> {
+  const settingValue = getSettingFromStorage<K, T>(key);
   const settingRef = ref<T | undefined>(settingValue === null ? undefined : settingValue);
-  watch(settingRef, () => saveSettingToStorage(key, settingRef.value === undefined ? null : settingRef.value));
+  watch(settingRef, () => saveSettingToStorage(key, settingRef.value === undefined ? null : (settingRef.value as T)));
   return settingRef;
 }
 
-export function useSyncSettingMapNullArray<T extends Array<unknown>>(key: SettingKey): Ref<UnwrapRef<T | undefined>> {
-  const settingValue = getSettingFromStorage<T>(key);
-  const settingRef = ref<T | undefined>(settingValue === null ? ([] as Array<unknown> as T) : settingValue);
-  watch(settingRef, () => saveSettingToStorage(key, settingRef.value));
+export function useSyncSettingMapNullArray<
+  K extends SettingValueType[K] extends Array<unknown> ? SettingKey : never,
+  T extends SettingValueType[K] extends Array<unknown> ? SettingValueType[K] : never,
+>(key: K): Ref<T | undefined> {
+  const settingValue = getSettingFromStorage<K, T>(key);
+  const settingRef = ref<T | undefined>();
+  settingRef.value = settingValue === null ? ([] as Array<unknown> as T & Array<unknown>) : settingValue;
+  watch(settingRef, () => saveSettingToStorage<K, T>(key, settingRef.value));
   return settingRef;
 }

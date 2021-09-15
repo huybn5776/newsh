@@ -33,7 +33,7 @@ function onDropdownSelect(key: string): void {
 }
 
 function hideSource(): void {
-  updateSettingFromStorage<string[]>(SettingKey.HiddenSources, (hiddenSources) => [
+  updateSettingFromStorage(SettingKey.HiddenSources, (hiddenSources) => [
     ...(hiddenSources || []),
     props.news.publication,
   ]);
@@ -49,7 +49,7 @@ function addExcludeTerm(): void {
       if (!term) {
         return;
       }
-      updateSettingFromStorage<string[]>(SettingKey.ExcludeTerms, (terms) => [...(terms || []), term]);
+      updateSettingFromStorage(SettingKey.ExcludeTerms, (terms) => [...(terms || []), term]);
       message.success(`'${term}' has been added to exclude terms.`);
     },
   });

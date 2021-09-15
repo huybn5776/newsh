@@ -2,7 +2,6 @@ import { getMultiTopicNews } from '@api/google-news-api';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { SeenNewsItem } from '@interfaces/seen-news-item';
 import { getSettingFromStorage, updateSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
 export function getSeenNewsUrlMap(
@@ -24,7 +23,7 @@ export function trimSeenNewsItems(): void {
   const now = Date.now();
   const millisecondsPerDay = 24 * 60 * 60 * 1000;
 
-  updateSettingFromStorage<SeenNewsItem[]>(
+  updateSettingFromStorage(
     SettingKey.SeenNewsItems,
     (seenNewsItems) => seenNewsItems?.filter((news) => now - news.seenAt < millisecondsPerDay) || [],
   );
@@ -47,9 +46,9 @@ export async function prepareNewsInfo(languageAndRegion: string): Promise<void> 
 }
 
 export function validateIsNewsInfoSettings(): boolean {
-  const languageAndRegion = getSettingFromStorage<string>(SettingKey.LanguageAndRegion);
-  const allTopicsInfo = getSettingFromStorage<NewsTopicInfo[]>(SettingKey.AllTopicsInfo);
-  const headlineTopicId = getSettingFromStorage<string>(SettingKey.HeadlineTopicId);
+  const languageAndRegion = getSettingFromStorage(SettingKey.LanguageAndRegion);
+  const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
+  const headlineTopicId = getSettingFromStorage(SettingKey.HeadlineTopicId);
 
   return !(
     !languageAndRegion ||

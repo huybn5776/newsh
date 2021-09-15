@@ -1,7 +1,6 @@
 import { ref, Ref } from 'vue';
 
 import { SettingKey } from '@enums/setting-key';
-import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
 export function useTopicsToShow(): {
@@ -25,9 +24,9 @@ export function useTopicsToShow(): {
 }
 
 function getTopicsToShow(): string[] {
-  const allTopicsInfo = getSettingFromStorage<NewsTopicInfo[]>(SettingKey.AllTopicsInfo) || [];
+  const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
   const allTopicsId = allTopicsInfo.map(topic => topic.id);
-  const collapsedTopics = getSettingFromStorage<string[]>(SettingKey.CollapsedTopics);
+  const collapsedTopics = getSettingFromStorage(SettingKey.CollapsedTopics);
   if (!collapsedTopics?.length) {
     return allTopicsId;
   }
@@ -35,7 +34,7 @@ function getTopicsToShow(): string[] {
 }
 
 function saveTopicsToShowSetting(topicsId: string[]): void {
-  const allTopicsInfo = getSettingFromStorage<NewsTopicInfo[]>(SettingKey.AllTopicsInfo) || [];
+  const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
   const allTopicsId = allTopicsInfo.map(topic => topic.id);
   const collapsedTopics = allTopicsId.filter((topicId) => !topicsId.includes(topicId));
   saveSettingToStorage(SettingKey.CollapsedTopics, collapsedTopics);

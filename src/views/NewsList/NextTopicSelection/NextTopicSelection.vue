@@ -20,13 +20,12 @@
 import { NButton } from 'naive-ui';
 
 import { SettingKey } from '@enums/setting-key';
-import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { getSettingFromStorage } from '@utils/storage-utils';
 
 defineProps<{ loadedTopics: Record<string, true> }>();
 const emits = defineEmits<{ (e: 'topicClick', value: string): void }>();
 
-const allTopicsInfo = getSettingFromStorage<NewsTopicInfo[]>(SettingKey.AllTopicsInfo);
+const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
 </script>
 
 <style lang="scss" scoped>

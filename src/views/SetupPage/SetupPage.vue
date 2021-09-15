@@ -41,7 +41,7 @@ const message = useMessage();
 const loadingBar = useLoadingBar();
 
 onMounted(async () => {
-  const originalRegion = getSettingFromStorage<string>(SettingKey.LanguageAndRegion) || undefined;
+  const originalRegion = getSettingFromStorage(SettingKey.LanguageAndRegion) || undefined;
   const regionHasBeenSet = !!originalRegion;
 
   selectedRegion.value = originalRegion;

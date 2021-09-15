@@ -16,7 +16,7 @@ export function useNewsRequest(): {
   const loadingTopics = ref<Record<string, true>>({} as Record<string, true>);
   const isLoading = computed(() => !!pendingRequests.value.length);
   const languageAndRegion = computed(() => {
-    const value = getSettingFromStorage<string>(SettingKey.LanguageAndRegion);
+    const value = getSettingFromStorage(SettingKey.LanguageAndRegion);
     if (!value) {
       throw new Error('No country and language setting from storage');
     }
