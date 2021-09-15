@@ -33,6 +33,7 @@
         </NCollapseItem>
       </div>
     </NCollapse>
+    <NextTopicSelection v-if="completeLoaded" :loadedTopics="loadedTopics" @topicClick="appendTopic" />
   </div>
 </template>
 
@@ -50,6 +51,7 @@ import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { removeYoutubeNews, removeByNewsSource, removeByTerms } from '@services/news-filter';
 import { getSettingFromStorage } from '@utils/storage-utils';
 import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
+import NextTopicSelection from '@views/NewsList/NextTopicSelection/NextTopicSelection.vue';
 import { useNewsRequest } from '@views/NewsList/use-news-request';
 import { useProvideSeenNews } from '@views/NewsList/use-provide-seen-news';
 import { useTopicsToShow } from '@views/NewsList/use-topics-to-show';
@@ -58,6 +60,8 @@ const vIntersection = intersectionDirectiveFactory();
 
 const newsTopics = ref<NewsTopicItem[]>([]);
 const fullLoadedTopics = ref<string[]>([]);
+const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);
+const loadedTopics = ref<Record<string, true>>({});
 
 const newsTopicList = computed(() => {
   let newsTopicItems = newsTopics.value;
@@ -75,6 +79,7 @@ const newsTopicList = computed(() => {
   return newsTopicItems;
 });
 const isSingleTopic = computed(() => !!route.params.topic);
+const completeLoaded = computed(() => newsLoaders.value.length === 0);
 
 const route = useRoute();
 const router = useRouter();
@@ -91,7 +96,6 @@ watch(
   route,
   () => {
     newsTopics.value = [];
-    loadedNewsTopicIndex.value = -1;
     loadNews();
   },
   { flush: 'post' },
@@ -118,7 +122,6 @@ async function loadNews(): Promise<void> {
       () => getMultiTopicNews('topStories'),
       () => getMultiTopicNews('worldAndNation'),
       () => getMultiTopicNews('others'),
-      async () => [await getNonDuplicatedNewsTopic(headlineTopicId)],
     ];
     await loadNextTopic();
   } else if (allTopicsInfo.some((topic) => topic.id === topicId)) {
@@ -130,12 +133,8 @@ async function loadNews(): Promise<void> {
   }
 }
 
-const loadedNewsTopicIndex = ref(-1);
-const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);
-
 async function loadNextTopic(): Promise<void> {
-  loadedNewsTopicIndex.value++;
-  const newsLoader = newsLoaders.value[loadedNewsTopicIndex.value];
+  const newsLoader = newsLoaders.value.shift();
   if (newsLoader) {
     newsTopics.value = [...newsTopics.value, ...(await newsLoader())];
   }
@@ -156,8 +155,7 @@ async function getNonDuplicatedNewsTopic(topicId: string): Promise<NewsTopicItem
 
 function onNewsTopicEnter(topicName: string): void {
   const loadThreshold = 2;
-  const completeLoaded = loadedNewsTopicIndex.value === newsLoaders.value.length - 1;
-  if (completeLoaded) {
+  if (completeLoaded.value) {
     return;
   }
   const index = newsTopicList.value.findIndex((newsTopic) => newsTopic.name === topicName);
@@ -181,6 +179,12 @@ async function loadMore(topicId: string): Promise<void> {
   };
   newsTopics.value = newTopicItems;
   fullLoadedTopics.value = [...fullLoadedTopics.value, topicId];
+}
+
+async function appendTopic(topicId: string): Promise<void> {
+  loadedTopics.value = { ...loadedTopics.value, [topicId]: true };
+  const topicItem = await getNonDuplicatedNewsTopic(topicId);
+  newsTopics.value = [...newsTopics.value, topicItem];
 }
 </script>
 
