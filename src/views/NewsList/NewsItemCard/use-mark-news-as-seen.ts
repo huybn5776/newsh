@@ -5,7 +5,7 @@ import { NewsItem } from '@interfaces/news-item';
 import { updateSettingFromStorage } from '@utils/storage-utils';
 
 type Timeout = ReturnType<typeof setTimeout>;
-const markAsSeenTime = 3000;
+const markAsSeenTime = 2000;
 
 export function useMarkNewsAsSeen(seenNewsUrlMap: Record<string, boolean>): {
   onNewsEnter: (newsItem: NewsItem) => void;
