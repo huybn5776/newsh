@@ -12,6 +12,7 @@ export enum SettingKey {
   LanguageAndRegionLabel = 'languageAndRegionLabel',
   AllTopicsInfo = 'allTopicsInfo',
   HeadlineTopicId = 'headlineTopicId',
+  NewsTopicsAfterTopStories = 'newsTopicsAfterTopStories',
 }
 
 export type SettingValueType = {
@@ -25,4 +26,5 @@ export type SettingValueType = {
   [SettingKey.LanguageAndRegionLabel]: string;
   [SettingKey.AllTopicsInfo]: NewsTopicInfo[];
   [SettingKey.HeadlineTopicId]: string;
+  [SettingKey.NewsTopicsAfterTopStories]: string[];
 };

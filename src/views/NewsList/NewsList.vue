@@ -118,10 +118,15 @@ async function loadNews(): Promise<void> {
 
   const topicId = route.params.topicId as string;
   if (!topicId) {
+    const newsTopicsAfterTopStories = getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories);
     newsLoaders.value = [
       () => getMultiTopicNews('topStories'),
       () => getMultiTopicNews('worldAndNation'),
       () => getMultiTopicNews('others'),
+      ...(newsTopicsAfterTopStories?.map((topic) => async () => {
+        loadedTopics.value = { ...loadedTopics, [topic]: true };
+        return [await getNonDuplicatedNewsTopic(topic)];
+      }) || []),
     ];
     await loadNextTopic();
   } else if (allTopicsInfo.some((topic) => topic.id === topicId)) {

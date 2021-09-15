@@ -29,6 +29,15 @@
   }
 }
 
+.setting-select-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+.setting-select {
+  max-width: 300px;
+}
+
 .setting-link {
   color: #8ab4f8;
 }

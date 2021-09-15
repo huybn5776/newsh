@@ -14,8 +14,13 @@
         <span class="setting-title">Gray out the news that seen within one day.</span>
       </div>
 
+      <div class="setting-row setting-select-row">
+        <span>News topics after top stories:</span>
+        <NSelect class="setting-select" multiple placeholder="Topics" :options="allTopicsSelection" v-model:value="newsTopicsAfterTopStories" />
+      </div>
+
       <div class="setting-row">
-        <p>Language & region: {{ languageAndRegionLabel }}</p>
+        <span>Language & region: {{ languageAndRegionLabel }}</span>
         <router-link class="setting-link" :to="{ name: 'setup', query: { from: 'settings' } }">Update</router-link>
       </div>
     </div>
@@ -42,13 +47,18 @@
 <script lang="ts" setup>
 import { watch, ref } from 'vue';
 
-import { NSwitch, NDynamicTags } from 'naive-ui';
+import { NSelect, NSwitch, NDynamicTags } from 'naive-ui';
 
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
 import { SettingKey } from '@enums/setting-key';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@utils/storage-utils';
 
+const allTopicsSelection = ref(
+  getSettingFromStorage(SettingKey.AllTopicsInfo)?.map((topic) => ({ label: topic.name, value: topic.id })),
+);
+
 const filterOutYoutube = useSyncSettingMapUndefined(SettingKey.FilterOutYoutube);
+const newsTopicsAfterTopStories = useSyncSettingMapNullArray(SettingKey.NewsTopicsAfterTopStories);
 const languageAndRegionLabel = ref(getSettingFromStorage(SettingKey.LanguageAndRegionLabel));
 const hideSeenNews = useSyncSettingMapUndefined(SettingKey.HideSeenNews);
 const hiddenSources = useSyncSettingMapNullArray(SettingKey.HiddenSources);
