@@ -1,0 +1,36 @@
+.dots-loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 64px;
+}
+
+.dots-loader {
+  --dots-color-show: #fffe;
+  --dots-color-hide: #fff4;
+
+  width: 12px;
+  height: 12px;
+  background: var(--dots-color-show);
+  border-radius: 50%;
+  box-shadow: 20px 0 var(--dots-color-hide), -20px 0 var(--dots-color-show);
+  animation: dotLoaderAnimation 1s infinite linear alternate;
+}
+
+@keyframes dotLoaderAnimation {
+  0% {
+    background: var(--dots-color-show);
+    box-shadow: 20px 0 var(--dots-color-show), -20px 0 var(--dots-color-hide);
+  }
+
+  33% {
+    background: var(--dots-color-hide);
+    box-shadow: 20px 0 var(--dots-color-show), -20px 0 var(--dots-color-hide);
+  }
+
+  66% {
+    background: var(--dots-color-hide);
+    box-shadow: 20px 0 var(--dots-color-hide), -20px 0 var(--dots-color-show);
+  }
+}

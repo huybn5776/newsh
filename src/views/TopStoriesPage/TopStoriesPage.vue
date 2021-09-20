@@ -9,6 +9,7 @@
       @newsTopicEntered="onNewsTopicEnter"
       @loadMore="loadMore"
     />
+    <DotsLoader v-if="!completeLoaded" />
     <NextTopicSelection
       v-if="completeLoaded"
       title="Next topic to show"
@@ -21,6 +22,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
 
+import DotsLoader from '@components/DotsLoader/DotsLoader.vue';
 import NewsTopics from '@components/NewsTopics/NewsTopics.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { useProvideSeenNews } from '@compositions/use-provide-seen-news';

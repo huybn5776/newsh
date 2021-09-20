@@ -10,6 +10,7 @@
       :news="news"
       :related-expanded="!isMobile && newsIndex === 0"
     />
+    <DotsLoader v-if="isLoading" />
     <NextTopicSelection
       v-if="!isLoading"
       title="Go to topic"
@@ -24,6 +25,7 @@ import { ref, onMounted, watch } from 'vue';
 
 import { useRoute, useRouter } from 'vue-router';
 
+import DotsLoader from '@components/DotsLoader/DotsLoader.vue';
 import NewsItemCard from '@components/NewsItemCard/NewsItemCard.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { useProvideSeenNews } from '@compositions/use-provide-seen-news';
