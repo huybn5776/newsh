@@ -10,6 +10,12 @@
       :news="news"
       :related-expanded="!isMobile && newsIndex === 0"
     />
+    <NextTopicSelection
+      v-if="!isLoading"
+      title="Go to topic"
+      :disabledTopics="{ [newsTopic?.id || '']: true }"
+      @topicClick="goToTopic"
+    />
   </div>
 </template>
 
@@ -24,6 +30,7 @@ import { useProvideSeenNews } from '@compositions/use-provide-seen-news';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { getSettingFromStorage } from '@utils/storage-utils';
+import NextTopicSelection from '@views/TopStoriesPage/NextTopicSelection/NextTopicSelection.vue';
 import { useNewsRequest } from '@views/TopStoriesPage/use-news-request';
 
 const allTopicsInfo = ref(getSettingFromStorage(SettingKey.AllTopicsInfo) || []);
@@ -33,7 +40,7 @@ const newsTopic = ref<NewsTopicItem>();
 const route = useRoute();
 const router = useRouter();
 const isMobile = useIsMobile();
-const { getSingleTopicNews } = useNewsRequest();
+const { getSingleTopicNews, isLoading } = useNewsRequest();
 useProvideSeenNews(newsTopic);
 
 onMounted(() => loadNews());
@@ -50,6 +57,10 @@ async function loadNews(): Promise<void> {
   } else {
     await router.push({ name: 'topStories' });
   }
+}
+
+function goToTopic(topicId: string): void {
+  router.push({ name: 'newsTopic', params: { topicId } });
 }
 </script>
 

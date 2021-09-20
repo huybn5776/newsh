@@ -1,4 +1,4 @@
-import { ref, computed, watch, Ref, readonly, DeepReadonly, onUnmounted } from 'vue';
+import { ref, computed, watch, Ref, readonly, DeepReadonly, onUnmounted, ComputedRef } from 'vue';
 
 import { useLoadingBar } from 'naive-ui';
 
@@ -11,6 +11,7 @@ export function useNewsRequest(): {
   getSingleTopicNews: (topic: Parameters<typeof getSingleTopicNews>[0]) => Promise<NewsTopicItem>;
   getMultiTopicNews: (topic: Parameters<typeof getMultiTopicNews>[0]) => Promise<NewsTopicItem[]>;
   loadingTopics: DeepReadonly<Ref<Record<string, true>>>;
+  isLoading: ComputedRef<boolean>,
 } {
   const pendingRequests = ref<Promise<unknown>[]>([]);
   const loadingTopics = ref<Record<string, true>>({} as Record<string, true>);
@@ -65,5 +66,6 @@ export function useNewsRequest(): {
     getSingleTopicNews: withPushLoadingTopic(withPushPendingRequest(withLanguageAndRegion(getSingleTopicNews))),
     getMultiTopicNews: withPushPendingRequest(withLanguageAndRegion(getMultiTopicNews)),
     loadingTopics: readonly(loadingTopics),
+    isLoading,
   };
 }

@@ -9,7 +9,12 @@
       @newsTopicEntered="onNewsTopicEnter"
       @loadMore="loadMore"
     />
-    <NextTopicSelection v-if="completeLoaded" :loadedTopics="loadedTopics" @topicClick="appendTopic" />
+    <NextTopicSelection
+      v-if="completeLoaded"
+      title="Next topic to show"
+      :disabledTopics="loadedTopics"
+      @topicClick="appendTopic"
+    />
   </div>
 </template>
 

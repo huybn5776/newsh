@@ -1,13 +1,13 @@
 <template>
   <div class="next-topic-selection">
-    <h3 class="next-topic-header">Next topic to show</h3>
+    <h3 class="next-topic-header">{{ title }}</h3>
     <div class="topic-selections">
       <!--suppress RequiredAttributes -->
       <NButton
         v-for="topic of allTopicsInfo"
         :key="topic.id"
         class="next-topic-button"
-        :disabled="loadedTopics[topic.id]"
+        :disabled="disabledTopics[topic.id]"
         @click="emits('topicClick', topic.id)"
       >
         {{ topic.name }}
@@ -22,7 +22,7 @@ import { NButton } from 'naive-ui';
 import { SettingKey } from '@enums/setting-key';
 import { getSettingFromStorage } from '@utils/storage-utils';
 
-defineProps<{ loadedTopics: Record<string, true> }>();
+defineProps<{ title: string; disabledTopics: Record<string, true> }>();
 const emits = defineEmits<{ (e: 'topicClick', value: string): void }>();
 
 const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
