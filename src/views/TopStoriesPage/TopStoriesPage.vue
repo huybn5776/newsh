@@ -52,11 +52,11 @@ const newsTopicList = computed(() => {
   }
   return newsTopicItems;
 });
-const completeLoaded = computed(() => newsLoaders.value.length === 0);
+const completeLoaded = ref(false);
 
 const isMobile = useIsMobile();
 useProvideSeenNews(newsTopics);
-const { getSingleTopicNews, getMultiTopicNews, loadingTopics } = useNewsRequest();
+const { getSingleTopicNews, getMultiTopicNews, loadingTopics, isLoading } = useNewsRequest();
 
 onMounted(async () => {
   await loadNews();
@@ -86,6 +86,7 @@ async function loadNextTopic(): Promise<void> {
   const newsLoader = newsLoaders.value.shift();
   if (newsLoader) {
     newsTopics.value = [...newsTopics.value, ...(await newsLoader())];
+    completeLoaded.value = newsLoaders.value.length === 0 && !isLoading.value;
   }
 }
 
@@ -104,7 +105,8 @@ async function getNonDuplicatedNewsTopic(topicId: string): Promise<NewsTopicItem
 
 function onNewsTopicEnter(id: string): void {
   const loadThreshold = 2;
-  if (completeLoaded.value) {
+  const noNextTopicToLoad = newsLoaders.value.length === 0;
+  if (noNextTopicToLoad) {
     return;
   }
   const index = newsTopicList.value.findIndex((newsTopic) => newsTopic.id === id);
