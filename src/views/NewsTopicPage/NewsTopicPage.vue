@@ -1,6 +1,7 @@
 <template>
   <div class="page-content">
     <h2 class="news-topic-title">
+      <router-link class="back-icon" :to="{ name: 'topStories' }"></router-link>
       {{ newsTopic?.name || newsTopicName }}
     </h2>
     <NewsItemCard
