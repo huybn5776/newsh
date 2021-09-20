@@ -70,7 +70,7 @@ onUnmounted(() => loadingBar.finish());
 
 function toNextPage(): void {
   const fromRoute = route.query.from as string;
-  router.push({ name: fromRoute ?? 'news' });
+  router.push({ name: fromRoute ?? 'topStories' });
 }
 
 async function updateRegionAndNewsInfo(): Promise<void> {

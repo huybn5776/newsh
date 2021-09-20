@@ -10,9 +10,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
+import NewsDropdown from '@components/NewsDropdown/NewsDropdown.vue';
 import { NewsItem } from '@interfaces/news-item';
 import { formatToTimeAgo } from '@utils/time-ago';
-import NewsDropdown from '@views/NewsList/NewsDropdown/NewsDropdown.vue';
 
 const props = defineProps<{ news: NewsItem }>();
 

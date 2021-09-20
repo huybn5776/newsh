@@ -43,12 +43,12 @@ import { ref, computed, onUpdated, inject } from 'vue';
 
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
 import Image from '@components/Image/Image.vue';
+import NewsInfoBar from '@components/NewsInfoBar/NewsInfoBar.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
+import { useMarkNewsAsSeen } from '@compositions/use-mark-news-as-seen';
+import { provideSeenNewsUrlMap, provideHiddenSeenNewsSetting } from '@compositions/use-provide-seen-news';
 import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
 import { NewsItem } from '@interfaces/news-item';
-import NewsInfoBar from '@views/NewsList/NewsInfoBar/NewsInfoBar.vue';
-import { useMarkNewsAsSeen } from '@views/NewsList/NewsItemCard/use-mark-news-as-seen';
-import { provideSeenNewsUrlMap, provideHiddenSeenNewsSetting } from '@views/NewsList/use-provide-seen-news';
 
 const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();
 const emits = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean): void }>();

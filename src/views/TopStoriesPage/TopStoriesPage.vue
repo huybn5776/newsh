@@ -1,38 +1,14 @@
 <template>
   <div class="page-content news-list">
-    <NCollapse
-      class="news-topic-collapse"
-      @item-header-click="onNewsTopicToggleExpand"
-      :default-expanded-names="topicsToShow"
-    >
-      <div v-for="(topic, topicIndex) of newsTopicList" :key="topic.name" class="news-topic-collapse-item-container">
-        <router-link v-if="!isSingleTopic" class="more-news-link" :to="{ name: 'news', params: { topicId: topic.id } }">
-          More
-        </router-link>
-
-        <NCollapseItem class="news-topic-section" :name="topic.id">
-          <!--suppress HtmlUnknownAttribute -->
-          <template #header>
-            <div class="news-topic-header">
-              <h2 class="news-topic-title" v-intersection="{ enter: () => onNewsTopicEnter(topic.name) }">
-                {{ topic.name }}
-              </h2>
-            </div>
-          </template>
-          <NewsItemCard
-            v-for="(news, newsIndex) of topic.newsItems"
-            :key="news.url"
-            :news="news"
-            :related-expanded="!isMobile && topicIndex === 0 && newsIndex === 0"
-          />
-          <div v-if="!isSingleTopic && !fullLoadedTopics.includes(topic.id)" class="news-topic-load-all-container">
-            <NButton :disabled="loadingTopics[topic.id]" @click="loadMore(topic.id)">
-              Load all news of this topic
-            </NButton>
-          </div>
-        </NCollapseItem>
-      </div>
-    </NCollapse>
+    <NewsTopics
+      :newsTopics="newsTopicList"
+      :showMoreLink="!isSingleTopic"
+      :expandFirstNews="!isMobile"
+      :fullLoadedTopics="fullLoadedTopics"
+      :loadingTopics="loadingTopics"
+      @newsTopicEntered="onNewsTopicEnter"
+      @loadMore="loadMore"
+    />
     <NextTopicSelection v-if="completeLoaded" :loadedTopics="loadedTopics" @topicClick="appendTopic" />
   </div>
 </template>
@@ -40,23 +16,18 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from 'vue';
 
-import { NButton, NCollapse, NCollapseItem } from 'naive-ui';
 import { useRoute, useRouter } from 'vue-router';
 
+import NewsTopics from '@components/NewsTopics/NewsTopics.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
-import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
+import { useProvideSeenNews } from '@compositions/use-provide-seen-news';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { removeYoutubeNews, removeByNewsSource, removeByTerms } from '@services/news-filter';
 import { getSettingFromStorage } from '@utils/storage-utils';
-import NewsItemCard from '@views/NewsList/NewsItemCard/NewsItemCard.vue';
-import NextTopicSelection from '@views/NewsList/NextTopicSelection/NextTopicSelection.vue';
-import { useNewsRequest } from '@views/NewsList/use-news-request';
-import { useProvideSeenNews } from '@views/NewsList/use-provide-seen-news';
-import { useTopicsToShow } from '@views/NewsList/use-topics-to-show';
-
-const vIntersection = intersectionDirectiveFactory();
+import NextTopicSelection from '@views/TopStoriesPage/NextTopicSelection/NextTopicSelection.vue';
+import { useNewsRequest } from '@views/TopStoriesPage/use-news-request';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
 const fullLoadedTopics = ref<string[]>([]);
@@ -84,7 +55,6 @@ const completeLoaded = computed(() => newsLoaders.value.length === 0);
 const route = useRoute();
 const router = useRouter();
 const isMobile = useIsMobile();
-const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();
 useProvideSeenNews(newsTopics);
 const { getSingleTopicNews, getMultiTopicNews, loadingTopics } = useNewsRequest();
 
@@ -101,14 +71,6 @@ watch(
   { flush: 'post' },
 );
 
-function onNewsTopicToggleExpand({ name: topicId, expanded }: { name: string; expanded: boolean }): void {
-  if (expanded) {
-    addTopicToShow(topicId);
-  } else {
-    deleteTopicToShow(topicId);
-  }
-}
-
 async function loadNews(): Promise<void> {
   const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
   const headlineTopicId = getSettingFromStorage(SettingKey.HeadlineTopicId);
@@ -124,7 +86,7 @@ async function loadNews(): Promise<void> {
       () => getMultiTopicNews('worldAndNation'),
       () => getMultiTopicNews('others'),
       ...(newsTopicsAfterTopStories?.map((topic) => async () => {
-        loadedTopics.value = { ...loadedTopics, [topic]: true };
+        loadedTopics.value = { ...loadedTopics.value, [topic]: true };
         return [await getNonDuplicatedNewsTopic(topic)];
       }) || []),
     ];
@@ -158,12 +120,12 @@ async function getNonDuplicatedNewsTopic(topicId: string): Promise<NewsTopicItem
   return newsTopicItem;
 }
 
-function onNewsTopicEnter(topicName: string): void {
+function onNewsTopicEnter(id: string): void {
   const loadThreshold = 2;
   if (completeLoaded.value) {
     return;
   }
-  const index = newsTopicList.value.findIndex((newsTopic) => newsTopic.name === topicName);
+  const index = newsTopicList.value.findIndex((newsTopic) => newsTopic.id === id);
   if (index + loadThreshold >= newsTopicList.value.length) {
     loadNextTopic();
   }
@@ -194,5 +156,5 @@ async function appendTopic(topicId: string): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-@import './NewsList.scss';
+@import 'TopStoriesPage.scss';
 </style>
