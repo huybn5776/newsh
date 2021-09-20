@@ -18,6 +18,12 @@ const routes: RouteRecordRaw[] = [
     name: 'topStories',
     beforeEnter: newsPageGuard,
   },
+  {
+    path: '/news/:topicId',
+    component: () => import('@views/NewsTopicPage/NewsTopicPage.vue'),
+    name: 'newsTopic',
+    beforeEnter: newsPageGuard,
+  },
   { path: '/settings', component: () => import('@views/SettingsPage/SettingsPage.vue'), name: 'settings' },
   { path: '/setup', component: () => import('@views/SetupPage/SetupPage.vue'), name: 'setup' },
   { path: '/:catchAll(.*)', redirect: { name: 'topStories' } },

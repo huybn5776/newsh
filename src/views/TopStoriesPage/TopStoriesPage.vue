@@ -1,8 +1,8 @@
 <template>
   <div class="page-content news-list">
     <NewsTopics
+      showMoreLink
       :newsTopics="newsTopicList"
-      :showMoreLink="!isSingleTopic"
       :expandFirstNews="!isMobile"
       :fullLoadedTopics="fullLoadedTopics"
       :loadingTopics="loadingTopics"
@@ -14,9 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from 'vue';
-
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
 
 import NewsTopics from '@components/NewsTopics/NewsTopics.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
@@ -49,11 +47,8 @@ const newsTopicList = computed(() => {
   }
   return newsTopicItems;
 });
-const isSingleTopic = computed(() => !!route.params.topic);
 const completeLoaded = computed(() => newsLoaders.value.length === 0);
 
-const route = useRoute();
-const router = useRouter();
 const isMobile = useIsMobile();
 useProvideSeenNews(newsTopics);
 const { getSingleTopicNews, getMultiTopicNews, loadingTopics } = useNewsRequest();
@@ -62,15 +57,6 @@ onMounted(async () => {
   await loadNews();
 });
 
-watch(
-  route,
-  () => {
-    newsTopics.value = [];
-    loadNews();
-  },
-  { flush: 'post' },
-);
-
 async function loadNews(): Promise<void> {
   const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
   const headlineTopicId = getSettingFromStorage(SettingKey.HeadlineTopicId);
@@ -78,26 +64,17 @@ async function loadNews(): Promise<void> {
     throw new Error('News info is not ready.');
   }
 
-  const topicId = route.params.topicId as string;
-  if (!topicId) {
-    const newsTopicsAfterTopStories = getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories);
-    newsLoaders.value = [
-      () => getMultiTopicNews('topStories'),
-      () => getMultiTopicNews('worldAndNation'),
-      () => getMultiTopicNews('others'),
-      ...(newsTopicsAfterTopStories?.map((topic) => async () => {
-        loadedTopics.value = { ...loadedTopics.value, [topic]: true };
-        return [await getNonDuplicatedNewsTopic(topic)];
-      }) || []),
-    ];
-    await loadNextTopic();
-  } else if (allTopicsInfo.some((topic) => topic.id === topicId)) {
-    newsLoaders.value = [async () => [await getSingleTopicNews(topicId)]];
-    await loadNextTopic();
-    fullLoadedTopics.value = newsTopics.value.map((newsTopic) => newsTopic.id);
-  } else {
-    await router.push({ name: 'news' });
-  }
+  const newsTopicsAfterTopStories = getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories);
+  newsLoaders.value = [
+    () => getMultiTopicNews('topStories'),
+    () => getMultiTopicNews('worldAndNation'),
+    () => getMultiTopicNews('others'),
+    ...(newsTopicsAfterTopStories?.map((topic) => async () => {
+      loadedTopics.value = { ...loadedTopics.value, [topic]: true };
+      return [await getNonDuplicatedNewsTopic(topic)];
+    }) || []),
+  ];
+  await loadNextTopic();
 }
 
 async function loadNextTopic(): Promise<void> {

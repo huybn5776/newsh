@@ -8,14 +8,17 @@ import { getSettingFromStorage } from '@utils/storage-utils';
 export const provideHiddenSeenNewsSetting = SettingKey.HideSeenNews;
 export const provideSeenNewsUrlMap = 'seenNewsUrlMap';
 
-export function useProvideSeenNews(newsTopicsRef: Ref<UnwrapRef<NewsTopicItem[]>>): void {
+export function useProvideSeenNews(newsTopicsRef: Ref<UnwrapRef<NewsTopicItem | NewsTopicItem[] | undefined>>): void {
   const hideSeenNewsEnabled = getSettingFromStorage(SettingKey.HideSeenNews);
   const seenNewsItems = getSettingFromStorage(SettingKey.SeenNewsItems);
   const seenNewsItemsUrl = (seenNewsItems || []).map((news) => news.url);
 
-  const seenNewsUrlMap = computed(() =>
-    hideSeenNewsEnabled ? getSeenNewsUrlMap(seenNewsItemsUrl, newsTopicsRef.value) : {},
-  );
+  const newsTopics = Array.isArray(newsTopicsRef.value)
+    ? newsTopicsRef.value
+    : newsTopicsRef.value
+    ? [newsTopicsRef.value]
+    : [];
+  const seenNewsUrlMap = computed(() => (hideSeenNewsEnabled ? getSeenNewsUrlMap(seenNewsItemsUrl, newsTopics) : {}));
 
   onMounted(() => {
     if (hideSeenNewsEnabled) {

@@ -1,0 +1,57 @@
+<template>
+  <div class="page-content">
+    <h2 class="news-topic-title">
+      {{ newsTopic?.name || newsTopicName }}
+    </h2>
+    <NewsItemCard
+      v-for="(news, newsIndex) of newsTopic?.newsItems"
+      :key="news.url"
+      :news="news"
+      :related-expanded="!isMobile && newsIndex === 0"
+    />
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, onMounted, watch } from 'vue';
+
+import { useRoute, useRouter } from 'vue-router';
+
+import NewsItemCard from '@components/NewsItemCard/NewsItemCard.vue';
+import { useIsMobile } from '@compositions/use-is-mobile';
+import { useProvideSeenNews } from '@compositions/use-provide-seen-news';
+import { SettingKey } from '@enums/setting-key';
+import { NewsTopicItem } from '@interfaces/news-topic-item';
+import { getSettingFromStorage } from '@utils/storage-utils';
+import { useNewsRequest } from '@views/TopStoriesPage/use-news-request';
+
+const allTopicsInfo = ref(getSettingFromStorage(SettingKey.AllTopicsInfo) || []);
+const newsTopicName = ref<string>();
+const newsTopic = ref<NewsTopicItem>();
+
+const route = useRoute();
+const router = useRouter();
+const isMobile = useIsMobile();
+const { getSingleTopicNews } = useNewsRequest();
+useProvideSeenNews(newsTopic);
+
+onMounted(() => loadNews());
+
+watch(route, () => loadNews(), { flush: 'post' });
+
+async function loadNews(): Promise<void> {
+  newsTopic.value = undefined;
+  const topicId = route.params.topicId as string;
+  newsTopicName.value = allTopicsInfo.value.find((topic) => topic.id === topicId)?.name;
+
+  if (allTopicsInfo.value.some((topic) => topic.id === topicId)) {
+    newsTopic.value = await getSingleTopicNews(topicId);
+  } else {
+    await router.push({ name: 'topStories' });
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@import './NewsTopicPage.scss';
+</style>
