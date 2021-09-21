@@ -55,7 +55,7 @@ const newsTopicList = computed(() => {
 const completeLoaded = ref(false);
 
 const isMobile = useIsMobile();
-useProvideSeenNews(newsTopics);
+useProvideSeenNews();
 const { getSingleTopicNews, getMultiTopicNews, loadingTopics, isLoading } = useNewsRequest();
 
 onMounted(async () => {

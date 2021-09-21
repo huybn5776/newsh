@@ -4,21 +4,6 @@ import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { getSettingFromStorage, updateSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
-export function getSeenNewsUrlMap(
-  seenNewsItemsUrl: string[],
-  newsTopicItems: NewsTopicItem[],
-): Record<string, boolean> {
-  const seenNewsUrlMap: Record<string, boolean> = {};
-  const allNewsItems = newsTopicItems
-    .flatMap((newsTopic) => newsTopic.newsItems)
-    .flatMap((newsItem) => [newsItem, ...(newsItem.relatedNewsItems || [])]);
-  allNewsItems.forEach((newsItem) => {
-    seenNewsUrlMap[newsItem.url] = seenNewsItemsUrl.includes(newsItem.url);
-  });
-
-  return seenNewsUrlMap;
-}
-
 export function trimSeenNewsItems(): void {
   const now = Date.now();
   const millisecondsPerDay = 24 * 60 * 60 * 1000;

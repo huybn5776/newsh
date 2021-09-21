@@ -43,7 +43,7 @@ const route = useRoute();
 const router = useRouter();
 const isMobile = useIsMobile();
 const { getSingleTopicNews, isLoading } = useNewsRequest();
-useProvideSeenNews(newsTopic);
+useProvideSeenNews();
 
 onMounted(() => loadNews());
 

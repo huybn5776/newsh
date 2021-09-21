@@ -22,7 +22,7 @@ export function useMarkNewsAsSeen(seenNewsUrlMap: Record<string, boolean>): {
 
     newsItemIntersectionTimeout.value[newsUrl] = setTimeout(() => {
       updateSettingFromStorage(SettingKey.SeenNewsItems, (newsItems) => [
-        ...(newsItems || []),
+        ...(newsItems?.filter((news) => news.url !== newsUrl) || []),
         { seenAt: Date.now(), title: newsItem.title, url: newsUrl },
       ]);
       delete newsItemIntersectionTimeout.value[newsUrl];
