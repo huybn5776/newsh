@@ -50,7 +50,7 @@ export async function getSingleTopicNews(topicId: string, languageAndRegion: str
     throw new Error(`Incorrect response type, expect '${topicId}' to have single topics response.`);
   }
   const newsTopicObject = newsArray as NewsObjectRaw;
-  const newsTopicItem = parseNewsTopic(newsTopicObject);
+  const newsTopicItem = { ...parseNewsTopic(newsTopicObject), isPartial: false };
   newsTopicItem.name = infoArray?.[2] || newsTopicItem.name;
   return newsTopicItem;
 }
@@ -75,7 +75,7 @@ export async function getMultiTopicNews(
   const newsTopicObjects = (newsObjects[3] as NewsObjectRaw[]).map(
     (newsObject: NewsObjectRaw) => newsObject[2],
   ) as NewsObjectRaw[];
-  return newsTopicObjects.map(parseNewsTopic);
+  return newsTopicObjects.map((newsTopicObject) => ({ ...parseNewsTopic(newsTopicObject), isPartial: true }));
 }
 
 async function fetchNews(requestBody: unknown): Promise<NewsObjectRaw[]> {
@@ -89,7 +89,7 @@ async function fetchNews(requestBody: unknown): Promise<NewsObjectRaw[]> {
   return JSON.parse(response.data.split('\n')[2]);
 }
 
-function parseNewsTopic(newsTopicObject: NewsObjectRaw): NewsTopicItem {
+function parseNewsTopic(newsTopicObject: NewsObjectRaw): Omit<NewsTopicItem, 'isPartial'> {
   const topicName = newsTopicObject[2];
   const topicId = `${newsTopicObject[13]?.[1] || newsTopicObject[21]}`.split('/')[1];
 

@@ -28,7 +28,7 @@
           :news="news"
           :related-expanded="expandFirstNews && topicIndex === 0 && newsIndex === 0"
         />
-        <div v-if="showMoreLink && !fullLoadedTopics.includes(topic.id)" class="news-topic-load-all-container">
+        <div v-if="showMoreLink && topic.isPartial" class="news-topic-load-all-container">
           <NButton :disabled="loadingTopics[topic.id]" @click="emits('loadMore', topic.id)">
             Load all news of this topic
           </NButton>
@@ -61,7 +61,6 @@ defineProps<{
   newsTopics: NewsTopicItem[];
   showMoreLink: boolean;
   expandFirstNews: boolean;
-  fullLoadedTopics: string[];
   loadingTopics: Record<string, true>;
 }>();
 const emits = defineEmits<{

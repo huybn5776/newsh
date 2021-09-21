@@ -4,7 +4,6 @@
       showMoreLink
       :newsTopics="newsTopicList"
       :expandFirstNews="!isMobile"
-      :fullLoadedTopics="fullLoadedTopics"
       :loadingTopics="loadingTopics"
       @newsTopicEntered="onNewsTopicEnter"
       @loadMore="loadMore"
@@ -35,7 +34,6 @@ import NextTopicSelection from '@views/TopStoriesPage/NextTopicSelection/NextTop
 import { useNewsRequest } from '@views/TopStoriesPage/use-news-request';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
-const fullLoadedTopics = ref<string[]>([]);
 const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);
 const loadedTopics = ref<Record<string, true>>({});
 
@@ -129,9 +127,9 @@ async function loadMore(topicId: string): Promise<void> {
   newTopicItems[indexToAppend] = {
     ...originalNewsTopicItem,
     newsItems: [...originalNewsTopicItem.newsItems, ...newsItemsToAppend],
+    isPartial: false,
   };
   newsTopics.value = newTopicItems;
-  fullLoadedTopics.value = [...fullLoadedTopics.value, topicId];
 }
 
 async function appendTopic(topicId: string): Promise<void> {

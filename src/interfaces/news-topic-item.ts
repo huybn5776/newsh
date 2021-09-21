@@ -4,4 +4,5 @@ export interface NewsTopicItem {
   id: string;
   name: string;
   newsItems: NewsItem[];
+  isPartial: boolean;
 }
