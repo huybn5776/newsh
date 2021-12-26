@@ -1,7 +1,16 @@
 .settings-page {
   display: flex;
   flex-direction: column;
-  padding-bottom: 12px;
+  padding-bottom: 0;
+
+  &::after {
+    padding: 4px;
+    content: '';
+  }
+
+  > :nth-last-child(2) {
+    margin-bottom: 16px;
+  }
 }
 
 .setting-page-title {
@@ -50,6 +59,7 @@
   margin-top: auto;
   padding: 8px;
   font-size: 0;
+  line-height: 36px;
   background: url('/src/assets/svg/github.svg') no-repeat center;
   background-size: 36px 36px;
   opacity: .6;
