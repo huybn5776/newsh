@@ -13,3 +13,42 @@ export function isMobile(): boolean {
   })(navigator.userAgent || navigator.vendor);
   return check;
 }
+
+export function saveDataToJsonFile(data: unknown, filename: string): void {
+  const json = JSON.stringify(data);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  document.body.appendChild(a);
+  a.href = url;
+  a.download = `${filename}.json`;
+  a.click();
+
+  setTimeout(() => {
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  });
+}
+
+export function selectFile(fileType?: string): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = fileType ? `.${fileType}` : '';
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) {
+        resolve(null);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.readAsText(file, 'UTF-8');
+      reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
+        resolve(readerEvent.target?.result?.toString() || null);
+      };
+    };
+    input.click();
+  });
+}

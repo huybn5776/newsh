@@ -40,6 +40,15 @@
       </div>
     </div>
 
+    <div class="setting-section">
+      <h3>Backup</h3>
+      <div class="setting-row">
+        <NButton @click="downloadSettings">Download settings</NButton>
+        <NButton @click="importSettings">Import settings</NButton>
+        <NButton @click="editSettingsInJson">Edit settings in JSON</NButton>
+      </div>
+    </div>
+
     <a class="github-logo" href="https://github.com/huybn5776/newsh" target="_blank">GitHub</a>
   </div>
 </template>
@@ -47,10 +56,12 @@
 <script lang="ts" setup>
 import { watch, ref } from 'vue';
 
-import { NSelect, NSwitch, NDynamicTags } from 'naive-ui';
+// noinspection ES6UnusedImports
+import { NButton, NDynamicTags, NSelect, NSwitch } from 'naive-ui';
 
+import { useBackupSettings } from '@compositions/use-backup-settings';
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
-import { SettingKey } from '@enums/setting-key';
+import { SettingKey, SettingValueType } from '@enums/setting-key';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@utils/storage-utils';
 
 const allTopicsSelection = ref(
@@ -63,6 +74,7 @@ const languageAndRegionLabel = ref(getSettingFromStorage(SettingKey.LanguageAndR
 const hideSeenNews = useSyncSettingMapUndefined(SettingKey.HideSeenNews);
 const hiddenSources = useSyncSettingMapNullArray(SettingKey.HiddenSources);
 const excludeTerms = useSyncSettingMapNullArray(SettingKey.ExcludeTerms);
+const { downloadSettings, importSettings, editSettingsInJson } = useBackupSettings(reloadSettings);
 
 watch(
   () => hideSeenNews.value,
@@ -72,6 +84,14 @@ watch(
     }
   },
 );
+
+function reloadSettings(settingValue: Partial<SettingValueType>): void {
+  filterOutYoutube.value = settingValue.filterOutYoutube;
+  hideSeenNews.value = settingValue.hideSeenNews;
+  newsTopicsAfterTopStories.value = settingValue.newsTopicsAfterTopStories || [];
+  hiddenSources.value = settingValue.hiddenSources || [];
+  excludeTerms.value = settingValue.excludeTerms || [];
+}
 </script>
 
 <style lang="scss" scoped>
