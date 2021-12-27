@@ -8,12 +8,14 @@
 <script lang="ts" setup>
 import { ref, onUnmounted } from 'vue';
 
+// noinspection ES6UnusedImports
 import { NDropdown, useMessage, DialogReactive } from 'naive-ui';
 import { DropdownMixedOption } from 'naive-ui/lib/dropdown/src/interface';
 
 import { useInputDialog } from '@compositions/use-input-dialog';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
+import { distinctArrayRight } from '@utils/array-utils';
 import { updateSettingFromStorage } from '@utils/storage-utils';
 
 const menuActions: Record<string, Omit<DropdownMixedOption, 'key'> & { action: () => void }> = {
@@ -50,7 +52,7 @@ function addExcludeTerm(): void {
       if (!term) {
         return;
       }
-      updateSettingFromStorage(SettingKey.ExcludeTerms, (terms) => [...(terms || []), term]);
+      updateSettingFromStorage(SettingKey.ExcludeTerms, (terms) => distinctArrayRight([...(terms || []), term]));
       message.success(`'${term}' has been added to exclude terms.`);
     },
   });

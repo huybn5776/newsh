@@ -22,11 +22,11 @@ export function useSyncSettingMapUndefined<K extends SettingKey, T extends Setti
 export function useSyncSettingMapNullArray<
   K extends SettingValueType[K] extends Array<unknown> ? SettingKey : never,
   T extends SettingValueType[K] extends Array<unknown> ? SettingValueType[K] : never,
->(key: K): Ref<T | undefined> {
+>(key: K, map?: (value: T | undefined) => T | undefined): Ref<T | undefined> {
   const settingValue = getSettingFromStorage<K, T>(key);
   const settingRef = ref<T | undefined>();
   settingRef.value = settingValue === null ? ([] as Array<unknown> as T & Array<unknown>) : settingValue;
-  watch(settingRef, () => saveOrDelete<K, T>(key, settingRef.value));
+  watch(settingRef, () => saveOrDelete<K, T>(key, map ? map(settingRef.value) : settingRef.value));
   return settingRef;
 }
 
