@@ -95,10 +95,10 @@ function parseNewsTopic(newsTopicObject: NewsObjectRaw): Omit<NewsTopicItem, 'is
 
   const newsObjects: NewsObjectRaw[] = newsTopicObject[3];
   const newsItems: NewsItem[] = [];
-  for (const newsObject of newsObjects) {
+  newsObjects.forEach((newsObject) => {
     const newsGroupType = newsObject[0];
     if (newsGroupType === NewsObjectType.CustomBanner) {
-      continue;
+      return;
     }
 
     let newsItem: NewsItem;
@@ -113,7 +113,7 @@ function parseNewsTopic(newsTopicObject: NewsObjectRaw): Omit<NewsTopicItem, 'is
       newsItem = parseNewsItem(newsObject[3]);
     }
     newsItems.push(newsItem);
-  }
+  });
 
   return { id: topicId, name: topicName, newsItems };
 }

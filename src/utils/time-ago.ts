@@ -10,11 +10,11 @@ export function formatToTimeAgo(date: Date | number): string {
   }
   if (millisecondsAgo < millisecondsPerHour) {
   const minutesAgo = Math.floor(millisecondsAgo / millisecondsPerMinute);
-    return `${minutesAgo} minute${minutesAgo == 1 ? '' : 's'} ago`;
+    return `${minutesAgo} minute${minutesAgo === 1 ? '' : 's'} ago`;
   }
   if (millisecondsAgo < millisecondsPerDay) {
     const hoursAgo = Math.floor(millisecondsAgo / millisecondsPerHour);
-    return `${hoursAgo} hour${hoursAgo == 1 ? '' : 's'} ago`;
+    return `${hoursAgo} hour${hoursAgo === 1 ? '' : 's'} ago`;
   }
   const daysAgo = Math.floor(millisecondsAgo / millisecondsPerDay);
   return daysAgo === 1 ? 'yesterday' : `${daysAgo} days ago`;

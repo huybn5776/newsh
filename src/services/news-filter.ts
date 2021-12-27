@@ -1,9 +1,7 @@
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 
-export function collapseRelatedNewsExcept(
-  topicsToShow: string[],
-): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
+export function collapseRelatedNewsExcept(topicsToShow: string[]): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
   return (newsTopicItem: NewsTopicItem) => {
     const toCollapse = topicsToShow.length && !topicsToShow.includes(newsTopicItem.id);
     return { ...newsTopicItem, newsItems: toCollapse ? [] : newsTopicItem.newsItems };
@@ -28,7 +26,7 @@ function removeNewsOfTopicBy(
   const filter = removeNewsBy(predicate);
 
   return (newsTopicItem: NewsTopicItem) => {
-    const newsItems: NewsItem[] = newsTopicItem.newsItems;
+    const { newsItems } = newsTopicItem;
     const filteredNewsItems: NewsItem[] = [];
     newsItems.forEach((newsItem) => {
       const updatedNewsItem = filter(newsItem);
