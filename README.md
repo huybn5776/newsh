@@ -1,15 +1,16 @@
 # Newsh
 
-A news site that use Google News as source and provide some custom features for it.
+A news site that uses Google News as a source and provides some custom features for it.
 
 ## Features
 
 - Always open news with new tab, prevent losing the current reading list/location when reading news on the phone.
-- Collapse topic that not interesting on it, and save this setting.
+- Collapse topic that you may not be interested on it.
 - Filter out YouTube news, when it is not suitable to watch with sound.
 - Gray out seen news, free your short-term memory to remember what news you may like to skip.
 - Hide news source/term without login with Google account.
-- Load headline news on bottom of news list, no need to scroll to top and click "More Headlines" again, will also filter out already listed news above.
+- Load headline or specific topic when react the bottom of all news, no need to scroll to top and click "More Headlines" or something again, will also filter out already listed news above.
+- Backup settings.
 
 
 
@@ -37,4 +38,4 @@ So in implement here is using a geolocation api service, to use user ip address 
 
 ### Gray out seen news
 
-Use IntersectionObserver, after a news row enter to viewport for 3 seconds, the news will be mark news as seen.
+Use IntersectionObserver, after a news row enter to viewport for 2 seconds, the news will be mark news as seen.
