@@ -45,6 +45,7 @@ function addExcludeTerm(): void {
     title: 'Add exclude term',
     placeholder: 'exclude term',
     value: props.news.title,
+    positiveText: 'Add',
     onValue: (term) => {
       if (!term) {
         return;
