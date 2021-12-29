@@ -71,9 +71,9 @@ async function loadNews(): Promise<void> {
 
   const newsTopicsAfterTopStories = getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories);
   newsLoaders.value = [
-    () => getMultiTopicNews('topStories'),
-    () => getMultiTopicNews('worldAndNation'),
-    () => getMultiTopicNews('others'),
+    () => getNonDuplicatedMultiNewsTopic('topStories'),
+    () => getNonDuplicatedMultiNewsTopic('worldAndNation'),
+    () => getNonDuplicatedMultiNewsTopic('others'),
     ...(newsTopicsAfterTopStories?.map((topic) => async () => {
       loadedTopics.value = { ...loadedTopics.value, [topic]: true };
       return [await getNonDuplicatedNewsTopic(topic)];
@@ -90,17 +90,35 @@ async function loadNextTopic(): Promise<void> {
   }
 }
 
+async function getNonDuplicatedMultiNewsTopic(
+  topicId: Parameters<typeof getMultiTopicNews>[0],
+): Promise<NewsTopicItem[]> {
+  const newsTopicItems = await getMultiTopicNews(topicId);
+  let allNewsUrl = getAllNewsUrl(newsTopics.value);
+
+  return newsTopicItems.map((newsTopicItem) => {
+    const filteredTopicItem = {
+      ...newsTopicItem,
+      newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.includes(news.url)),
+    };
+    allNewsUrl = [...allNewsUrl, ...getAllNewsUrl([newsTopicItem])];
+    return filteredTopicItem;
+  });
+}
+
 async function getNonDuplicatedNewsTopic(topicId: string): Promise<NewsTopicItem> {
-  const allNewsUrl = newsTopics.value.flatMap((topic) => [
+  const newsTopicItem = await getSingleTopicNews(topicId);
+  const allNewsUrl = getAllNewsUrl(newsTopics.value);
+  return { ...newsTopicItem, newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.includes(news.url)) };
+}
+
+function getAllNewsUrl(newsTopicItems: NewsTopicItem[]): string[] {
+  return newsTopicItems.flatMap((topic) => [
     ...topic.newsItems.map((news) => news.url),
     ...topic.newsItems.flatMap((news) =>
       ((news.relatedNewsItems || []) as NewsItem[]).map((relatedNews) => relatedNews.url),
     ),
   ]);
-
-  const newsTopicItem = await getSingleTopicNews(topicId);
-  newsTopicItem.newsItems = newsTopicItem.newsItems.filter((news) => !allNewsUrl.includes(news.url));
-  return newsTopicItem;
 }
 
 function onNewsTopicEnter(id: string): void {
