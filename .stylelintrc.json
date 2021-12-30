@@ -1,5 +1,6 @@
 {
   "extends": [
+    "stylelint-config-recommended-scss",
     "stylelint-config-rational-order"
   ],
   "plugins": [
@@ -123,11 +124,6 @@
     "declaration-colon-space-before": "never",
     "declaration-block-single-line-max-declarations": 1,
     "declaration-block-trailing-semicolon": "always",
-    "declaration-property-value-blacklist": {
-      "/^border/": [
-        "none"
-      ]
-    },
     "at-rule-empty-line-before": [
       "always",
       {
