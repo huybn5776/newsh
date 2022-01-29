@@ -84,7 +84,7 @@ module.exports = {
     'no-multiple-empty-lines': 2,
     'no-return-assign': [2, 'except-parens'],
     'no-useless-return': 1,
-    'prettier/prettier': 0,
+    'prettier/prettier': 1,
     quotes: ['error', 'single', { allowTemplateLiterals: true }],
     semi: [2, 'always'],
 
