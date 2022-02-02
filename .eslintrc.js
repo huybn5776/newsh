@@ -4,7 +4,7 @@ module.exports = {
     browser: true,
   },
   extends: [
-    'airbnb',
+    'airbnb-base',
     'airbnb-typescript',
     'plugin:@typescript-eslint/recommended',
     'prettier',
@@ -13,7 +13,7 @@ module.exports = {
     'eslint:recommended',
     '@vue/typescript/recommended',
     '@vue/prettier',
-    '@vue/eslint-config-typescript'
+    '@vue/eslint-config-typescript',
   ],
   parser: 'vue-eslint-parser',
   parserOptions: {
@@ -24,7 +24,7 @@ module.exports = {
     sourceType: 'module',
     project: './tsconfig.json',
   },
-  plugins: ['@typescript-eslint', 'import', 'jsx-a11y', 'react'],
+  plugins: ['@typescript-eslint', 'import', 'jsx-a11y'],
   ignorePatterns: ['dist/**', '.eslintrc.js', 'config-overrides.js'],
   globals: {
     defineProps: 'readonly',
@@ -33,6 +33,9 @@ module.exports = {
     withDefaults: 'readonly',
   },
   rules: {
+    // override rule from 'plugin:@typescript-eslint/recommended'
+    'react/jsx-filename-extension': 0,
+
     'import/order': [
       2,
       {
