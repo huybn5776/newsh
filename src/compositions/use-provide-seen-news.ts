@@ -1,11 +1,9 @@
 import { onMounted, provide } from 'vue';
 
+import { provideHiddenSeenNewsSettingKey, provideSeenNewsInjectKey } from '@/symbols';
 import { SettingKey } from '@enums/setting-key';
 import { trimSeenNewsItems } from '@services/news-service';
 import { getSettingFromStorage } from '@utils/storage-utils';
-
-export const provideHiddenSeenNewsSetting = SettingKey.HideSeenNews;
-export const provideSeenNewsUrlMap = 'seenNewsUrlMap';
 
 export function useProvideSeenNews(): void {
   const hideSeenNewsEnabled = getSettingFromStorage(SettingKey.HideSeenNews);
@@ -20,6 +18,6 @@ export function useProvideSeenNews(): void {
     }
   });
 
-  provide(SettingKey.HideSeenNews, hideSeenNewsEnabled);
-  provide('seenNewsUrlMap', seenNewsUrlMap);
+  provide(provideHiddenSeenNewsSettingKey, hideSeenNewsEnabled);
+  provide(provideSeenNewsInjectKey, seenNewsUrlMap);
 }

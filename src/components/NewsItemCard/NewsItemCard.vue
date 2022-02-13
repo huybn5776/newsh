@@ -41,22 +41,23 @@
 <script lang="ts" setup>
 import { ref, computed, onUpdated, inject } from 'vue';
 
+import { provideSeenNewsInjectKey, provideHiddenSeenNewsSettingKey } from '@/symbols';
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
 import Image from '@components/Image/Image.vue';
 import NewsInfoBar from '@components/NewsInfoBar/NewsInfoBar.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { useMarkNewsAsSeen } from '@compositions/use-mark-news-as-seen';
-import { provideSeenNewsUrlMap, provideHiddenSeenNewsSetting } from '@compositions/use-provide-seen-news';
 import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
 import { NewsItem } from '@interfaces/news-item';
+import { injectStrict } from '@utils/inject-utils';
 
 const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();
 const emits = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean): void }>();
 const vIntersection = intersectionDirectiveFactory({ threshold: 1 });
 
 const expandedDirection = ref<'up' | 'down'>(props.relatedExpanded ? 'up' : 'down');
-const hideSeenNewsEnabled = inject(provideHiddenSeenNewsSetting);
-const seenNewsUrlMap = inject(provideSeenNewsUrlMap) as Record<string, boolean>;
+const hideSeenNewsEnabled = inject(provideHiddenSeenNewsSettingKey);
+const seenNewsUrlMap = injectStrict(provideSeenNewsInjectKey);
 
 const expanded = computed(() => expandedDirection.value === 'up');
 const hasRelatedNews = computed(() => props.news.relatedNewsItems?.length);
