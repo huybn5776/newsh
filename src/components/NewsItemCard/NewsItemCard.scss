@@ -23,8 +23,9 @@
 }
 
 .news-link {
-  &.seen-news {
-    opacity: .6;
+  &.seen-news,
+  &:visited {
+    color: #a6a6a7;
 
     .news-title {
       font-weight: normal;
@@ -60,6 +61,11 @@
     background: white;
     border-radius: 50%;
     content: '';
+  }
+
+  &.seen-news::before,
+  &:visited::before {
+    background: #a6a6a7;
   }
 
   .related-news-title {
