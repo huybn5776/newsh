@@ -1,7 +1,13 @@
 import * as R from 'ramda';
 
 export const isNilOrEmpty = R.either(R.isEmpty, R.isNil) as (value: unknown) => value is null | undefined;
-export const isNotNilOrEmpty = R.complement(isNilOrEmpty) as (value: unknown) => value is Record<string, unknown>;
+export function isNotNilOrEmpty<T>(value: T | null | undefined): value is T {
+  return !isNilOrEmpty(value);
+}
+
+export function isNotNil<T>(value: T | null | undefined): value is T {
+  return !R.isNil(value);
+}
 
 export function deleteNilProperties<T>(obj: T): Partial<T> {
   const newObj = { ...obj };

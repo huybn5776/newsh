@@ -7,7 +7,7 @@ import { defineConfig, Alias } from 'vite';
 import * as tsconfig from './tsconfig.json';
 
 function readAliasFromTsConfig(): Alias[] {
-  const pathReplaceRegex = new RegExp(/\/\*$/, '');
+  const pathReplaceRegex = /\/\*$/;
   return Object.entries(tsconfig.compilerOptions.paths).reduce((aliases, [fromPaths, toPaths]) => {
     const find = fromPaths.replace(pathReplaceRegex, '');
     const toPath = toPaths[0].replace(pathReplaceRegex, '');
@@ -26,7 +26,9 @@ export default defineConfig({
     proxy: {
       '/news.google.com': {
         target: 'https://news.google.com',
-        rewrite(urlPath) { return urlPath.replace(/^\/news.google.com/, ''); },
+        rewrite(urlPath) {
+          return urlPath.replace(/^\/news.google.com/, '');
+        },
         changeOrigin: true,
         followRedirects: true,
       },

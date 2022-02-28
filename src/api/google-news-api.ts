@@ -32,7 +32,6 @@ const multiTopicRequestCode = {
   worldAndNation: 'xBjcpf',
   others: 'N0vcJe',
 };
-export const requestTopics = Object.keys(multiTopicRequestCode) as (keyof typeof multiTopicRequestCode)[];
 
 type NewsObjectRaw = [number] & [unknown, NewsObjectRaw | NewsObjectRaw[] | string];
 

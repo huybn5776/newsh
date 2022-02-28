@@ -12,12 +12,12 @@ export function useTopicsToShow(): {
 
   return {
     topicsToShow,
-    addTopicToShow(topicId:string ) {
+    addTopicToShow(topicId: string) {
       topicsToShow.value = [...topicsToShow.value, topicId];
       saveTopicsToShowSetting(topicsToShow.value);
     },
-    deleteTopicToShow(topicId:string ) {
-      topicsToShow.value = topicsToShow.value.filter((topic) => topic !== (topicId));
+    deleteTopicToShow(topicId: string) {
+      topicsToShow.value = topicsToShow.value.filter((topic) => topic !== topicId);
       saveTopicsToShowSetting(topicsToShow.value);
     },
   };
@@ -25,7 +25,7 @@ export function useTopicsToShow(): {
 
 function getTopicsToShow(): string[] {
   const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
-  const allTopicsId = allTopicsInfo.map(topic => topic.id);
+  const allTopicsId = allTopicsInfo.map((topic) => topic.id);
   const collapsedTopics = getSettingFromStorage(SettingKey.CollapsedTopics);
   if (!collapsedTopics?.length) {
     return allTopicsId;
@@ -35,7 +35,7 @@ function getTopicsToShow(): string[] {
 
 function saveTopicsToShowSetting(topicsId: string[]): void {
   const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
-  const allTopicsId = allTopicsInfo.map(topic => topic.id);
+  const allTopicsId = allTopicsInfo.map((topic) => topic.id);
   const collapsedTopics = allTopicsId.filter((topicId) => !topicsId.includes(topicId));
   saveSettingToStorage(SettingKey.CollapsedTopics, collapsedTopics);
 }

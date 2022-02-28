@@ -9,7 +9,7 @@ export function formatToTimeAgo(date: Date | number): string {
     return 'just now';
   }
   if (millisecondsAgo < millisecondsPerHour) {
-  const minutesAgo = Math.floor(millisecondsAgo / millisecondsPerMinute);
+    const minutesAgo = Math.floor(millisecondsAgo / millisecondsPerMinute);
     return `${minutesAgo} minute${minutesAgo === 1 ? '' : 's'} ago`;
   }
   if (millisecondsAgo < millisecondsPerDay) {

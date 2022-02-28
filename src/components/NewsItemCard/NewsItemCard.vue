@@ -5,10 +5,10 @@
     <div class="news-item">
       <a
         :href="news.url"
-        class="news-link"
+        class="news-link main-news-link"
         target="_blank"
         v-intersection="{ enter: () => onNewsEnter(news), leave: () => onNewsLeave(news) }"
-        :class="seenNewsUrlMap[news.url] ? 'seen-news' : ''"
+        :class="{ 'seen-news': seenNewsUrlMap[news.url] }"
       >
         <h3 class="news-title">{{ news.title }}</h3>
         <NewsInfoBar :news="news" />
@@ -19,7 +19,7 @@
           v-for="(relatedNews, index) of news.relatedNewsItems"
           :key="relatedNews.url"
           v-show="expanded || (!isMobile && index === 0)"
-          class="related-news-link"
+          class="news-link related-news-link"
           target="_blank"
           v-intersection="{ enter: () => onNewsEnter(relatedNews), leave: () => onNewsLeave(relatedNews) }"
           :href="relatedNews.url"

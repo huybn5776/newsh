@@ -16,7 +16,13 @@
 
       <div class="setting-row setting-select-row">
         <span>News topics after top stories:</span>
-        <NSelect class="setting-select" multiple placeholder="Topics" :options="allTopicsSelection" v-model:value="newsTopicsAfterTopStories" />
+        <NSelect
+          class="setting-select"
+          multiple
+          placeholder="Topics"
+          :options="allTopicsSelection"
+          v-model:value="newsTopicsAfterTopStories"
+        />
       </div>
 
       <div class="setting-row">
@@ -56,7 +62,6 @@
 <script lang="ts" setup>
 import { watch, ref } from 'vue';
 
-// noinspection ES6UnusedImports
 import { NButton, NDynamicTags, NSelect, NSwitch } from 'naive-ui';
 
 import { useBackupSettings } from '@compositions/use-backup-settings';
