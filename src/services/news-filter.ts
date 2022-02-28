@@ -12,8 +12,12 @@ export function removeYoutubeNews(): (newsTopicItem: NewsTopicItem) => NewsTopic
   return removeNewsOfTopicBy((news) => news.url.includes('youtube'));
 }
 
-export function removeByNewsSource(publications: string[]): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
-  return removeNewsOfTopicBy((news) => publications.includes(news.publication));
+export function removeByNewsSource(sources: string[]): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
+  return removeNewsOfTopicBy((news) => sources.includes(news.publication));
+}
+
+export function removeByNewsUrlMatch(urlMatches: string[]): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
+  return removeNewsOfTopicBy((news) => urlMatches.some((match) => !!news.url.match(match)));
 }
 
 export function removeByTerms(terms: string[]): (newsTopicItem: NewsTopicItem) => NewsTopicItem {

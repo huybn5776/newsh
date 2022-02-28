@@ -6,7 +6,11 @@ export enum SettingKey {
   FilterOutYoutube = 'filterOutYoutube',
   HideSeenNews = 'hideSeenNews',
   SeenNewsItems = 'seenNewsItems',
+  /**
+   * publication name
+   */
   HiddenSources = 'hiddenSources',
+  HiddenUrlMatches = 'hiddenUrlMatches',
   ExcludeTerms = 'excludeTerms',
   LanguageAndRegion = 'languageAndRegion',
   LanguageAndRegionLabel = 'languageAndRegionLabel',
@@ -21,6 +25,7 @@ export type SettingValueType = {
   [SettingKey.HideSeenNews]: boolean;
   [SettingKey.SeenNewsItems]: SeenNewsItem[];
   [SettingKey.HiddenSources]: string[];
+  [SettingKey.HiddenUrlMatches]: string[];
   [SettingKey.ExcludeTerms]: string[];
   [SettingKey.LanguageAndRegion]: string;
   [SettingKey.LanguageAndRegionLabel]: string;

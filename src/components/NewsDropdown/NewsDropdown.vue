@@ -8,9 +8,9 @@
 <script lang="ts" setup>
 import { ref, onUnmounted } from 'vue';
 
-// noinspection ES6UnusedImports
 import { NDropdown, useMessage, DialogReactive } from 'naive-ui';
 import { DropdownMixedOption } from 'naive-ui/lib/dropdown/src/interface';
+import { append } from 'ramda';
 
 import { useInputDialog } from '@compositions/use-input-dialog';
 import { SettingKey } from '@enums/setting-key';
@@ -19,7 +19,8 @@ import { distinctArrayRight } from '@utils/array-utils';
 import { updateSettingFromStorage } from '@utils/storage-utils';
 
 const menuActions: Record<string, Omit<DropdownMixedOption, 'key'> & { action: () => void }> = {
-  hideSource: { label: 'Hide all news from this source', action: hideSource },
+  hideSourceByPublication: { label: 'Hide all news from this publication', action: hideSourceByPublication },
+  hideSourceByDomain: { label: 'Hide all news from this domain', action: hideSourceByDomain },
   addExcludeTerm: { label: 'Add exclude term from title (edit)', action: addExcludeTerm },
 };
 const menuOptions: DropdownMixedOption[] = Object.entries(menuActions).map(([key, option]) => ({ ...option, key }));
@@ -34,12 +35,16 @@ function onDropdownSelect(key: string): void {
   menuActions[key]?.action();
 }
 
-function hideSource(): void {
-  updateSettingFromStorage(SettingKey.HiddenSources, (hiddenSources) => [
-    ...(hiddenSources || []),
-    props.news.publication,
-  ]);
-  message.success(`'${props.news.publication}' has been added to the hidden list.`);
+function hideSourceByPublication(): void {
+  const { publication } = props.news;
+  updateSettingFromStorage(SettingKey.HiddenSources, (hiddenSources) => append(publication, hiddenSources || []));
+  message.success(`'${publication}' has been added to the hidden list.`);
+}
+
+function hideSourceByDomain(): void {
+  const domain = new URL(props.news.url)?.host;
+  updateSettingFromStorage(SettingKey.HiddenUrlMatches, (hiddenMatches) => append(domain, hiddenMatches || []));
+  message.success(`'${domain}' has been added to the hidden list.`);
 }
 
 function addExcludeTerm(): void {

@@ -93,6 +93,7 @@ export function useBackupSettings(reloadSettings: (settingsValue: Partial<Settin
         hideSeenNews: validate((v) => typeof v === 'boolean'),
         newsTopicsAfterTopStories: validate((v) => Array.isArray(v)),
         hiddenSources: validate((v) => Array.isArray(v)),
+        hiddenUrlMatches: validate((v) => Array.isArray(v)),
         excludeTerms: validate((v) => Array.isArray(v)),
       },
       settingValue,
@@ -111,6 +112,7 @@ function getSettingValues(): Partial<SettingValueType> {
     hideSeenNews: getSettingFromStorage(SettingKey.HideSeenNews) || undefined,
     newsTopicsAfterTopStories: getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories) || undefined,
     hiddenSources: getSettingFromStorage(SettingKey.HiddenSources) || undefined,
+    hiddenUrlMatches: getSettingFromStorage(SettingKey.HiddenUrlMatches) || undefined,
     excludeTerms: getSettingFromStorage(SettingKey.ExcludeTerms) || undefined,
   };
   return deleteNilProperties(settingValues);

@@ -28,7 +28,7 @@ import { useProvideSeenNews } from '@compositions/use-provide-seen-news';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { removeYoutubeNews, removeByNewsSource, removeByTerms } from '@services/news-filter';
+import { removeYoutubeNews, removeByNewsSource, removeByTerms, removeByNewsUrlMatch } from '@services/news-filter';
 import { getSettingFromStorage } from '@utils/storage-utils';
 import NextTopicSelection from '@views/TopStoriesPage/NextTopicSelection/NextTopicSelection.vue';
 import { useNewsRequest } from '@views/TopStoriesPage/use-news-request';
@@ -45,6 +45,10 @@ const newsTopicList = computed(() => {
   const hiddenSources = getSettingFromStorage(SettingKey.HiddenSources);
   if (hiddenSources?.length) {
     newsTopicItems = newsTopicItems.map(removeByNewsSource(hiddenSources));
+  }
+  const hiddenUrlMatches = getSettingFromStorage(SettingKey.HiddenUrlMatches);
+  if (hiddenUrlMatches?.length) {
+    newsTopicItems = newsTopicItems.map(removeByNewsUrlMatch(hiddenUrlMatches));
   }
   const excludedTerms = getSettingFromStorage(SettingKey.ExcludeTerms);
   if (excludedTerms?.length) {

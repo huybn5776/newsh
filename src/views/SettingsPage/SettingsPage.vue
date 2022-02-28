@@ -33,9 +33,15 @@
 
     <div class="setting-section">
       <h3>Hidden news</h3>
+
       <div class="setting-row">
         <span>Sources: </span>
         <NDynamicTags v-model:value="hiddenSources" />
+      </div>
+
+      <div class="setting-row">
+        <span>Url matches: </span>
+        <NDynamicTags v-model:value="hiddenUrlMatches" />
       </div>
 
       <div class="setting-row">
@@ -79,6 +85,7 @@ const newsTopicsAfterTopStories = useSyncSettingMapNullArray(SettingKey.NewsTopi
 const languageAndRegionLabel = ref(getSettingFromStorage(SettingKey.LanguageAndRegionLabel));
 const hideSeenNews = useSyncSettingMapUndefined(SettingKey.HideSeenNews);
 const hiddenSources = useSyncSettingMapNullArray(SettingKey.HiddenSources, mapArrayValue);
+const hiddenUrlMatches = useSyncSettingMapNullArray(SettingKey.HiddenUrlMatches, mapArrayValue);
 const excludeTerms = useSyncSettingMapNullArray(SettingKey.ExcludeTerms, mapArrayValue);
 const { downloadSettings, importSettings, editSettingsInJson } = useBackupSettings(reloadSettings);
 
@@ -100,6 +107,7 @@ function reloadSettings(settingValue: Partial<SettingValueType>): void {
   hideSeenNews.value = settingValue.hideSeenNews;
   newsTopicsAfterTopStories.value = settingValue.newsTopicsAfterTopStories || [];
   hiddenSources.value = settingValue.hiddenSources || [];
+  hiddenUrlMatches.value = settingValue.hiddenUrlMatches || [];
   excludeTerms.value = settingValue.excludeTerms || [];
 }
 </script>
