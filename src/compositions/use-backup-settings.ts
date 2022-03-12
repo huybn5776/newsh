@@ -91,6 +91,7 @@ export function useBackupSettings(reloadSettings: (settingsValue: Partial<Settin
       {
         filterOutYoutube: validate((v) => typeof v === 'boolean'),
         hideSeenNews: validate((v) => typeof v === 'boolean'),
+        spaceKeyToExpandRelated: validate((v) => typeof v === 'boolean'),
         newsTopicsAfterTopStories: validate((v) => Array.isArray(v)),
         hiddenSources: validate((v) => Array.isArray(v)),
         hiddenUrlMatches: validate((v) => Array.isArray(v)),
@@ -110,6 +111,7 @@ function getSettingValues(): Partial<SettingValueType> {
   const settingValues: Partial<SettingValueType> = {
     filterOutYoutube: getSettingFromStorage(SettingKey.FilterOutYoutube) || undefined,
     hideSeenNews: getSettingFromStorage(SettingKey.HideSeenNews) || undefined,
+    spaceKeyToExpandRelated: getSettingFromStorage(SettingKey.SpaceKeyToExpandRelated) || undefined,
     newsTopicsAfterTopStories: getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories) || undefined,
     hiddenSources: getSettingFromStorage(SettingKey.HiddenSources) || undefined,
     hiddenUrlMatches: getSettingFromStorage(SettingKey.HiddenUrlMatches) || undefined,

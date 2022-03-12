@@ -1,3 +1,5 @@
+import { onUnmounted } from 'vue';
+
 export function listenForKey(
   match: string | ((event: KeyboardEvent) => boolean),
   callback: (event: KeyboardEvent) => void,
@@ -21,4 +23,12 @@ export function listenForKeyOnce(
     callback(event);
   });
   return removeListener;
+}
+
+export function listenForKeyUntilUnmounted(
+  ...params: Parameters<typeof listenForKey>
+): ReturnType<typeof listenForKey> {
+  const dispose = listenForKey(...params);
+  onUnmounted(dispose);
+  return dispose;
 }

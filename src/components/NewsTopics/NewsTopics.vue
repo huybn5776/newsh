@@ -13,7 +13,7 @@
         More
       </router-link>
 
-      <NCollapseItem class="news-topic-section" :name="topic.id">
+      <NCollapseItem class="news-topic-section" :name="topic.id" :data-topic-id="topic.id">
         <template #header>
           <div class="news-topic-header">
             <h2 class="news-topic-title" v-intersection="{ enter: () => emits('newsTopicEntered', topic.id) }">
@@ -26,6 +26,7 @@
           :key="news.url"
           :news="news"
           :related-expanded="expandedNews[`${topic.id}-${news.url}`]"
+          :data-url="news.url"
           @update:relatedExpanded="onNewsExpandChanged(topic.id, news.url, $event)"
         />
         <div v-if="showMoreLink && topic.isPartial" class="news-topic-load-all-container">
@@ -39,14 +40,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 
 import { NButton, NCollapse, NCollapseItem } from 'naive-ui';
 
 import NewsItemCard from '@components/NewsItemCard/NewsItemCard.vue';
 import { useTopicsToShow } from '@components/NewsTopics/use-topics-to-show';
 import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
+import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
+import { listenForKeyUntilUnmounted } from '@utils/keyboard-event-utils';
+import { getSettingFromStorage } from '@utils/storage-utils';
 
 const vIntersection = intersectionDirectiveFactory();
 const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();
@@ -88,6 +92,36 @@ watch(
     firstNewsExpanded.value = true;
   },
 );
+
+onMounted(() => {
+  if (getSettingFromStorage(SettingKey.SpaceKeyToExpandRelated)) {
+    listenForKeyUntilUnmounted('Space', (event) => {
+      const { topicId, url } = getHoveringNews();
+      if (!topicId || !url) {
+        return;
+      }
+      event.preventDefault();
+      toggleNewsExpanded(topicId, url);
+    });
+  }
+});
+
+function getHoveringNews(): { topicId?: string; url?: string } {
+  const hoveringSection = document.querySelector('[data-topic-id]:hover');
+  const hoveringNewsItemCard = document.querySelector('[data-url]:hover');
+  if (!hoveringSection || !hoveringNewsItemCard) {
+    return {};
+  }
+  const topicId = hoveringSection.getAttribute('data-topic-id') || undefined;
+  const url = hoveringNewsItemCard.getAttribute('data-url') || undefined;
+  return { topicId, url };
+}
+
+function toggleNewsExpanded(topicId: string, url: string): void {
+  const key = `${topicId}-${url}`;
+  const orgExpanded = expandedNews.value[key] || false;
+  expandedNews.value = { ...expandedNews.value, [`${topicId}-${url}`]: !orgExpanded };
+}
 
 function onNewsExpandChanged(topicId: string, newsUrl: string, expanded: boolean): void {
   expandedNews.value = { ...expandedNews.value, [`${topicId}-${newsUrl}`]: expanded };

@@ -14,6 +14,11 @@
         <span class="setting-title">Gray out the news that seen within one day.</span>
       </div>
 
+      <div class="setting-row">
+        <NSwitch v-model:value="spaceKeyToExpandRelated" />
+        <span class="setting-title">Use space key to expand currently hovered related news.</span>
+      </div>
+
       <div class="setting-row setting-select-row">
         <span>News topics after top stories:</span>
         <NSelect
@@ -84,6 +89,7 @@ const filterOutYoutube = useSyncSettingMapUndefined(SettingKey.FilterOutYoutube)
 const newsTopicsAfterTopStories = useSyncSettingMapNullArray(SettingKey.NewsTopicsAfterTopStories);
 const languageAndRegionLabel = ref(getSettingFromStorage(SettingKey.LanguageAndRegionLabel));
 const hideSeenNews = useSyncSettingMapUndefined(SettingKey.HideSeenNews);
+const spaceKeyToExpandRelated = useSyncSettingMapUndefined(SettingKey.SpaceKeyToExpandRelated);
 const hiddenSources = useSyncSettingMapNullArray(SettingKey.HiddenSources, mapArrayValue);
 const hiddenUrlMatches = useSyncSettingMapNullArray(SettingKey.HiddenUrlMatches, mapArrayValue);
 const excludeTerms = useSyncSettingMapNullArray(SettingKey.ExcludeTerms, mapArrayValue);
@@ -105,6 +111,7 @@ function mapArrayValue(array: string[] | undefined): string[] {
 function reloadSettings(settingValue: Partial<SettingValueType>): void {
   filterOutYoutube.value = settingValue.filterOutYoutube;
   hideSeenNews.value = settingValue.hideSeenNews;
+  spaceKeyToExpandRelated.value = settingValue.spaceKeyToExpandRelated;
   newsTopicsAfterTopStories.value = settingValue.newsTopicsAfterTopStories || [];
   hiddenSources.value = settingValue.hiddenSources || [];
   hiddenUrlMatches.value = settingValue.hiddenUrlMatches || [];
