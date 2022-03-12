@@ -34,12 +34,17 @@
     </div>
 
     <!--suppress RequiredAttributes -->
-    <ChevronArrow v-if="expandable" class="news-expand-arrow" v-model:direction="expandedDirection" />
+    <ChevronArrow
+      v-if="expandable"
+      class="news-expand-arrow"
+      :direction="expandedDirection"
+      @update:direction="onExpandDirectionChange"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onUpdated, inject } from 'vue';
+import { ref, computed, inject, watch } from 'vue';
 
 import { provideSeenNewsInjectKey, provideHiddenSeenNewsSettingKey } from '@/symbols';
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
@@ -55,11 +60,11 @@ const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();
 const emits = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean): void }>();
 const vIntersection = intersectionDirectiveFactory({ threshold: 1 });
 
-const expandedDirection = ref<'up' | 'down'>(props.relatedExpanded ? 'up' : 'down');
 const hideSeenNewsEnabled = inject(provideHiddenSeenNewsSettingKey);
 const seenNewsUrlMap = injectStrict(provideSeenNewsInjectKey);
 
-const expanded = computed(() => expandedDirection.value === 'up');
+const expanded = ref(props.relatedExpanded || false);
+const expandedDirection = computed<'up' | 'down'>(() => (expanded.value ? 'up' : 'down'));
 const hasRelatedNews = computed(() => props.news.relatedNewsItems?.length);
 const isMobile = useIsMobile();
 const expandable = computed(
@@ -67,6 +72,11 @@ const expandable = computed(
 );
 
 const markNewsSeenCallback = useMarkNewsAsSeen(seenNewsUrlMap);
+
+watch(
+  () => props.relatedExpanded,
+  () => (expanded.value = props.relatedExpanded || false),
+);
 
 function onNewsEnter(newsItem: NewsItem): void {
   if (hideSeenNewsEnabled) {
@@ -80,9 +90,10 @@ function onNewsLeave(newsItem: NewsItem): void {
   }
 }
 
-onUpdated(() => {
+function onExpandDirectionChange(direction: 'up' | 'down'): void {
+  expanded.value = direction === 'up';
   emits('update:relatedExpanded', expanded.value);
-});
+}
 </script>
 
 <style lang="scss" scoped>

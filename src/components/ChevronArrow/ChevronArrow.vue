@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType, ref } from 'vue';
+import { PropType, ref, watch } from 'vue';
 
 const props = defineProps({
   direction: {
@@ -16,6 +16,11 @@ const props = defineProps({
 const emits = defineEmits<{ (direction: 'update:direction', value: 'up' | 'down'): void }>();
 
 const direction = ref(props.direction);
+
+watch(
+  () => props.direction,
+  () => (direction.value = props.direction),
+);
 
 function toggleDirection(): void {
   direction.value = direction.value === 'up' ? 'down' : 'up';
