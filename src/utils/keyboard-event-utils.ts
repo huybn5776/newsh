@@ -3,7 +3,7 @@ export function listenForKey(
   callback: (event: KeyboardEvent) => void,
 ): () => void {
   const keydownListener = (event: KeyboardEvent): void => {
-    if ((typeof match === 'string' && event.key === match) || (typeof match === 'function' && match(event))) {
+    if ((typeof match === 'string' && event.code === match) || (typeof match === 'function' && match(event))) {
       callback(event);
     }
   };
