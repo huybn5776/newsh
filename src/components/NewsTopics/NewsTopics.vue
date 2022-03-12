@@ -4,7 +4,7 @@
     @item-header-click="onNewsTopicToggleExpand"
     :default-expanded-names="topicsToShow"
   >
-    <div v-for="(topic, topicIndex) of newsTopics" :key="topic.name" class="news-topic-collapse-item-container">
+    <div v-for="topic of newsTopics" :key="topic.name" class="news-topic-collapse-item-container">
       <router-link
         v-if="showMoreLink"
         class="more-news-link"
@@ -14,7 +14,6 @@
       </router-link>
 
       <NCollapseItem class="news-topic-section" :name="topic.id">
-        <!--suppress HtmlUnknownAttribute -->
         <template #header>
           <div class="news-topic-header">
             <h2 class="news-topic-title" v-intersection="{ enter: () => emits('newsTopicEntered', topic.id) }">
@@ -23,10 +22,11 @@
           </div>
         </template>
         <NewsItemCard
-          v-for="(news, newsIndex) of topic.newsItems"
+          v-for="news of topic.newsItems"
           :key="news.url"
           :news="news"
-          :related-expanded="expandFirstNews && topicIndex === 0 && newsIndex === 0"
+          :related-expanded="expandedNews[`${topic.id}-${news.url}`]"
+          @update:relatedExpanded="onNewsExpandChanged(topic.id, news.url, $event)"
         />
         <div v-if="showMoreLink && topic.isPartial" class="news-topic-load-all-container">
           <NButton :disabled="loadingTopics[topic.id]" @click="emits('loadMore', topic.id)">
@@ -39,6 +39,8 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, watch } from 'vue';
+
 import { NButton, NCollapse, NCollapseItem } from 'naive-ui';
 
 import NewsItemCard from '@components/NewsItemCard/NewsItemCard.vue';
@@ -57,7 +59,7 @@ function onNewsTopicToggleExpand({ name: topicId, expanded }: { name: string; ex
   }
 }
 
-defineProps<{
+const props = defineProps<{
   newsTopics: NewsTopicItem[];
   showMoreLink: boolean;
   expandFirstNews: boolean;
@@ -67,6 +69,29 @@ const emits = defineEmits<{
   (e: 'newsTopicEntered', id: string): void;
   (e: 'loadMore', id: string): void;
 }>();
+
+const expandedNews = ref<Record<string, boolean>>({});
+const firstNewsExpanded = ref(false);
+
+watch(
+  () => props.newsTopics,
+  () => {
+    if (!props.expandFirstNews || firstNewsExpanded.value) {
+      return;
+    }
+    const firstTopicId = props.newsTopics[0]?.id;
+    const firstNewsUrlOfFirstTopic = props.newsTopics?.[0].newsItems[0]?.url;
+    if (!firstTopicId || !firstNewsUrlOfFirstTopic) {
+      return;
+    }
+    expandedNews.value = { ...expandedNews.value, [`${firstTopicId}-${firstNewsUrlOfFirstTopic}`]: true };
+    firstNewsExpanded.value = true;
+  },
+);
+
+function onNewsExpandChanged(topicId: string, newsUrl: string, expanded: boolean): void {
+  expandedNews.value = { ...expandedNews.value, [`${topicId}-${newsUrl}`]: expanded };
+}
 </script>
 
 <style lang="scss" scoped>
