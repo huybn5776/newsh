@@ -98,5 +98,5 @@ function saveRegionSetting(languageAndRegion: string, label: string | undefined)
 </script>
 
 <style lang="scss" scoped>
-@import './SetupPage.scss';
+@import './SetupPage';
 </style>

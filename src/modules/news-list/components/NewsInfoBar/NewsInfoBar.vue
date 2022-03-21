@@ -21,5 +21,5 @@ const timeAgo = computed(() => formatToTimeAgo(props.news.timestamp));
 </script>
 
 <style lang="scss" scoped>
-@import './NewsInfoBar.scss';
+@import './NewsInfoBar';
 </style>

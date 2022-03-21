@@ -29,5 +29,5 @@ function toggleDirection(): void {
 </script>
 
 <style lang="scss" scoped>
-@import 'ChevronArrow';
+@import './ChevronArrow';
 </style>

@@ -67,5 +67,5 @@ onUnmounted(() => dialogRef.value?.destroy());
 </script>
 
 <style lang="scss" scoped>
-@import './NewsDropdown.scss';
+@import './NewsDropdown';
 </style>

@@ -29,5 +29,5 @@ const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
 </script>
 
 <style lang="scss" scoped>
-@import './NextTopicSelection.scss';
+@import './NextTopicSelection';
 </style>

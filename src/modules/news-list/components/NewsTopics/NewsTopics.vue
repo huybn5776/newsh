@@ -129,5 +129,5 @@ function onNewsExpandChanged(topicId: string, newsUrl: string, expanded: boolean
 </script>
 
 <style lang="scss" scoped>
-@import './NewsTopics.scss';
+@import './NewsTopics';
 </style>

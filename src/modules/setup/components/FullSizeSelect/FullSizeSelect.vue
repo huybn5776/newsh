@@ -53,5 +53,5 @@ const filteredItems = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import './FullSizeSelect.scss';
+@import './FullSizeSelect';
 </style>

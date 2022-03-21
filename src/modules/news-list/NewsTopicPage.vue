@@ -67,5 +67,5 @@ function goToTopic(topicId: string): void {
 </script>
 
 <style lang="scss" scoped>
-@import './NewsTopicPage.scss';
+@import './NewsTopicPage';
 </style>

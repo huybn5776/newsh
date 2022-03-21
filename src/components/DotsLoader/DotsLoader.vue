@@ -5,5 +5,5 @@
 </template>
 
 <style lang="scss" scoped>
-@import './DotsLoader.scss';
+@import './DotsLoader';
 </style>

@@ -97,5 +97,5 @@ function onExpandDirectionChange(direction: 'up' | 'down'): void {
 </script>
 
 <style lang="scss" scoped>
-@import 'NewsItemCard.scss';
+@import './NewsItemCard';
 </style>

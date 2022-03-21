@@ -120,5 +120,5 @@ function reloadSettings(settingValue: Partial<SettingValueType>): void {
 </script>
 
 <style lang="scss" scoped>
-@import './SettingsPage.scss';
+@import './SettingsPage';
 </style>

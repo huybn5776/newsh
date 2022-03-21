@@ -41,5 +41,5 @@ const selectedRegion = ref(props.modelValue);
 </script>
 
 <style lang="scss" scoped>
-@import './RegionSelection.scss';
+@import './RegionSelection';
 </style>
