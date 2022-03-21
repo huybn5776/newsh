@@ -31,24 +31,31 @@ export function saveDataToJsonFile(data: unknown, filename: string): void {
   });
 }
 
-export function selectFile(fileType?: string): Promise<string | null> {
-  return new Promise<string | null>((resolve) => {
+export async function selectFile(fileType?: string): Promise<string | null> {
+  const file = await new Promise<File | undefined>((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = fileType ? `.${fileType}` : '';
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) {
-        resolve(null);
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.readAsText(file, 'UTF-8');
-      reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
-        resolve(readerEvent.target?.result?.toString() || null);
-      };
-    };
+    input.onchange = () => resolve(input.files?.[0]);
     input.click();
+  });
+  if (!file) {
+    return null;
+  }
+  return readBlobAsText(file);
+}
+
+export async function readBlobAsJson<T>(file: Blob): Promise<T> {
+  const text = await readBlobAsText(file);
+  return JSON.parse(text) as T;
+}
+
+export function readBlobAsText(file: Blob): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsText(file, 'UTF-8');
+    reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
+      resolve(readerEvent.target?.result?.toString() || '');
+    };
   });
 }
