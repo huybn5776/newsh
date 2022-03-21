@@ -14,18 +14,18 @@ const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', redirect: { name: 'topStories' } },
   {
     path: '/news/topStories',
-    component: () => import('@views/TopStoriesPage/TopStoriesPage.vue'),
+    component: () => import('@modules/news-list/TopStoriesPage.vue'),
     name: 'topStories',
     beforeEnter: newsPageGuard,
   },
   {
     path: '/news/:topicId',
-    component: () => import('@views/NewsTopicPage/NewsTopicPage.vue'),
+    component: () => import('@modules/news-list/NewsTopicPage.vue'),
     name: 'newsTopic',
     beforeEnter: newsPageGuard,
   },
-  { path: '/settings', component: () => import('@views/SettingsPage/SettingsPage.vue'), name: 'settings' },
-  { path: '/setup', component: () => import('@views/SetupPage/SetupPage.vue'), name: 'setup' },
+  { path: '/settings', component: () => import('@modules/settings/SettingsPage.vue'), name: 'settings' },
+  { path: '/setup', component: () => import('@modules/setup/SetupPage.vue'), name: 'setup' },
   { path: '/:catchAll(.*)', redirect: { name: 'topStories' } },
 ];
 

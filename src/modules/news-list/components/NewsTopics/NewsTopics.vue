@@ -44,11 +44,11 @@ import { ref, onMounted, watch } from 'vue';
 
 import { NButton, NCollapse, NCollapseItem } from 'naive-ui';
 
-import NewsItemCard from '@components/NewsItemCard/NewsItemCard.vue';
-import { useTopicsToShow } from '@components/NewsTopics/use-topics-to-show';
 import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
+import NewsItemCard from '@modules/news-list/components/NewsItemCard/NewsItemCard.vue';
+import { useTopicsToShow } from '@modules/news-list/compositions/use-topics-to-show';
 import { listenForKeyUntilUnmounted } from '@utils/keyboard-event-utils';
 import { getSettingFromStorage } from '@utils/storage-utils';
 

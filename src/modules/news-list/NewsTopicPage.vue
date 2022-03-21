@@ -26,14 +26,14 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import DotsLoader from '@components/DotsLoader/DotsLoader.vue';
-import NewsItemCard from '@components/NewsItemCard/NewsItemCard.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
-import { useProvideSeenNews } from '@compositions/use-provide-seen-news';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
+import NewsItemCard from '@modules/news-list/components/NewsItemCard/NewsItemCard.vue';
+import NextTopicSelection from '@modules/news-list/components/NextTopicSelection/NextTopicSelection.vue';
+import { useNewsRequest } from '@modules/news-list/compositions/use-news-request';
+import { useProvideSeenNews } from '@modules/news-list/compositions/use-provide-seen-news';
 import { getSettingFromStorage } from '@utils/storage-utils';
-import NextTopicSelection from '@views/TopStoriesPage/NextTopicSelection/NextTopicSelection.vue';
-import { useNewsRequest } from '@views/TopStoriesPage/use-news-request';
 
 const allTopicsInfo = ref(getSettingFromStorage(SettingKey.AllTopicsInfo) || []);
 const newsTopicName = ref<string>();

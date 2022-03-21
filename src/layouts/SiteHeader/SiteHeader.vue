@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import NavBar from '@components/NavBar/NavBar.vue';
+import NavBar from '@layouts/NavBar/NavBar.vue';
 </script>
 
 <style lang="scss" scoped>

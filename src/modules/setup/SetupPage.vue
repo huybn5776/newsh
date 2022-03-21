@@ -22,9 +22,9 @@ import { onMounted, ref, onUnmounted } from 'vue';
 import { useMessage, useLoadingBar, NSpin } from 'naive-ui';
 import { useRouter, useRoute } from 'vue-router';
 
-import RegionSelection from '@components/RegionSelection/RegionSelection.vue';
 import { SettingKey } from '@enums/setting-key';
 import { SelectionItem } from '@interfaces/selection-item';
+import RegionSelection from '@modules/setup/components/RegionSelection/RegionSelection.vue';
 import { prepareNewsInfo } from '@services/news-service';
 import { getRegionSelections } from '@services/region-service';
 import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';

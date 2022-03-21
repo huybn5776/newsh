@@ -17,10 +17,11 @@
       "@compositions/*": ["src/compositions/*"],
       "@directives/*": ["src/directives/*"],
       "@enums/*": ["src/enums/*"],
-      "@services/*": ["src/services/*"],
       "@interfaces/*": ["src/interfaces/*"],
-      "@utils/*": ["src/utils/*"],
-      "@views/*": ["src/views/*"]
+      "@layouts/*": ["src/layouts/*"],
+      "@modules/*": ["src/modules/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "vite.config.ts"]

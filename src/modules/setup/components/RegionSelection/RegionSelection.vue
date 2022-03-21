@@ -22,8 +22,8 @@ import { ref } from 'vue';
 
 import { NButton } from 'naive-ui';
 
-import FullSizeSelect from '@components/FullSizeSelect/FullSizeSelect.vue';
 import { SelectionItem } from '@interfaces/selection-item';
+import FullSizeSelect from '@modules/setup/components/FullSizeSelect/FullSizeSelect.vue';
 
 const props = defineProps<{
   modelValue?: string;

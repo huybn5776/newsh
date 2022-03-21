@@ -48,12 +48,12 @@ import { ref, computed, inject, watch } from 'vue';
 
 import { provideSeenNewsInjectKey, provideHiddenSeenNewsSettingKey } from '@/symbols';
 import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
-import Image from '@components/Image/Image.vue';
-import NewsInfoBar from '@components/NewsInfoBar/NewsInfoBar.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
-import { useMarkNewsAsSeen } from '@compositions/use-mark-news-as-seen';
 import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
 import { NewsItem } from '@interfaces/news-item';
+import Image from '@modules/news-list/components/Image/Image.vue';
+import NewsInfoBar from '@modules/news-list/components/NewsInfoBar/NewsInfoBar.vue';
+import { useMarkNewsAsSeen } from '@modules/news-list/compositions/use-mark-news-as-seen';
 import { injectStrict } from '@utils/inject-utils';
 
 const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();

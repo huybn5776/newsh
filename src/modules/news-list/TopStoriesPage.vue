@@ -22,16 +22,21 @@
 import { ref, onMounted, computed } from 'vue';
 
 import DotsLoader from '@components/DotsLoader/DotsLoader.vue';
-import NewsTopics from '@components/NewsTopics/NewsTopics.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
-import { useProvideSeenNews } from '@compositions/use-provide-seen-news';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { removeYoutubeNews, removeByNewsSource, removeByTerms, removeByNewsUrlMatch } from '@services/news-filter';
+import NewsTopics from '@modules/news-list/components/NewsTopics/NewsTopics.vue';
+import NextTopicSelection from '@modules/news-list/components/NextTopicSelection/NextTopicSelection.vue';
+import { useNewsRequest } from '@modules/news-list/compositions/use-news-request';
+import { useProvideSeenNews } from '@modules/news-list/compositions/use-provide-seen-news';
+import {
+  removeByNewsSource,
+  removeByNewsUrlMatch,
+  removeByTerms,
+  removeYoutubeNews,
+} from '@modules/news-list/services/news-filter';
 import { getSettingFromStorage } from '@utils/storage-utils';
-import NextTopicSelection from '@views/TopStoriesPage/NextTopicSelection/NextTopicSelection.vue';
-import { useNewsRequest } from '@views/TopStoriesPage/use-news-request';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
 const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);
@@ -160,7 +165,3 @@ async function appendTopic(topicId: string): Promise<void> {
   newsTopics.value = [...newsTopics.value, topicItem];
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'TopStoriesPage.scss';
-</style>
