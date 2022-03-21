@@ -1,7 +1,5 @@
-export function distinctArrayLeft<T>(array: T[] | undefined): T[] {
-  return Array.from(new Set(array));
-}
-
-export function distinctArrayRight<T>(array: T[] | undefined): T[] {
-  return Array.from(new Set([...(array || [])]?.reverse())).reverse();
+export function distinctArray<T>(array1: T[] | undefined | null, array2?: T[] | undefined | null): T[] {
+  const set = new Set<T>(array1);
+  array2?.forEach((value) => set.add(value));
+  return Array.from(set);
 }

@@ -78,7 +78,7 @@ import { NButton, NDynamicTags, NSelect, NSwitch } from 'naive-ui';
 import { useBackupSettings } from '@compositions/use-backup-settings';
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
 import { SettingKey, SettingValueType } from '@enums/setting-key';
-import { distinctArrayRight } from '@utils/array-utils';
+import { distinctArray } from '@utils/array-utils';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@utils/storage-utils';
 
 const allTopicsSelection = ref(
@@ -105,7 +105,7 @@ watch(
 );
 
 function mapArrayValue(array: string[] | undefined): string[] {
-  return distinctArrayRight(array?.map((value) => value.trim()).filter((value) => !!value));
+  return distinctArray(array?.map((value) => value.trim()).filter((value) => !!value));
 }
 
 function reloadSettings(settingValue: Partial<SettingValueType>): void {

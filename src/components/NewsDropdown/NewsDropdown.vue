@@ -15,7 +15,7 @@ import { append } from 'ramda';
 import { useInputDialog } from '@compositions/use-input-dialog';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
-import { distinctArrayRight } from '@utils/array-utils';
+import { distinctArray } from '@utils/array-utils';
 import { updateSettingFromStorage } from '@utils/storage-utils';
 
 const menuActions: Record<string, Omit<DropdownMixedOption, 'key'> & { action: () => void }> = {
@@ -57,7 +57,7 @@ function addExcludeTerm(): void {
       if (!term) {
         return;
       }
-      updateSettingFromStorage(SettingKey.ExcludeTerms, (terms) => distinctArrayRight([...(terms || []), term]));
+      updateSettingFromStorage(SettingKey.ExcludeTerms, (terms) => distinctArray(terms, [term]));
       message.success(`'${term}' has been added to exclude terms.`);
     },
   });
