@@ -1,11 +1,9 @@
 import { useMessage } from 'naive-ui';
-import { isNil, evolve } from 'ramda';
 
 import { useInputDialog } from '@compositions/use-input-dialog';
-import { SettingValueType, SettingKey } from '@enums/setting-key';
+import { SettingValueType } from '@enums/setting-key';
+import { getSettingValues, validateSettings } from '@services/setting-service';
 import { saveDataToJsonFile, selectFile } from '@utils/browser-utils';
-import { deleteNilProperties } from '@utils/object-utils';
-import { getSettingFromStorage } from '@utils/storage-utils';
 
 export function useBackupSettings(reloadSettings: (settingsValue: Partial<SettingValueType>) => void): {
   downloadSettings: () => void;
@@ -81,43 +79,7 @@ export function useBackupSettings(reloadSettings: (settingsValue: Partial<Settin
     message.error(errorMessage, { duration: 0, closable: true });
   }
 
-  function validateSettings(settingValue: Partial<SettingValueType>): SettingKey[] {
-    const invalidMark = {};
-    const validate = (predicate: (v: unknown) => boolean) => {
-      return (v: unknown) => (isNil(v) || predicate(v) ? undefined : invalidMark);
-    };
-
-    const errors = evolve(
-      {
-        filterOutYoutube: validate((v) => typeof v === 'boolean'),
-        hideSeenNews: validate((v) => typeof v === 'boolean'),
-        spaceKeyToExpandRelated: validate((v) => typeof v === 'boolean'),
-        newsTopicsAfterTopStories: validate((v) => Array.isArray(v)),
-        hiddenSources: validate((v) => Array.isArray(v)),
-        hiddenUrlMatches: validate((v) => Array.isArray(v)),
-        excludeTerms: validate((v) => Array.isArray(v)),
-      },
-      settingValue,
-    );
-    return Object.entries(errors)
-      .filter(([, value]) => value === invalidMark)
-      .map(([key]) => key as SettingKey);
-  }
-
   return { importSettings, downloadSettings, editSettingsInJson };
-}
-
-function getSettingValues(): Partial<SettingValueType> {
-  const settingValues: Partial<SettingValueType> = {
-    filterOutYoutube: getSettingFromStorage(SettingKey.FilterOutYoutube) || undefined,
-    hideSeenNews: getSettingFromStorage(SettingKey.HideSeenNews) || undefined,
-    spaceKeyToExpandRelated: getSettingFromStorage(SettingKey.SpaceKeyToExpandRelated) || undefined,
-    newsTopicsAfterTopStories: getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories) || undefined,
-    hiddenSources: getSettingFromStorage(SettingKey.HiddenSources) || undefined,
-    hiddenUrlMatches: getSettingFromStorage(SettingKey.HiddenUrlMatches) || undefined,
-    excludeTerms: getSettingFromStorage(SettingKey.ExcludeTerms) || undefined,
-  };
-  return deleteNilProperties(settingValues);
 }
 
 function downloadSettings(): void {
