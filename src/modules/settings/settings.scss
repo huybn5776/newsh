@@ -1,0 +1,34 @@
+.setting-section {
+  & + &::before {
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin: 32px 0 16px 0;
+    background: rgba(white, .3);
+    content: '';
+  }
+}
+
+.setting-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+
+  & + & {
+    margin-top: 16px;
+  }
+}
+
+.setting-select-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+.setting-select {
+  max-width: 300px;
+}
+
+.setting-link {
+  color: #8ab4f8;
+}
