@@ -43,6 +43,10 @@
       text-decoration: underline;
     }
   }
+
+  &.single-news {
+    min-height: 100px;
+  }
 }
 
 .related-news-list {

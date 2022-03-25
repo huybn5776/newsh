@@ -8,7 +8,7 @@
         class="news-link main-news-link"
         target="_blank"
         v-intersection="{ enter: () => onNewsEnter(news), leave: () => onNewsLeave(news) }"
-        :class="{ 'seen-news': seenNewsUrlMap[news.url] }"
+        :class="{ 'seen-news': seenNewsUrlMap[news.url], 'single-news': !hasRelatedNews }"
       >
         <h3 class="news-title">{{ news.title }}</h3>
         <NewsInfoBar :news="news" />
@@ -23,7 +23,7 @@
           target="_blank"
           v-intersection="{ enter: () => onNewsEnter(relatedNews), leave: () => onNewsLeave(relatedNews) }"
           :href="relatedNews.url"
-          :class="seenNewsUrlMap[relatedNews.url] ? 'seen-news' : ''"
+          :class="{ 'seen-news': seenNewsUrlMap[relatedNews.url] }"
         >
           <div class="related-news-container">
             <h4 class="related-news-title">{{ relatedNews.title }}</h4>
