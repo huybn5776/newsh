@@ -66,6 +66,8 @@
       </div>
     </div>
 
+    <DropboxSettings @update:settingValues="reloadSettings" />
+
     <a class="github-logo" href="https://github.com/huybn5776/newsh" target="_blank">GitHub</a>
   </div>
 </template>
@@ -78,6 +80,7 @@ import { NButton, NDynamicTags, NSelect, NSwitch } from 'naive-ui';
 import { useBackupSettings } from '@compositions/use-backup-settings';
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
 import { SettingKey, SettingValueType } from '@enums/setting-key';
+import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
 import { distinctArray } from '@utils/array-utils';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@utils/storage-utils';
 

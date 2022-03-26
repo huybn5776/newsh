@@ -1,3 +1,4 @@
+import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
 
@@ -18,6 +19,7 @@ export enum SettingKey {
   AllTopicsInfo = 'allTopicsInfo',
   HeadlineTopicId = 'headlineTopicId',
   NewsTopicsAfterTopStories = 'newsTopicsAfterTopStories',
+  DropboxToken = 'dropboxToken',
 }
 
 export type SettingValueType = {
@@ -34,4 +36,5 @@ export type SettingValueType = {
   [SettingKey.AllTopicsInfo]: NewsTopicInfo[];
   [SettingKey.HeadlineTopicId]: string;
   [SettingKey.NewsTopicsAfterTopStories]: string[];
+  [SettingKey.DropboxToken]: DropboxTokenInfo;
 };
