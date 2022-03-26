@@ -17,6 +17,9 @@
       >
         Load settings from Dropbox
       </NButton>
+      <NButton :disabled="!dropboxToken || dropboxLoading" :loading="mergingSettings" @click="mergeSettingsFromDropbox">
+        Merge settings with Dropbox
+      </NButton>
     </div>
   </div>
 </template>
@@ -41,8 +44,8 @@ import {
   saveSeenNewsToDropbox,
   saveSettingsToDropbox,
 } from '@services/dropbox-sync-service';
-import { getSettingValues, validateSettings } from '@services/setting-service';
-import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
+import { getSettingValues, mergeSeenNews, mergeSettings, validateSettings } from '@services/setting-service';
+import { getSettingFromStorage, updateSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
 const emits = defineEmits<{ (e: 'update:settingValues', value: Partial<SettingValueType>): void }>();
 
@@ -106,6 +109,21 @@ async function loadSettingsFromDropbox(): Promise<void> {
     },
   );
   downloadingSettings.value = false;
+}
+
+async function mergeSettingsFromDropbox(): Promise<void> {
+  mergingSettings.value = true;
+  await getSettingsFromDropbox(
+    (settings) => {
+      const originalSettings = getSettingValues();
+      const updatedSettings = mergeSettings(originalSettings, settings);
+      emits('update:settingValues', updatedSettings);
+    },
+    (seenNews) => {
+      updateSettingFromStorage(SettingKey.SeenNewsItems, (s) => mergeSeenNews(s || [], seenNews));
+    },
+  );
+  mergingSettings.value = false;
 }
 
 async function getSettingsFromDropbox(

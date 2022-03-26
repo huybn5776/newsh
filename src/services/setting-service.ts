@@ -1,7 +1,9 @@
-import { isNil, evolve } from 'ramda';
+import { isNil, evolve, groupBy, sortBy } from 'ramda';
 
 import { SettingValueType, SettingKey } from '@enums/setting-key';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
+import { SeenNewsItem } from '@interfaces/seen-news-item';
+import { distinctArray } from '@utils/array-utils';
 import { deleteNilProperties } from '@utils/object-utils';
 import { getSettingFromStorage } from '@utils/storage-utils';
 import { NullableProps } from '@utils/type-utils';
@@ -53,4 +55,26 @@ export function validateSettings(settingValue: Partial<AllowBackupSettings>): Se
   return Object.entries(errors)
     .filter(([, value]) => value === invalidMark)
     .map(([key]) => key as SettingKey);
+}
+
+export function mergeSettings(
+  settingValues1: Partial<SettingValueType>,
+  settingValues2: Partial<SettingValueType>,
+): Partial<SettingValueType> {
+  const mergedSettings = { ...settingValues1, ...settingValues2 };
+  mergedSettings.hiddenSources = distinctArray(settingValues1.hiddenSources, settingValues2.hiddenSources);
+  mergedSettings.hiddenUrlMatches = distinctArray(settingValues1.hiddenUrlMatches, settingValues2.hiddenUrlMatches);
+  mergedSettings.excludeTerms = distinctArray(settingValues1.excludeTerms, settingValues2.excludeTerms);
+  return mergedSettings;
+}
+
+export function mergeSeenNews(seenNews1: SeenNewsItem[], seenNews2: SeenNewsItem[]): SeenNewsItem[] {
+  const seenNewsGroupings = groupBy((seenNews) => seenNews.url, [...seenNews1, ...seenNews2]);
+  return Object.entries(seenNewsGroupings).map(([, seenNewsItems]) => {
+    if (seenNewsItems.length === 1) {
+      return seenNewsItems[0];
+    }
+    const sortedItems = sortBy((seenNews) => seenNews.seenAt, seenNewsItems);
+    return sortedItems[sortedItems.length - 1];
+  });
 }
