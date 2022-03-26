@@ -32,6 +32,15 @@ export function getSettingValues(): Partial<AllowBackupSettings> {
   return deleteNilProperties(settingValues);
 }
 
+export function trimSeenNewsItems(seenNewsItems: SeenNewsItem[] | undefined | null): SeenNewsItem[] {
+  if (!seenNewsItems) {
+    return [];
+  }
+  const now = Date.now();
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  return seenNewsItems?.filter((seenNews) => now - seenNews.seenAt < millisecondsPerDay * 2);
+}
+
 type SettingEvolve = Record<keyof AllowBackupSettings, (v: unknown) => object | undefined>;
 
 export function validateSettings(settingValue: Partial<AllowBackupSettings>): SettingKey[] {

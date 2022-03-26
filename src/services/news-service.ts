@@ -2,17 +2,7 @@ import { getMultiTopicNews } from '@api/google-news-api';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { getSettingFromStorage, updateSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
-
-export function trimSeenNewsItems(): void {
-  const now = Date.now();
-  const millisecondsPerDay = 24 * 60 * 60 * 1000;
-
-  updateSettingFromStorage(
-    SettingKey.SeenNewsItems,
-    (seenNewsItems) => seenNewsItems?.filter((news) => now - news.seenAt < millisecondsPerDay * 2) || [],
-  );
-}
+import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
 export async function prepareNewsInfo(languageAndRegion: string): Promise<void> {
   const topicItems: NewsTopicItem[] = (
