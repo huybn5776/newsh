@@ -1,6 +1,7 @@
 import { Directive, DirectiveBinding } from 'vue';
 
 export interface IntersectionDirectiveConfig {
+  disabled?: boolean;
   enter?: (entry: IntersectionObserverEntry) => void;
   leave?: (entry: IntersectionObserverEntry) => void;
 }
@@ -24,10 +25,16 @@ export const intersectionDirectiveFactory = (
 
   return {
     mounted(element: Element, { value: config }: DirectiveBinding<IntersectionDirectiveConfig>) {
+      if (config.disabled) {
+        return;
+      }
       elementConfigMap.set(element, config);
       intersectionObserver.observe(element);
     },
-    unmounted(element: Element) {
+    unmounted(element: Element, { value: config }: DirectiveBinding<IntersectionDirectiveConfig>) {
+      if (config.disabled) {
+        return;
+      }
       elementConfigMap.delete(element);
       intersectionObserver.unobserve(element);
     },

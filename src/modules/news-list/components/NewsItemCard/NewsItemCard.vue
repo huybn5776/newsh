@@ -21,7 +21,11 @@
           v-show="expanded || (!isMobile && index === 0)"
           class="news-link related-news-link"
           target="_blank"
-          v-intersection="{ enter: () => onNewsEnter(relatedNews), leave: () => onNewsLeave(relatedNews) }"
+          v-intersection="{
+            disabled: !hideSeenNewsEnabled,
+            enter: () => onNewsEnter(relatedNews),
+            leave: () => onNewsLeave(relatedNews),
+          }"
           :href="relatedNews.url"
           :class="{ 'seen-news': seenNewsUrlMap[relatedNews.url] }"
         >
@@ -79,15 +83,11 @@ watch(
 );
 
 function onNewsEnter(newsItem: NewsItem): void {
-  if (hideSeenNewsEnabled) {
-    markNewsSeenCallback.onNewsEnter(newsItem);
-  }
+  markNewsSeenCallback.onNewsEnter(newsItem);
 }
 
 function onNewsLeave(newsItem: NewsItem): void {
-  if (hideSeenNewsEnabled) {
-    markNewsSeenCallback.onNewsLeave(newsItem);
-  }
+  markNewsSeenCallback.onNewsLeave(newsItem);
 }
 
 function onExpandDirectionChange(direction: 'up' | 'down'): void {
