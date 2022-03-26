@@ -11,7 +11,7 @@
 
       <div class="setting-row">
         <NSwitch v-model:value="hideSeenNews" />
-        <span class="setting-title">Gray out the news that seen within one day.</span>
+        <span class="setting-title">Gray out the news that seen within two days.</span>
       </div>
 
       <div class="setting-row">

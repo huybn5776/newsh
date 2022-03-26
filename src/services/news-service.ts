@@ -10,7 +10,7 @@ export function trimSeenNewsItems(): void {
 
   updateSettingFromStorage(
     SettingKey.SeenNewsItems,
-    (seenNewsItems) => seenNewsItems?.filter((news) => now - news.seenAt < millisecondsPerDay) || [],
+    (seenNewsItems) => seenNewsItems?.filter((news) => now - news.seenAt < millisecondsPerDay * 2) || [],
   );
 }
 
