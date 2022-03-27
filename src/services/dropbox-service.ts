@@ -3,8 +3,8 @@ import { Dropbox, DropboxAuth, files as DropboxFiles } from 'dropbox';
 import { SettingKey } from '@enums/setting-key';
 import { DropboxApiError } from '@interfaces/dropbox-api-error';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
+import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
 import { readBlobAsJson } from '@utils/browser-utils';
-import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
 
 export type DropboxFile = DropboxFiles.FileMetadata & { fileBlob: Blob };
 

@@ -15,8 +15,8 @@ import { append } from 'ramda';
 import { useInputDialog } from '@compositions/use-input-dialog';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
+import { updateSettingFromStorage } from '@services/setting-service';
 import { distinctArray } from '@utils/array-utils';
-import { updateSettingFromStorage } from '@utils/storage-utils';
 
 const menuActions: Record<string, Omit<DropdownMixedOption, 'key'> & { action: () => void }> = {
   hideSourceByPublication: { label: 'Hide all news from this publication', action: hideSourceByPublication },

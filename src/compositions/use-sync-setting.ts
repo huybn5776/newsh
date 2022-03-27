@@ -1,8 +1,8 @@
 import { Ref, ref, watch, UnwrapRef } from 'vue';
 
 import { SettingKey, SettingValueType } from '@enums/setting-key';
+import { deleteSettingFromStorage, saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
 import { isNilOrEmpty } from '@utils/object-utils';
-import { getSettingFromStorage, saveSettingToStorage, deleteSettingFromStorage } from '@utils/storage-utils';
 
 export function useSyncSetting<K extends SettingKey, T extends SettingValueType[K]>(key: K): Ref<UnwrapRef<T | null>> {
   const settingRef = ref(getSettingFromStorage<K, T>(key));

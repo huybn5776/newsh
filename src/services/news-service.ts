@@ -2,7 +2,7 @@ import { getMultiTopicNews } from '@api/google-news-api';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
+import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
 
 export async function prepareNewsInfo(languageAndRegion: string): Promise<void> {
   const topicItems: NewsTopicItem[] = (

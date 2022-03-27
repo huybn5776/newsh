@@ -5,7 +5,7 @@ import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
 import { distinctArray } from '@utils/array-utils';
 import { deleteNilProperties } from '@utils/object-utils';
-import { getSettingFromStorage } from '@utils/storage-utils';
+import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@utils/storage-utils';
 import { NullableProps } from '@utils/type-utils';
 
 type AllowBackupSettings = Omit<
@@ -16,6 +16,28 @@ type AllowBackupSettings = Omit<
   | SettingKey.AllTopicsInfo
   | SettingKey.HeadlineTopicId
 >;
+
+export function getSettingFromStorage<K extends SettingKey, T extends SettingValueType[K]>(key: K): T | null {
+  return getFromStorage<T>(key);
+}
+
+export function saveSettingToStorage<K extends SettingKey, T extends SettingValueType[K]>(
+  key: K,
+  value: T | null | undefined,
+): void {
+  saveToStorage(key, value);
+}
+
+export function updateSettingFromStorage<K extends SettingKey, T extends SettingValueType[K]>(
+  key: K,
+  updater: (value: T | null) => T | null,
+): void {
+  updateFromStorage<T>(key, updater);
+}
+
+export function deleteSettingFromStorage(key: SettingKey): void {
+  deleteFromStorage(key);
+}
 
 export function getSettingValues(): Partial<AllowBackupSettings> {
   const settingValues: NullableProps<AllowBackupSettings> = {

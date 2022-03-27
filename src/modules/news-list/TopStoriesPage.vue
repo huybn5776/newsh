@@ -36,7 +36,7 @@ import {
   removeByTerms,
   removeYoutubeNews,
 } from '@modules/news-list/services/news-filter';
-import { getSettingFromStorage } from '@utils/storage-utils';
+import { getSettingFromStorage } from '@services/setting-service';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
 const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);

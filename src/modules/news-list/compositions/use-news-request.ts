@@ -5,7 +5,7 @@ import { useLoadingBar } from 'naive-ui';
 import { getSingleTopicNews, getMultiTopicNews } from '@api/google-news-api';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { getSettingFromStorage } from '@utils/storage-utils';
+import { getSettingFromStorage } from '@services/setting-service';
 
 export function useNewsRequest(): {
   getSingleTopicNews: (topic: Parameters<typeof getSingleTopicNews>[0]) => Promise<NewsTopicItem>;

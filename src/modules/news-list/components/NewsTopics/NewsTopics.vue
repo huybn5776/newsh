@@ -49,8 +49,8 @@ import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import NewsItemCard from '@modules/news-list/components/NewsItemCard/NewsItemCard.vue';
 import { useTopicsToShow } from '@modules/news-list/compositions/use-topics-to-show';
+import { getSettingFromStorage } from '@services/setting-service';
 import { listenForKeyUntilUnmounted } from '@utils/keyboard-event-utils';
-import { getSettingFromStorage } from '@utils/storage-utils';
 
 const vIntersection = intersectionDirectiveFactory();
 const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();

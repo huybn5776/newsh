@@ -1,7 +1,7 @@
 import { ref, Ref } from 'vue';
 
 import { SettingKey } from '@enums/setting-key';
-import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
+import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
 
 export function useTopicsToShow(): {
   topicsToShow: Ref<string[]>;

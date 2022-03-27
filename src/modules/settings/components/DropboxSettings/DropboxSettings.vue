@@ -44,8 +44,15 @@ import {
   saveSeenNewsToDropbox,
   saveSettingsToDropbox,
 } from '@services/dropbox-sync-service';
-import { getSettingValues, mergeSeenNews, mergeSettings, validateSettings } from '@services/setting-service';
-import { getSettingFromStorage, updateSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
+import {
+  getSettingValues,
+  mergeSeenNews,
+  mergeSettings,
+  validateSettings,
+  updateSettingFromStorage,
+  saveSettingToStorage,
+  getSettingFromStorage,
+} from '@services/setting-service';
 
 const emits = defineEmits<{ (e: 'update:settingValues', value: Partial<SettingValueType>): void }>();
 

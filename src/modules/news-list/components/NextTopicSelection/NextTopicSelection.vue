@@ -20,7 +20,7 @@
 import { NButton } from 'naive-ui';
 
 import { SettingKey } from '@enums/setting-key';
-import { getSettingFromStorage } from '@utils/storage-utils';
+import { getSettingFromStorage } from '@services/setting-service';
 
 defineProps<{ title: string; disabledTopics: Record<string, true> }>();
 const emits = defineEmits<{ (e: 'topicClick', value: string): void }>();

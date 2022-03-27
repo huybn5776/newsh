@@ -27,7 +27,7 @@ import { SelectionItem } from '@interfaces/selection-item';
 import RegionSelection from '@modules/setup/components/RegionSelection/RegionSelection.vue';
 import { prepareNewsInfo } from '@services/news-service';
 import { getRegionSelections } from '@services/region-service';
-import { getSettingFromStorage, saveSettingToStorage } from '@utils/storage-utils';
+import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
 
 const showSetupLoader = ref(true);
 const selectedRegion = ref<string>();

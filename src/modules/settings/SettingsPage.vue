@@ -81,8 +81,8 @@ import { useBackupSettings } from '@compositions/use-backup-settings';
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
 import { SettingKey, SettingValueType } from '@enums/setting-key';
 import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
+import { deleteSettingFromStorage, getSettingFromStorage } from '@services/setting-service';
 import { distinctArray } from '@utils/array-utils';
-import { deleteSettingFromStorage, getSettingFromStorage } from '@utils/storage-utils';
 
 const allTopicsSelection = ref(
   getSettingFromStorage(SettingKey.AllTopicsInfo)?.map((topic) => ({ label: topic.name, value: topic.id })),

@@ -33,7 +33,7 @@ import NewsItemCard from '@modules/news-list/components/NewsItemCard/NewsItemCar
 import NextTopicSelection from '@modules/news-list/components/NextTopicSelection/NextTopicSelection.vue';
 import { useNewsRequest } from '@modules/news-list/compositions/use-news-request';
 import { useProvideSeenNews } from '@modules/news-list/compositions/use-provide-seen-news';
-import { getSettingFromStorage } from '@utils/storage-utils';
+import { getSettingFromStorage } from '@services/setting-service';
 
 const allTopicsInfo = ref(getSettingFromStorage(SettingKey.AllTopicsInfo) || []);
 const newsTopicName = ref<string>();

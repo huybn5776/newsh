@@ -2,8 +2,7 @@ import { onMounted, provide } from 'vue';
 
 import { provideHiddenSeenNewsSettingKey, provideSeenNewsInjectKey } from '@/symbols';
 import { SettingKey } from '@enums/setting-key';
-import { trimSeenNewsItems } from '@services/setting-service';
-import { getSettingFromStorage, updateSettingFromStorage } from '@utils/storage-utils';
+import { trimSeenNewsItems, updateSettingFromStorage, getSettingFromStorage } from '@services/setting-service';
 
 export function useProvideSeenNews(): void {
   const hideSeenNewsEnabled = getSettingFromStorage(SettingKey.HideSeenNews);

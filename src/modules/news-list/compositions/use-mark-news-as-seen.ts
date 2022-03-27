@@ -2,7 +2,7 @@ import { ref, onUnmounted } from 'vue';
 
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
-import { updateSettingFromStorage } from '@utils/storage-utils';
+import { updateSettingFromStorage } from '@services/setting-service';
 
 type Timeout = ReturnType<typeof setTimeout>;
 const markAsSeenTime = 2000;
