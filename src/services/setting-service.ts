@@ -27,6 +27,7 @@ export function saveSettingToStorage<K extends SettingKey, T extends SettingValu
   value: T | null | undefined,
 ): void {
   saveToStorage(key, value);
+  updateLastModify();
   emitter.emit(key, value);
 }
 
@@ -36,13 +37,19 @@ export function updateSettingFromStorage<K extends SettingKey, T extends Setting
 ): void {
   const { updated, value } = updateFromStorage<T>(key, updater);
   if (updated) {
+    updateLastModify();
     emitter.emit(key, value);
   }
 }
 
 export function deleteSettingFromStorage(key: SettingKey): void {
   deleteFromStorage(key);
+  updateLastModify();
   emitter.emit(key, null);
+}
+
+function updateLastModify(): void {
+  saveToStorage(SettingKey.LastModify, Date.now());
 }
 
 export function getSettingValues(): Partial<AllowBackupSettings> {
@@ -56,6 +63,7 @@ export function getSettingValues(): Partial<AllowBackupSettings> {
     excludeTerms: getSettingFromStorage(SettingKey.ExcludeTerms),
     newsTopicsAfterTopStories: getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories),
     dropboxToken: getSettingFromStorage(SettingKey.DropboxToken),
+    lastModify: getSettingFromStorage(SettingKey.LastModify),
   };
   return deleteNilProperties(settingValues);
 }
@@ -70,6 +78,7 @@ const allowBackupSettingsObject: { [key in keyof AllowBackupSettings]: true } = 
   [SettingKey.ExcludeTerms]: true,
   [SettingKey.NewsTopicsAfterTopStories]: true,
   [SettingKey.DropboxToken]: true,
+  [SettingKey.LastModify]: true,
 };
 export const allowBackupSettingKeys = Object.keys(allowBackupSettingsObject) as SettingKey[];
 
@@ -106,6 +115,7 @@ export function validateSettings(settingValue: Partial<AllowBackupSettings>): Se
     excludeTerms: validate((v) => Array.isArray(v)),
     newsTopicsAfterTopStories: validate((v) => Array.isArray(v)),
     dropboxToken: validate((v) => typeof (v as Partial<DropboxTokenInfo>).accessToken === 'string'),
+    lastModify: validate((v) => typeof v === 'number'),
   };
   const errors = evolve(transformations, settingValue);
   return Object.entries(errors)
