@@ -8,6 +8,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@vueuse/core": "^8.2.0",
     "axios": "^0.24.0",
     "dropbox": "^10.26.0",
     "mitt": "^3.0.0",

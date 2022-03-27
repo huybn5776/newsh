@@ -2,8 +2,7 @@ import { Ref, ref, watch, UnwrapRef, toRaw } from 'vue';
 
 import { useMitt } from '@compositions/use-mitt';
 import { SettingKey, SettingValueType } from '@enums/setting-key';
-import { deleteSettingFromStorage, saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
-import { isNilOrEmpty } from '@utils/object-utils';
+import { getSettingFromStorage, saveOrDelete } from '@services/setting-service';
 
 export function useSyncSetting<K extends SettingKey>(key: K): Ref<UnwrapRef<SettingValueType[K] | null>> {
   const settingRef = ref(getSettingFromStorage<K, SettingValueType[K]>(key));
@@ -42,29 +41,28 @@ function watchWithEvent<K extends SettingKey, T extends SettingValueType[K], N>(
   callback: (value: T | null | undefined) => void,
   map?: (value: T | N) => T | N,
 ): void {
-  let lastValue: T | null | undefined;
+  let lastValue: T | null | undefined = toRaw(settingRef.value);
+  let pauseEvent = false;
+
   watch(settingRef, () => {
-    lastValue = toRaw(settingRef.value) as T;
-    lastValue = (map ? map(lastValue) : lastValue) as T;
-    callback(lastValue);
-  });
-  const { onEvent } = useMitt();
-  onEvent(key, (newValue) => {
-    let value = newValue as T;
-    if (value === lastValue) {
+    const newValue = toRaw(settingRef.value);
+    if (newValue === lastValue) {
       return;
     }
-    value = (map ? map(value) : value) as T;
+    lastValue = (map ? map(newValue as T) : lastValue) as T;
+    pauseEvent = true;
+    callback(lastValue);
+    pauseEvent = false;
+  });
+  const { onEvent } = useMitt();
+  onEvent(key, (eventValue) => {
+    const newValue = eventValue as T;
+    if (newValue === lastValue || pauseEvent) {
+      return;
+    }
+    const value = (map ? map(newValue) : newValue) as T;
     lastValue = value;
     // eslint-disable-next-line
     settingRef.value = value;
   });
-}
-
-function saveOrDelete<K extends SettingKey, T extends SettingValueType[K]>(key: K, value: T | null | undefined): void {
-  if (isNilOrEmpty(value)) {
-    deleteSettingFromStorage(key);
-    return;
-  }
-  saveSettingToStorage(key, value);
 }

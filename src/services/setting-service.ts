@@ -12,7 +12,7 @@ import {
 } from '@services/dropbox-sync-service';
 import { emitter, EventTypes } from '@services/emitter-service';
 import { distinctArray } from '@utils/array-utils';
-import { deleteNilProperties } from '@utils/object-utils';
+import { deleteNilProperties, isNilOrEmpty } from '@utils/object-utils';
 import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@utils/storage-utils';
 import { NullableProps } from '@utils/type-utils';
 
@@ -53,6 +53,17 @@ export function deleteSettingFromStorage(key: SettingKey): void {
   deleteFromStorage(key);
   updateLastModify();
   emitter.emit(key, null);
+}
+
+export function saveOrDelete<K extends SettingKey, T extends SettingValueType[K]>(
+  key: K,
+  value: T | null | undefined,
+): void {
+  if (isNilOrEmpty(value)) {
+    deleteSettingFromStorage(key);
+    return;
+  }
+  saveSettingToStorage(key, value);
 }
 
 function updateLastModify(): void {
@@ -167,21 +178,19 @@ export async function syncSettingValues(): Promise<void> {
   delete localSettings.dropboxToken;
   const mergedSettings = mergeSettings(localSettings, remoteSettings);
 
-  const settingsToJson = (settings: Partial<SettingValueType>): string =>
-    JSON.stringify(omit([SettingKey.LastModify], deleteNilProperties(settings)));
   const needUploadToRemote = settingsToJson(mergedSettings) !== settingsToJson(remoteSettings);
   const settingsChanged = settingsToJson(mergedSettings) !== settingsToJson(localSettings);
-  const needSaveToLocal = (remoteSettings.lastModify || 0) > (localSettings.lastModify || 0) && settingsChanged;
+  const needOverrideToLocal = (remoteSettings.lastModify || 0) > (localSettings.lastModify || 0) && settingsChanged;
   if (needUploadToRemote) {
     mergedSettings.lastModify = Date.now();
     await saveSettingsToDropbox(mergedSettings);
   }
-  if (needSaveToLocal) {
+  if (needOverrideToLocal) {
     saveSettingValues(mergedSettings);
   } else if (settingsChanged) {
-    saveSettingToStorage(SettingKey.HiddenSources, mergedSettings.hiddenSources);
-    saveSettingToStorage(SettingKey.HiddenUrlMatches, mergedSettings.hiddenUrlMatches);
-    saveSettingToStorage(SettingKey.ExcludeTerms, mergedSettings.excludeTerms);
+    saveOrDelete(SettingKey.HiddenSources, mergedSettings.hiddenSources);
+    saveOrDelete(SettingKey.HiddenUrlMatches, mergedSettings.hiddenUrlMatches);
+    saveOrDelete(SettingKey.ExcludeTerms, mergedSettings.excludeTerms);
   }
 }
 
@@ -205,4 +214,8 @@ export async function syncSeenNews(): Promise<void> {
     saveSettingToStorage(SettingKey.SeenNewsItems, mergedSeenNews);
     emitter.emit(EventKey.RemoteSeenNews, remoteSeenNews);
   }
+}
+
+function settingsToJson(settings: Partial<SettingValueType>): string {
+  return JSON.stringify(omit([SettingKey.LastModify], deleteNilProperties(settings)));
 }

@@ -31,11 +31,13 @@
 <script lang="ts" setup>
 import { computed, ref, onMounted } from 'vue';
 
+import { useDebounceFn } from '@vueuse/core';
 import { useMessage, NButton, NSwitch } from 'naive-ui';
 import { useRoute } from 'vue-router';
 
 import DropboxConnectionState from '@components/DropboxConnectionState/DropboxConnectionState.vue';
 import { useCatchDropboxTokenFromUrl } from '@compositions/use-catch-dropbox-token-from-url';
+import { useMitt } from '@compositions/use-mitt';
 import { useSyncSetting, useSyncSettingMapUndefined } from '@compositions/use-sync-setting';
 import { SettingKey, SettingValueType } from '@enums/setting-key';
 import { DropboxApiError } from '@interfaces/dropbox-api-error';
@@ -57,13 +59,15 @@ import {
   saveSettingToStorage,
   getSettingFromStorage,
   saveSettingValues,
+  allowBackupSettingKeys,
+  syncSettingValues,
 } from '@services/setting-service';
 
 const dropboxToken = useSyncSetting(SettingKey.DropboxToken);
 
 const route = useRoute();
 const message = useMessage();
-const { onEvent } = useMitt();
+const { onEvent, unsubscribeAllEvents } = useMitt();
 const { loading: loadingDropboxToken } = useCatchDropboxTokenFromUrl(onGotDropboxToken);
 
 const autoSyncWithDropbox = useSyncSettingMapUndefined(SettingKey.AutoSyncWithDropbox);
@@ -86,16 +90,34 @@ onMounted(async () => {
       dropboxToken.value = newTokenInfo;
     }
   }
+  if (dropboxToken.value && autoSyncWithDropbox.value) {
+    subscribeOnChangeToSync();
+  }
 });
+
+function subscribeOnChangeToSync(): void {
+  let hasSyncOnce = false;
+  const syncSettings = useDebounceFn(() => {
+    if (hasSyncOnce) {
+      saveSettingsToDropbox(getSettingValues());
+    } else {
+      syncSettingValues();
+      hasSyncOnce = true;
+    }
+  }, 1500);
+  allowBackupSettingKeys.forEach((key) => onEvent(key, syncSettings));
+}
 
 async function onToggleAutoSync(): Promise<void> {
   if (!autoSyncWithDropbox.value) {
+    unsubscribeAllEvents();
     return;
   }
   if (dropboxToken.value) {
     refreshingDropboxToken.value = true;
     await refreshDropboxTokenIfNeeded();
     refreshingDropboxToken.value = false;
+    subscribeOnChangeToSync();
   } else {
     await connectDropbox();
   }
@@ -108,9 +130,13 @@ async function connectDropbox(): Promise<void> {
 
 function onGotDropboxToken(token: DropboxTokenInfo): void {
   dropboxToken.value = token;
+  if (autoSyncWithDropbox.value) {
+    subscribeOnChangeToSync();
+  }
 }
 
 function clearDropboxToken(): void {
+  unsubscribeAllEvents();
   dropboxToken.value = null;
   autoSyncWithDropbox.value = false;
 }
