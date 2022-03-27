@@ -1,9 +1,16 @@
-import { isNil, evolve, groupBy, sortBy } from 'ramda';
+import { isNil, evolve, groupBy, sortBy, omit } from 'ramda';
 
+import { EventKey } from '@enums/event-key';
 import { SettingValueType, SettingKey } from '@enums/setting-key';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
-import { emitter } from '@services/emitter-service';
+import {
+  getSettingValuesFromDropbox,
+  saveSettingsToDropbox,
+  getSeenNewsFromDropbox,
+  saveSeenNewsToDropbox,
+} from '@services/dropbox-sync-service';
+import { emitter, EventTypes } from '@services/emitter-service';
 import { distinctArray } from '@utils/array-utils';
 import { deleteNilProperties } from '@utils/object-utils';
 import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@utils/storage-utils';
@@ -28,7 +35,7 @@ export function saveSettingToStorage<K extends SettingKey, T extends SettingValu
 ): void {
   saveToStorage(key, value);
   updateLastModify();
-  emitter.emit(key, value);
+  emitter.emit(key, value as EventTypes[K]);
 }
 
 export function updateSettingFromStorage<K extends SettingKey, T extends SettingValueType[K]>(
@@ -38,7 +45,7 @@ export function updateSettingFromStorage<K extends SettingKey, T extends Setting
   const { updated, value } = updateFromStorage<T>(key, updater);
   if (updated) {
     updateLastModify();
-    emitter.emit(key, value);
+    emitter.emit(key, value as EventTypes[K]);
   }
 }
 
@@ -63,6 +70,7 @@ export function getSettingValues(): Partial<AllowBackupSettings> {
     excludeTerms: getSettingFromStorage(SettingKey.ExcludeTerms),
     newsTopicsAfterTopStories: getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories),
     dropboxToken: getSettingFromStorage(SettingKey.DropboxToken),
+    autoSyncWithDropbox: getSettingFromStorage(SettingKey.AutoSyncWithDropbox),
     lastModify: getSettingFromStorage(SettingKey.LastModify),
   };
   return deleteNilProperties(settingValues);
@@ -78,6 +86,7 @@ const allowBackupSettingsObject: { [key in keyof AllowBackupSettings]: true } = 
   [SettingKey.ExcludeTerms]: true,
   [SettingKey.NewsTopicsAfterTopStories]: true,
   [SettingKey.DropboxToken]: true,
+  [SettingKey.AutoSyncWithDropbox]: true,
   [SettingKey.LastModify]: true,
 };
 export const allowBackupSettingKeys = Object.keys(allowBackupSettingsObject) as SettingKey[];
@@ -115,6 +124,7 @@ export function validateSettings(settingValue: Partial<AllowBackupSettings>): Se
     excludeTerms: validate((v) => Array.isArray(v)),
     newsTopicsAfterTopStories: validate((v) => Array.isArray(v)),
     dropboxToken: validate((v) => typeof (v as Partial<DropboxTokenInfo>).accessToken === 'string'),
+    autoSyncWithDropbox: validate((v) => typeof v === 'boolean'),
     lastModify: validate((v) => typeof v === 'number'),
   };
   const errors = evolve(transformations, settingValue);
@@ -127,7 +137,10 @@ export function mergeSettings(
   settingValues1: Partial<SettingValueType>,
   settingValues2: Partial<SettingValueType>,
 ): Partial<SettingValueType> {
-  const mergedSettings = { ...settingValues1, ...settingValues2 };
+  const mergedSettings: Partial<SettingValueType> =
+    (settingValues1.lastModify || 0) > (settingValues2.lastModify || 0)
+      ? { ...settingValues2, ...settingValues1 }
+      : { ...settingValues1, ...settingValues2 };
   mergedSettings.hiddenSources = distinctArray(settingValues1.hiddenSources, settingValues2.hiddenSources);
   mergedSettings.hiddenUrlMatches = distinctArray(settingValues1.hiddenUrlMatches, settingValues2.hiddenUrlMatches);
   mergedSettings.excludeTerms = distinctArray(settingValues1.excludeTerms, settingValues2.excludeTerms);
@@ -143,4 +156,53 @@ export function mergeSeenNews(seenNews1: SeenNewsItem[], seenNews2: SeenNewsItem
     const sortedItems = sortBy((seenNews) => seenNews.seenAt, seenNewsItems);
     return sortedItems[sortedItems.length - 1];
   });
+}
+
+export async function syncSettingValues(): Promise<void> {
+  const remoteSettings = await getSettingValuesFromDropbox();
+  if (!remoteSettings) {
+    return;
+  }
+  const localSettings = getSettingValues();
+  delete localSettings.dropboxToken;
+  const mergedSettings = mergeSettings(localSettings, remoteSettings);
+
+  const settingsToJson = (settings: Partial<SettingValueType>): string =>
+    JSON.stringify(omit([SettingKey.LastModify], deleteNilProperties(settings)));
+  const needUploadToRemote = settingsToJson(mergedSettings) !== settingsToJson(remoteSettings);
+  const settingsChanged = settingsToJson(mergedSettings) !== settingsToJson(localSettings);
+  const needSaveToLocal = (remoteSettings.lastModify || 0) > (localSettings.lastModify || 0) && settingsChanged;
+  if (needUploadToRemote) {
+    mergedSettings.lastModify = Date.now();
+    await saveSettingsToDropbox(mergedSettings);
+  }
+  if (needSaveToLocal) {
+    saveSettingValues(mergedSettings);
+  } else if (settingsChanged) {
+    saveSettingToStorage(SettingKey.HiddenSources, mergedSettings.hiddenSources);
+    saveSettingToStorage(SettingKey.HiddenUrlMatches, mergedSettings.hiddenUrlMatches);
+    saveSettingToStorage(SettingKey.ExcludeTerms, mergedSettings.excludeTerms);
+  }
+}
+
+export async function syncSeenNews(): Promise<void> {
+  let remoteSeenNews = await getSeenNewsFromDropbox();
+  if (!remoteSeenNews) {
+    return;
+  }
+  remoteSeenNews = trimSeenNewsItems(remoteSeenNews);
+
+  let localSeenNews = getSettingFromStorage(SettingKey.SeenNewsItems) || [];
+  localSeenNews = trimSeenNewsItems(localSeenNews);
+  const mergedSeenNews = mergeSeenNews(localSeenNews, remoteSeenNews);
+
+  const needToUploadToRemote = JSON.stringify(mergedSeenNews) !== JSON.stringify(remoteSeenNews);
+  const needToSaveToLocal = JSON.stringify(mergedSeenNews) !== JSON.stringify(localSeenNews);
+  if (needToUploadToRemote) {
+    await saveSeenNewsToDropbox(mergedSeenNews);
+  }
+  if (needToSaveToLocal) {
+    saveSettingToStorage(SettingKey.SeenNewsItems, mergedSeenNews);
+    emitter.emit(EventKey.RemoteSeenNews, remoteSeenNews);
+  }
 }

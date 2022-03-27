@@ -1,4 +1,4 @@
-import { InjectionKey } from 'vue';
+import { InjectionKey, Ref } from 'vue';
 
 export const provideHiddenSeenNewsSettingKey: InjectionKey<boolean> = Symbol('hideSeenNews');
-export const provideSeenNewsInjectKey: InjectionKey<Record<string, boolean>> = Symbol('seenNewsInjectKey');
+export const provideSeenNewsInjectKey: InjectionKey<Ref<Record<string, boolean>>> = Symbol('seenNewsInjectKey');

@@ -26,6 +26,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import DotsLoader from '@components/DotsLoader/DotsLoader.vue';
+import { useAutoSyncWithDropbox } from '@compositions/use-auto-sync-with-dropbox';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
@@ -44,6 +45,7 @@ const router = useRouter();
 const isMobile = useIsMobile();
 const { getSingleTopicNews, isLoading } = useNewsRequest();
 useProvideSeenNews();
+useAutoSyncWithDropbox();
 
 onMounted(() => loadNews());
 

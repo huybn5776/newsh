@@ -20,6 +20,7 @@ export enum SettingKey {
   HeadlineTopicId = 'headlineTopicId',
   NewsTopicsAfterTopStories = 'newsTopicsAfterTopStories',
   DropboxToken = 'dropboxToken',
+  AutoSyncWithDropbox = 'autoSyncWithDropbox',
   LastModify = 'lastModify',
 }
 
@@ -38,5 +39,6 @@ export type SettingValueType = {
   [SettingKey.HeadlineTopicId]: string;
   [SettingKey.NewsTopicsAfterTopStories]: string[];
   [SettingKey.DropboxToken]: DropboxTokenInfo;
+  [SettingKey.AutoSyncWithDropbox]: boolean;
   [SettingKey.LastModify]: number;
 };

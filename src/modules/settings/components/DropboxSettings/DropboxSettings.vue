@@ -1,6 +1,10 @@
 <template>
   <div class="setting-section">
     <h3>Dropbox sync</h3>
+    <div class="setting-row">
+      <NSwitch v-model:value="autoSyncWithDropbox" @update-value="onToggleAutoSync" />
+      <span class="setting-title">Auto sync setting with Dropbox.</span>
+    </div>
     <div class="setting-row setting-button-row">
       <DropboxConnectionState :dropboxToken="dropboxToken" :loading="dropboxTokenLoading" />
       <NButton v-if="!dropboxToken" @click="connectDropbox">Connect to dropbox</NButton>
@@ -27,12 +31,12 @@
 <script lang="ts" setup>
 import { computed, ref, onMounted } from 'vue';
 
-import { useMessage, NButton } from 'naive-ui';
+import { useMessage, NButton, NSwitch } from 'naive-ui';
 import { useRoute } from 'vue-router';
 
 import DropboxConnectionState from '@components/DropboxConnectionState/DropboxConnectionState.vue';
 import { useCatchDropboxTokenFromUrl } from '@compositions/use-catch-dropbox-token-from-url';
-import { useSyncSetting } from '@compositions/use-sync-setting';
+import { useSyncSetting, useSyncSettingMapUndefined } from '@compositions/use-sync-setting';
 import { SettingKey, SettingValueType } from '@enums/setting-key';
 import { DropboxApiError } from '@interfaces/dropbox-api-error';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
@@ -59,8 +63,10 @@ const dropboxToken = useSyncSetting(SettingKey.DropboxToken);
 
 const route = useRoute();
 const message = useMessage();
+const { onEvent } = useMitt();
 const { loading: loadingDropboxToken } = useCatchDropboxTokenFromUrl(onGotDropboxToken);
 
+const autoSyncWithDropbox = useSyncSettingMapUndefined(SettingKey.AutoSyncWithDropbox);
 const refreshingDropboxToken = ref(false);
 const uploadingSettings = ref(false);
 const downloadingSettings = ref(false);
@@ -82,6 +88,19 @@ onMounted(async () => {
   }
 });
 
+async function onToggleAutoSync(): Promise<void> {
+  if (!autoSyncWithDropbox.value) {
+    return;
+  }
+  if (dropboxToken.value) {
+    refreshingDropboxToken.value = true;
+    await refreshDropboxTokenIfNeeded();
+    refreshingDropboxToken.value = false;
+  } else {
+    await connectDropbox();
+  }
+}
+
 async function connectDropbox(): Promise<void> {
   const redirectUri = `${window.location.origin}${route.path}`;
   window.location.href = await createDropboxAuthUrl(redirectUri);
@@ -93,6 +112,7 @@ function onGotDropboxToken(token: DropboxTokenInfo): void {
 
 function clearDropboxToken(): void {
   dropboxToken.value = null;
+  autoSyncWithDropbox.value = false;
 }
 
 async function uploadSettingToDropbox(): Promise<void> {

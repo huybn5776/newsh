@@ -22,6 +22,7 @@
 import { ref, onMounted, computed } from 'vue';
 
 import DotsLoader from '@components/DotsLoader/DotsLoader.vue';
+import { useAutoSyncWithDropbox } from '@compositions/use-auto-sync-with-dropbox';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
@@ -66,6 +67,7 @@ const completeLoaded = ref(false);
 const isMobile = useIsMobile();
 useProvideSeenNews();
 const { getSingleTopicNews, getMultiTopicNews, loadingTopics, isLoading } = useNewsRequest();
+useAutoSyncWithDropbox();
 
 onMounted(async () => {
   await loadNews();

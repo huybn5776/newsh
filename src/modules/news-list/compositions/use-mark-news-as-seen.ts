@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, Ref } from 'vue';
 
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
@@ -7,7 +7,7 @@ import { updateSettingFromStorage } from '@services/setting-service';
 type Timeout = ReturnType<typeof setTimeout>;
 const markAsSeenTime = 2000;
 
-export function useMarkNewsAsSeen(seenNewsUrlMap: Record<string, boolean>): {
+export function useMarkNewsAsSeen(seenNewsUrlMap: Ref<Record<string, boolean>>): {
   onNewsEnter: (newsItem: NewsItem) => void;
   onNewsLeave: (newsItem: NewsItem) => void;
 } {
@@ -16,7 +16,7 @@ export function useMarkNewsAsSeen(seenNewsUrlMap: Record<string, boolean>): {
 
   function onNewsEnter(newsItem: NewsItem): void {
     const newsUrl = newsItem.url;
-    if (seenNewsUrlMap[newsItem.url] || hasSeenNewsItemsUrl.value.includes(newsUrl)) {
+    if (seenNewsUrlMap.value[newsItem.url] || hasSeenNewsItemsUrl.value.includes(newsUrl)) {
       return;
     }
 
