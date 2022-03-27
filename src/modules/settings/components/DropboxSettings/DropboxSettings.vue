@@ -52,9 +52,8 @@ import {
   updateSettingFromStorage,
   saveSettingToStorage,
   getSettingFromStorage,
+  saveSettingValues,
 } from '@services/setting-service';
-
-const emits = defineEmits<{ (e: 'update:settingValues', value: Partial<SettingValueType>): void }>();
 
 const dropboxToken = useSyncSetting(SettingKey.DropboxToken);
 
@@ -110,7 +109,7 @@ async function uploadSettingToDropbox(): Promise<void> {
 async function loadSettingsFromDropbox(): Promise<void> {
   downloadingSettings.value = true;
   await getSettingsFromDropbox(
-    (settings) => emits('update:settingValues', settings),
+    (settings) => saveSettingValues(settings),
     (seenNews) => {
       saveSettingToStorage(SettingKey.SeenNewsItems, seenNews);
     },
@@ -124,7 +123,7 @@ async function mergeSettingsFromDropbox(): Promise<void> {
     (settings) => {
       const originalSettings = getSettingValues();
       const updatedSettings = mergeSettings(originalSettings, settings);
-      emits('update:settingValues', updatedSettings);
+      saveSettingValues(updatedSettings);
     },
     (seenNews) => {
       updateSettingFromStorage(SettingKey.SeenNewsItems, (s) => mergeSeenNews(s || [], seenNews));

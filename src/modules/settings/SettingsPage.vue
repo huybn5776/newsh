@@ -66,7 +66,7 @@
       </div>
     </div>
 
-    <DropboxSettings @update:settingValues="reloadSettings" />
+    <DropboxSettings />
 
     <a class="github-logo" href="https://github.com/huybn5776/newsh" target="_blank">GitHub</a>
   </div>
@@ -79,7 +79,7 @@ import { NButton, NDynamicTags, NSelect, NSwitch } from 'naive-ui';
 
 import { useBackupSettings } from '@compositions/use-backup-settings';
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
-import { SettingKey, SettingValueType } from '@enums/setting-key';
+import { SettingKey } from '@enums/setting-key';
 import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@services/setting-service';
 import { distinctArray } from '@utils/array-utils';
@@ -96,7 +96,7 @@ const spaceKeyToExpandRelated = useSyncSettingMapUndefined(SettingKey.SpaceKeyTo
 const hiddenSources = useSyncSettingMapNullArray(SettingKey.HiddenSources, mapArrayValue);
 const hiddenUrlMatches = useSyncSettingMapNullArray(SettingKey.HiddenUrlMatches, mapArrayValue);
 const excludeTerms = useSyncSettingMapNullArray(SettingKey.ExcludeTerms, mapArrayValue);
-const { downloadSettings, importSettings, editSettingsInJson } = useBackupSettings(reloadSettings);
+const { downloadSettings, importSettings, editSettingsInJson } = useBackupSettings();
 
 watch(
   () => hideSeenNews.value,
@@ -109,16 +109,6 @@ watch(
 
 function mapArrayValue(array: string[] | undefined): string[] {
   return distinctArray(array?.map((value) => value.trim()).filter((value) => !!value));
-}
-
-function reloadSettings(settingValue: Partial<SettingValueType>): void {
-  filterOutYoutube.value = settingValue.filterOutYoutube;
-  hideSeenNews.value = settingValue.hideSeenNews;
-  spaceKeyToExpandRelated.value = settingValue.spaceKeyToExpandRelated;
-  newsTopicsAfterTopStories.value = settingValue.newsTopicsAfterTopStories || [];
-  hiddenSources.value = settingValue.hiddenSources || [];
-  hiddenUrlMatches.value = settingValue.hiddenUrlMatches || [];
-  excludeTerms.value = settingValue.excludeTerms || [];
 }
 </script>
 

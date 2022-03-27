@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^0.24.0",
     "dropbox": "^10.26.0",
+    "mitt": "^3.0.0",
     "naive-ui": "^2.23.2",
     "ramda": "^0.27.1",
     "vue": "^3.2.6",

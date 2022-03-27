@@ -2,10 +2,10 @@ import { useMessage } from 'naive-ui';
 
 import { useInputDialog } from '@compositions/use-input-dialog';
 import { SettingValueType } from '@enums/setting-key';
-import { getSettingValues, validateSettings } from '@services/setting-service';
+import { getSettingValues, validateSettings, saveSettingValues } from '@services/setting-service';
 import { saveDataToJsonFile, selectFile } from '@utils/browser-utils';
 
-export function useBackupSettings(reloadSettings: (settingsValue: Partial<SettingValueType>) => void): {
+export function useBackupSettings(): {
   downloadSettings: () => void;
   editSettingsInJson: () => void;
   importSettings: () => Promise<void>;
@@ -34,7 +34,7 @@ export function useBackupSettings(reloadSettings: (settingsValue: Partial<Settin
       showValidationError(errorSettings);
       return;
     }
-    reloadSettings(settingsValue);
+    saveSettingValues(settingsValue);
   }
 
   function editSettingsInJson(): void {
@@ -60,7 +60,7 @@ export function useBackupSettings(reloadSettings: (settingsValue: Partial<Settin
           showValidationError(errorProps);
           return false;
         }
-        reloadSettings(newSettings);
+        saveSettingValues(newSettings);
         return true;
       },
     });

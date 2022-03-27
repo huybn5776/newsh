@@ -3,6 +3,7 @@ import { isNil, evolve, groupBy, sortBy } from 'ramda';
 import { SettingValueType, SettingKey } from '@enums/setting-key';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
+import { emitter } from '@services/emitter-service';
 import { distinctArray } from '@utils/array-utils';
 import { deleteNilProperties } from '@utils/object-utils';
 import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@utils/storage-utils';
@@ -26,17 +27,22 @@ export function saveSettingToStorage<K extends SettingKey, T extends SettingValu
   value: T | null | undefined,
 ): void {
   saveToStorage(key, value);
+  emitter.emit(key, value);
 }
 
 export function updateSettingFromStorage<K extends SettingKey, T extends SettingValueType[K]>(
   key: K,
   updater: (value: T | null) => T | null,
 ): void {
-  updateFromStorage<T>(key, updater);
+  const { updated, value } = updateFromStorage<T>(key, updater);
+  if (updated) {
+    emitter.emit(key, value);
+  }
 }
 
 export function deleteSettingFromStorage(key: SettingKey): void {
   deleteFromStorage(key);
+  emitter.emit(key, null);
 }
 
 export function getSettingValues(): Partial<AllowBackupSettings> {
@@ -52,6 +58,25 @@ export function getSettingValues(): Partial<AllowBackupSettings> {
     dropboxToken: getSettingFromStorage(SettingKey.DropboxToken),
   };
   return deleteNilProperties(settingValues);
+}
+
+const allowBackupSettingsObject: { [key in keyof AllowBackupSettings]: true } = {
+  [SettingKey.CollapsedTopics]: true,
+  [SettingKey.FilterOutYoutube]: true,
+  [SettingKey.HideSeenNews]: true,
+  [SettingKey.SpaceKeyToExpandRelated]: true,
+  [SettingKey.HiddenSources]: true,
+  [SettingKey.HiddenUrlMatches]: true,
+  [SettingKey.ExcludeTerms]: true,
+  [SettingKey.NewsTopicsAfterTopStories]: true,
+  [SettingKey.DropboxToken]: true,
+};
+export const allowBackupSettingKeys = Object.keys(allowBackupSettingsObject) as SettingKey[];
+
+export function saveSettingValues(setting: Partial<AllowBackupSettings>): void {
+  (Object.entries(setting) as [SettingKey, unknown][])
+    .filter(([key]) => allowBackupSettingKeys.includes(key))
+    .forEach(([key, value]) => saveSettingToStorage(key, value as SettingValueType[typeof key]));
 }
 
 export function trimSeenNewsItems(seenNewsItems: SeenNewsItem[] | undefined | null): SeenNewsItem[] {
