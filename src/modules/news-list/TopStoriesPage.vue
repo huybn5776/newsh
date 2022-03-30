@@ -105,31 +105,42 @@ async function getNonDuplicatedMultiNewsTopic(
   topicId: Parameters<typeof getMultiTopicNews>[0],
 ): Promise<NewsTopicItem[]> {
   const newsTopicItems = await getMultiTopicNews(topicId);
-  let allNewsUrl = getAllNewsUrl(newsTopics.value);
+  const allNewsUrl = getAllNewsUrl(newsTopics.value);
 
   return newsTopicItems.map((newsTopicItem) => {
     const filteredTopicItem = {
       ...newsTopicItem,
-      newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.includes(news.url)),
+      newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.has(news.url)),
     };
-    allNewsUrl = [...allNewsUrl, ...getAllNewsUrl([newsTopicItem])];
+    newsTopicItem.newsItems.forEach((news) => {
+      // eslint-disable-next-line no-param-reassign
+      news.relatedNewsItems = news.relatedNewsItems?.filter((n) => !allNewsUrl.has(n.url)) || undefined;
+    });
+    getAllNewsUrl([newsTopicItem]).forEach((url) => allNewsUrl.add(url));
     return filteredTopicItem;
   });
 }
 
 async function getNonDuplicatedNewsTopic(topicId: string): Promise<NewsTopicItem> {
-  const newsTopicItem = await getSingleTopicNews(topicId);
+  let newsTopicItem = await getSingleTopicNews(topicId);
   const allNewsUrl = getAllNewsUrl(newsTopics.value);
-  return { ...newsTopicItem, newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.includes(news.url)) };
+  newsTopicItem = { ...newsTopicItem, newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.has(news.url)) };
+  newsTopicItem.newsItems.forEach((news) => {
+    // eslint-disable-next-line no-param-reassign
+    news.relatedNewsItems = news.relatedNewsItems?.filter((n) => !allNewsUrl.has(n.url)) || undefined;
+  });
+  return newsTopicItem;
 }
 
-function getAllNewsUrl(newsTopicItems: NewsTopicItem[]): string[] {
-  return newsTopicItems.flatMap((topic) => [
-    ...topic.newsItems.map((news) => news.url),
-    ...topic.newsItems.flatMap((news) =>
-      ((news.relatedNewsItems || []) as NewsItem[]).map((relatedNews) => relatedNews.url),
-    ),
-  ]);
+function getAllNewsUrl(newsTopicItems: NewsTopicItem[]): Set<string> {
+  return new Set<string>(
+    newsTopicItems.flatMap((topic) => [
+      ...topic.newsItems.map((news) => news.url),
+      ...topic.newsItems.flatMap((news) =>
+        ((news.relatedNewsItems || []) as NewsItem[]).map((relatedNews) => relatedNews.url),
+      ),
+    ]),
+  );
 }
 
 function onNewsTopicEnter(id: string): void {
