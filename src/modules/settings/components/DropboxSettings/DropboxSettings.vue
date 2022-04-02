@@ -1,10 +1,9 @@
 <template>
   <div class="setting-section">
     <h3>Dropbox sync</h3>
-    <div class="setting-row">
-      <NSwitch v-model:value="autoSyncWithDropbox" @update-value="onToggleAutoSync" />
-      <span class="setting-title">Auto sync setting with Dropbox.</span>
-    </div>
+    <SwitchRow v-model:value="autoSyncWithDropbox" @update:value="onToggleAutoSync">
+      Auto sync setting with Dropbox.
+    </SwitchRow>
     <div class="setting-row setting-button-row">
       <DropboxConnectionState :dropboxToken="dropboxToken" :loading="dropboxTokenLoading" />
       <NButton v-if="!dropboxToken" @click="connectDropbox">Connect to dropbox</NButton>
@@ -32,7 +31,7 @@
 import { computed, ref, onMounted } from 'vue';
 
 import { useDebounceFn } from '@vueuse/core';
-import { useMessage, NButton, NSwitch } from 'naive-ui';
+import { useMessage, NButton } from 'naive-ui';
 import { useRoute } from 'vue-router';
 
 import DropboxConnectionState from '@components/DropboxConnectionState/DropboxConnectionState.vue';
@@ -43,6 +42,7 @@ import { SettingKey, SettingValueType } from '@enums/setting-key';
 import { DropboxApiError } from '@interfaces/dropbox-api-error';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
+import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
 import { createDropboxAuthUrl, refreshDropboxTokenIfNeeded } from '@services/dropbox-service';
 import {
   getSeenNewsFromDropbox,

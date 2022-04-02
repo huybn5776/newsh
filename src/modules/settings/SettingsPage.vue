@@ -4,20 +4,11 @@
     <div class="setting-section">
       <h3>General settings</h3>
 
-      <div class="setting-row">
-        <NSwitch v-model:value="filterOutYoutube" />
-        <span class="setting-title">Filter out youtube news.</span>
-      </div>
-
-      <div class="setting-row">
-        <NSwitch v-model:value="hideSeenNews" />
-        <span class="setting-title">Gray out the news that seen within two days.</span>
-      </div>
-
-      <div class="setting-row">
-        <NSwitch v-model:value="spaceKeyToExpandRelated" />
-        <span class="setting-title">Use space key to expand currently hovered related news.</span>
-      </div>
+      <SwitchRow v-model:value="filterOutYoutube">Filter out youtube news.</SwitchRow>
+      <SwitchRow v-model:value="hideSeenNews">Gray out the news that seen within two days.</SwitchRow>
+      <SwitchRow v-model:value="spaceKeyToExpandRelated">
+        Use space key to expand currently hovered related news.
+      </SwitchRow>
 
       <div class="setting-row setting-select-row">
         <span>News topics after top stories:</span>
@@ -75,12 +66,13 @@
 <script lang="ts" setup>
 import { watch, ref } from 'vue';
 
-import { NButton, NDynamicTags, NSelect, NSwitch } from 'naive-ui';
+import { NButton, NDynamicTags, NSelect } from 'naive-ui';
 
 import { useBackupSettings } from '@compositions/use-backup-settings';
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
 import { SettingKey } from '@enums/setting-key';
 import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
+import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@services/setting-service';
 import { distinctArray } from '@utils/array-utils';
 
