@@ -1,6 +1,10 @@
 <template>
-  <NConfigProvider class="page-layout" :theme="darkTheme">
-    <NMessageProvider placement="top-right" :container-style="{ marginTop: '62px' }">
+  <NConfigProvider id="page-layout" class="page-layout" :theme="darkTheme">
+    <NMessageProvider
+      placement="top-right"
+      to=".page-content-container"
+      :container-style="{ position: 'sticky', order: -1, width: '100%', transform: 'translate(-12px, 12px)' }"
+    >
       <NDialogProvider>
         <NLoadingBarProvider>
           <slot />
