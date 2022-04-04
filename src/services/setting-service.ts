@@ -216,6 +216,29 @@ export async function syncSeenNews(): Promise<void> {
   }
 }
 
+export async function loadSettingsFromDropbox(): Promise<void> {
+  const remoteSettings = await getSettingValuesFromDropbox();
+  if (!remoteSettings) {
+    return;
+  }
+  const localSettings = getSettingValues();
+  delete localSettings.dropboxToken;
+
+  const settingsChanged = settingsToJson(localSettings) !== settingsToJson(remoteSettings);
+  if (settingsChanged) {
+    saveSettingValues(remoteSettings);
+  }
+}
+
+export async function loadSeenNewsFromDropbox(): Promise<void> {
+  let remoteSeenNews = await getSeenNewsFromDropbox();
+  if (!remoteSeenNews) {
+    return;
+  }
+  remoteSeenNews = trimSeenNewsItems(remoteSeenNews);
+  saveSettingToStorage(SettingKey.SeenNewsItems, remoteSeenNews);
+}
+
 function settingsToJson(settings: Partial<SettingValueType>): string {
   return JSON.stringify(omit([SettingKey.LastModify], deleteNilProperties(settings)));
 }

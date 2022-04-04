@@ -1,7 +1,7 @@
 <template>
   <div class="setting-section">
     <h3>Dropbox sync</h3>
-    <SwitchRow v-model:value="autoSyncWithDropbox" @update:value="onToggleAutoSync">
+    <SwitchRow v-model:value="autoSyncWithDropbox" :loading="syncingSettings" @update:value="onToggleAutoSync">
       Auto sync setting with Dropbox.
     </SwitchRow>
     <div class="setting-row setting-button-row">
@@ -10,17 +10,13 @@
       <NButton v-if="dropboxToken" @click="clearDropboxToken">Clear dropbox token</NButton>
     </div>
     <div class="setting-row">
-      <NButton :disabled="!dropboxToken || dropboxLoading" :loading="uploadingSettings" @click="uploadSettingToDropbox">
+      <NButton :disabled="!dropboxToken || dropboxLoading" :loading="uploadingSettings" @click="uploadSetting">
         Upload settings to Dropbox
       </NButton>
-      <NButton
-        :disabled="!dropboxToken || dropboxLoading"
-        :loading="downloadingSettings"
-        @click="loadSettingsFromDropbox"
-      >
+      <NButton :disabled="!dropboxToken || dropboxLoading" :loading="downloadingSettings" @click="loadSettings">
         Load settings from Dropbox
       </NButton>
-      <NButton :disabled="!dropboxToken || dropboxLoading" :loading="mergingSettings" @click="mergeSettingsFromDropbox">
+      <NButton :disabled="!dropboxToken || dropboxLoading" :loading="mergingSettings" @click="mergeSettingsWithDropbox">
         Merge settings with Dropbox
       </NButton>
     </div>
@@ -31,42 +27,31 @@
 import { computed, ref, onMounted } from 'vue';
 
 import { useDebounceFn } from '@vueuse/core';
-import { useMessage, NButton } from 'naive-ui';
+import { NButton } from 'naive-ui';
 import { useRoute } from 'vue-router';
 
 import DropboxConnectionState from '@components/DropboxConnectionState/DropboxConnectionState.vue';
 import { useCatchDropboxTokenFromUrl } from '@compositions/use-catch-dropbox-token-from-url';
 import { useMitt } from '@compositions/use-mitt';
 import { useSyncSetting, useSyncSettingMapUndefined } from '@compositions/use-sync-setting';
-import { SettingKey, SettingValueType } from '@enums/setting-key';
-import { DropboxApiError } from '@interfaces/dropbox-api-error';
+import { SettingKey } from '@enums/setting-key';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
-import { SeenNewsItem } from '@interfaces/seen-news-item';
 import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
 import { createDropboxAuthUrl, refreshDropboxTokenIfNeeded } from '@services/dropbox-service';
-import {
-  getSeenNewsFromDropbox,
-  getSettingValuesFromDropbox,
-  saveSeenNewsToDropbox,
-  saveSettingsToDropbox,
-} from '@services/dropbox-sync-service';
+import { saveSeenNewsToDropbox, saveSettingsToDropbox } from '@services/dropbox-sync-service';
 import {
   getSettingValues,
-  mergeSeenNews,
-  mergeSettings,
-  validateSettings,
-  updateSettingFromStorage,
-  saveSettingToStorage,
   getSettingFromStorage,
-  saveSettingValues,
   allowBackupSettingKeys,
   syncSettingValues,
+  syncSeenNews,
+  loadSeenNewsFromDropbox,
+  loadSettingsFromDropbox,
 } from '@services/setting-service';
 
 const dropboxToken = useSyncSetting(SettingKey.DropboxToken);
 
 const route = useRoute();
-const message = useMessage();
 const { onEvent, unsubscribeAllEvents } = useMitt();
 const { loading: loadingDropboxToken } = useCatchDropboxTokenFromUrl(onGotDropboxToken);
 
@@ -75,6 +60,7 @@ const refreshingDropboxToken = ref(false);
 const uploadingSettings = ref(false);
 const downloadingSettings = ref(false);
 const mergingSettings = ref(false);
+const syncingSettings = ref(false);
 
 const dropboxTokenLoading = computed(() => loadingDropboxToken.value || refreshingDropboxToken.value);
 const dropboxLoading = computed(
@@ -97,13 +83,15 @@ onMounted(async () => {
 
 function subscribeOnChangeToSync(): void {
   let hasSyncOnce = false;
-  const syncSettings = useDebounceFn(() => {
+  const syncSettings = useDebounceFn(async () => {
+    syncingSettings.value = true;
     if (hasSyncOnce) {
-      saveSettingsToDropbox(getSettingValues());
+      await saveSettingsToDropbox(getSettingValues());
     } else {
-      syncSettingValues();
+      await syncSettingValues();
       hasSyncOnce = true;
     }
+    syncingSettings.value = false;
   }, 1500);
   allowBackupSettingKeys.forEach((key) => onEvent(key, syncSettings));
 }
@@ -141,7 +129,7 @@ function clearDropboxToken(): void {
   autoSyncWithDropbox.value = false;
 }
 
-async function uploadSettingToDropbox(): Promise<void> {
+async function uploadSetting(): Promise<void> {
   if (!dropboxToken.value) {
     return;
   }
@@ -152,67 +140,16 @@ async function uploadSettingToDropbox(): Promise<void> {
   uploadingSettings.value = false;
 }
 
-async function loadSettingsFromDropbox(): Promise<void> {
+async function loadSettings(): Promise<void> {
   downloadingSettings.value = true;
-  await getSettingsFromDropbox(
-    (settings) => saveSettingValues(settings),
-    (seenNews) => {
-      saveSettingToStorage(SettingKey.SeenNewsItems, seenNews);
-    },
-  );
+  await Promise.all([loadSettingsFromDropbox(), loadSeenNewsFromDropbox()]);
   downloadingSettings.value = false;
 }
 
-async function mergeSettingsFromDropbox(): Promise<void> {
+async function mergeSettingsWithDropbox(): Promise<void> {
   mergingSettings.value = true;
-  await getSettingsFromDropbox(
-    (settings) => {
-      const originalSettings = getSettingValues();
-      const updatedSettings = mergeSettings(originalSettings, settings);
-      saveSettingValues(updatedSettings);
-    },
-    (seenNews) => {
-      updateSettingFromStorage(SettingKey.SeenNewsItems, (s) => mergeSeenNews(s || [], seenNews));
-    },
-  );
+  await Promise.all([syncSettingValues(), syncSeenNews()]);
   mergingSettings.value = false;
-}
-
-async function getSettingsFromDropbox(
-  settingsCallback: (settings: Partial<SettingValueType>) => void,
-  seenNewsCallback: (seenNews: SeenNewsItem[]) => void,
-): Promise<void> {
-  if (!dropboxToken.value) {
-    return;
-  }
-  await Promise.all([
-    getSettingValuesFromDropbox()
-      .catch(showDropboxError)
-      .then((settings) => {
-        if (!settings) {
-          return;
-        }
-        const errorProps = validateSettings(settings);
-        if (errorProps.length) {
-          const errorMessage = errorProps.map((key) => `Setting key: '${key}' is invalid`).join('\n');
-          message.error(errorMessage, { duration: 0, closable: true });
-        } else {
-          settingsCallback(settings);
-        }
-      }),
-    getSeenNewsFromDropbox()
-      .catch(showDropboxError)
-      .then((seenNews) => {
-        if (!seenNews) {
-          return;
-        }
-        seenNewsCallback(seenNews);
-      }),
-  ]);
-}
-
-function showDropboxError(e: DropboxApiError): void {
-  message.error(`Error when download file from dropbox: ${e.error.error_summary}`);
 }
 </script>
 
