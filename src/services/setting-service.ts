@@ -1,4 +1,5 @@
 import { diff } from 'fast-array-diff';
+import equal from 'fast-deep-equal';
 import { isNil, evolve, groupBy, sortBy, omit } from 'ramda';
 import { ValuesType } from 'utility-types';
 
@@ -196,8 +197,8 @@ export async function syncSettingValues(): Promise<void> {
   delete localSettings.dropboxToken;
   const mergedSettings = mergeSettings(localSettings, remoteSettings);
 
-  const needUploadToRemote = settingsToJson(mergedSettings) !== settingsToJson(remoteSettings);
-  const settingsChanged = settingsToJson(mergedSettings) !== settingsToJson(localSettings);
+  const needUploadToRemote = !equal(toSettingsCompare(mergedSettings), toSettingsCompare(remoteSettings));
+  const settingsChanged = !equal(toSettingsCompare(mergedSettings), toSettingsCompare(localSettings));
   const needOverrideToLocal = (remoteSettings.lastModify || 0) > (localSettings.lastModify || 0) && settingsChanged;
   if (needUploadToRemote) {
     mergedSettings.lastModify = Date.now();
@@ -226,8 +227,8 @@ export async function syncSeenNews(): Promise<void> {
   localSeenNews = trimSeenNewsItems(localSeenNews);
   const mergedSeenNews = mergeSeenNews(localSeenNews, remoteSeenNews);
 
-  const needToUploadToRemote = JSON.stringify(mergedSeenNews) !== JSON.stringify(remoteSeenNews);
-  const needToSaveToLocal = JSON.stringify(mergedSeenNews) !== JSON.stringify(localSeenNews);
+  const needToUploadToRemote = !equal(mergedSeenNews, remoteSeenNews);
+  const needToSaveToLocal = !equal(mergedSeenNews, localSeenNews);
   if (needToUploadToRemote) {
     await saveSeenNewsToDropbox(mergedSeenNews);
   }
@@ -246,7 +247,7 @@ export async function loadSettingsFromDropbox(): Promise<void> {
   const localSettings = getSettingValues();
   delete localSettings.dropboxToken;
 
-  const settingsChanged = settingsToJson(localSettings) !== settingsToJson(remoteSettings);
+  const settingsChanged = !equal(toSettingsCompare(localSettings), toSettingsCompare(remoteSettings));
   if (settingsChanged) {
     saveSettingValues(remoteSettings);
   }
@@ -266,6 +267,13 @@ export async function uploadSettingsToDropbox(settings: Partial<SettingValueType
   saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, settings);
 }
 
-function settingsToJson(settings: Partial<SettingValueType>): string {
-  return JSON.stringify(omit([SettingKey.LastModify], deleteNilProperties(settings)));
+function toSettingsCompare(
+  settings: Partial<SettingValueType>,
+): Omit<
+  Partial<SettingValueType>,
+  SettingKey.LastModify | SettingKey.RemoteSettingsSnapshot | SettingKey.RemoteSeenNewsSnapshot
+> {
+  return deleteNilProperties(
+    omit([SettingKey.LastModify, SettingKey.RemoteSettingsSnapshot, SettingKey.RemoteSeenNewsSnapshot], settings),
+  );
 }

@@ -1,5 +1,7 @@
 import { Ref, ref, watch, UnwrapRef, toRaw } from 'vue';
 
+import equal from 'fast-deep-equal';
+
 import { useMitt } from '@compositions/use-mitt';
 import { SettingKey, SettingValueType } from '@enums/setting-key';
 import { getSettingFromStorage, saveOrDelete } from '@services/setting-service';
@@ -46,23 +48,22 @@ function watchWithEvent<K extends SettingKey, T extends SettingValueType[K], N>(
 
   watch(settingRef, () => {
     const newValue = toRaw(settingRef.value);
-    if (newValue === lastValue) {
+    if (equal(newValue, lastValue)) {
       return;
     }
-    lastValue = (map ? map(newValue as T) : lastValue) as T;
+    lastValue = (map ? map(newValue as T) : newValue) as T;
     pauseEvent = true;
     callback(lastValue);
     pauseEvent = false;
   });
   const { onEvent } = useMitt();
   onEvent(key, (eventValue) => {
-    const newValue = eventValue as T;
-    if (newValue === lastValue || pauseEvent) {
+    const newValue = (map ? map(eventValue as T) : eventValue) as T;
+    if (equal(newValue, lastValue) || pauseEvent) {
       return;
     }
-    const value = (map ? map(newValue) : newValue) as T;
-    lastValue = value;
+    lastValue = newValue;
     // eslint-disable-next-line
-    settingRef.value = value;
+    settingRef.value = newValue;
   });
 }
