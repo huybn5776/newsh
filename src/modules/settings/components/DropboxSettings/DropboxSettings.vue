@@ -1,7 +1,7 @@
 <template>
   <div class="setting-section">
     <h3>Dropbox sync</h3>
-    <SwitchRow v-model:value="autoSyncWithDropbox" :loading="syncingSettings" @update:value="onToggleAutoSync">
+    <SwitchRow v-model:value="autoSyncWithDropbox" :loading="autoSyncingSettings" @update:value="onToggleAutoSync">
       Auto sync setting with Dropbox.
     </SwitchRow>
     <div class="setting-row setting-button-row">
@@ -16,8 +16,8 @@
       <NButton :disabled="!dropboxToken || dropboxLoading" :loading="downloadingSettings" @click="loadSettings">
         Load settings from Dropbox
       </NButton>
-      <NButton :disabled="!dropboxToken || dropboxLoading" :loading="mergingSettings" @click="mergeSettingsWithDropbox">
-        Merge settings with Dropbox
+      <NButton :disabled="!dropboxToken || dropboxLoading" :loading="syncingSettings" @click="syncSettingsWithDropbox">
+        Sync settings with Dropbox
       </NButton>
     </div>
   </div>
@@ -58,14 +58,14 @@ const { loading: loadingDropboxToken } = useCatchDropboxTokenFromUrl(onGotDropbo
 
 const autoSyncWithDropbox = useSyncSettingMapUndefined(SettingKey.AutoSyncWithDropbox);
 const refreshingDropboxToken = ref(false);
+const autoSyncingSettings = ref(false);
 const uploadingSettings = ref(false);
 const downloadingSettings = ref(false);
-const mergingSettings = ref(false);
 const syncingSettings = ref(false);
 
 const dropboxTokenLoading = computed(() => loadingDropboxToken.value || refreshingDropboxToken.value);
 const dropboxLoading = computed(
-  () => dropboxTokenLoading.value || uploadingSettings.value || downloadingSettings.value || mergingSettings.value,
+  () => dropboxTokenLoading.value || uploadingSettings.value || downloadingSettings.value || syncingSettings.value,
 );
 
 onMounted(async () => {
@@ -85,14 +85,14 @@ onMounted(async () => {
 function subscribeOnChangeToSync(): void {
   let hasSyncOnce = false;
   const syncSettings = useDebounceFn(async () => {
-    syncingSettings.value = true;
+    autoSyncingSettings.value = true;
     if (hasSyncOnce) {
       await uploadSettingsToDropbox(getSettingValues());
     } else {
       await syncSettingValues();
       hasSyncOnce = true;
     }
-    syncingSettings.value = false;
+    autoSyncingSettings.value = false;
   }, 1500);
   allowBackupSettingKeys.forEach((key) => onEvent(key, syncSettings));
 }
@@ -150,10 +150,10 @@ async function loadSettings(): Promise<void> {
   downloadingSettings.value = false;
 }
 
-async function mergeSettingsWithDropbox(): Promise<void> {
-  mergingSettings.value = true;
+async function syncSettingsWithDropbox(): Promise<void> {
+  syncingSettings.value = true;
   await Promise.all([syncSettingValues(), syncSeenNews()]);
-  mergingSettings.value = false;
+  syncingSettings.value = false;
 }
 </script>
 
