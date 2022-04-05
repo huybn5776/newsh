@@ -83,15 +83,8 @@ onMounted(async () => {
 });
 
 function subscribeOnChangeToSync(): void {
-  let hasSyncOnce = false;
   const syncSettings = useDebounceFn(async () => {
-    autoSyncingSettings.value = true;
-    if (hasSyncOnce) {
-      await uploadSettingsToDropbox(getSettingValues());
-    } else {
-      await syncSettingValues();
-      hasSyncOnce = true;
-    }
+    await syncSettingValues();
     autoSyncingSettings.value = false;
   }, 1500);
   allowBackupSettingKeys.forEach((key) => onEvent(key, syncSettings));
