@@ -11,9 +11,11 @@
     "@vueuse/core": "^8.2.4",
     "axios": "^0.26.1",
     "dropbox": "^10.27.0",
+    "fast-array-diff": "^1.0.1",
     "mitt": "^3.0.0",
     "naive-ui": "^2.27.0",
     "ramda": "^0.28.0",
+    "utility-types": "^3.10.0",
     "vue": "^3.2.31",
     "vue-router": "^4.0.14"
   },

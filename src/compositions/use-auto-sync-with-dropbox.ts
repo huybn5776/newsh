@@ -6,8 +6,14 @@ import { useMessage } from 'naive-ui';
 import { useMitt } from '@compositions/use-mitt';
 import { SettingKey } from '@enums/setting-key';
 import { refreshDropboxTokenIfNeeded } from '@services/dropbox-service';
-import { saveSettingsToDropbox, saveSeenNewsToDropbox } from '@services/dropbox-sync-service';
-import { getSettingFromStorage, syncSettingValues, syncSeenNews, getSettingValues } from '@services/setting-service';
+import { saveSeenNewsToDropbox } from '@services/dropbox-sync-service';
+import {
+  getSettingFromStorage,
+  syncSettingValues,
+  syncSeenNews,
+  getSettingValues,
+  uploadSettingsToDropbox,
+} from '@services/setting-service';
 
 const settingKeysToUpdateSettings: SettingKey[] = [
   SettingKey.HiddenSources,
@@ -37,7 +43,7 @@ export function useAutoSyncWithDropbox(): void {
   });
 
   function syncSettingsOnChange(): void {
-    settingKeysToUpdateSettings.forEach((key) => onEvent(key, () => saveSettingsToDropbox(getSettingValues())));
+    settingKeysToUpdateSettings.forEach((key) => onEvent(key, () => uploadSettingsToDropbox(getSettingValues())));
   }
 
   function syncSeenNewsOnChange(): void {

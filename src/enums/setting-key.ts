@@ -22,6 +22,8 @@ export enum SettingKey {
   DropboxToken = 'dropboxToken',
   AutoSyncWithDropbox = 'autoSyncWithDropbox',
   LastModify = 'lastModify',
+  RemoteSettingsSnapshot = 'remoteSettingsSnapshot',
+  RemoteSeenNewsSnapshot = 'remoteSeenNewsSnapshot',
 }
 
 export type SettingValueType = {
@@ -41,4 +43,17 @@ export type SettingValueType = {
   [SettingKey.DropboxToken]: DropboxTokenInfo;
   [SettingKey.AutoSyncWithDropbox]: boolean;
   [SettingKey.LastModify]: number;
+  [SettingKey.RemoteSettingsSnapshot]: Partial<AllowBackupSettings>;
+  [SettingKey.RemoteSeenNewsSnapshot]: SeenNewsItem[];
 };
+
+export type AllowBackupSettings = Omit<
+  SettingValueType,
+  | SettingKey.SeenNewsItems
+  | SettingKey.LanguageAndRegion
+  | SettingKey.LanguageAndRegionLabel
+  | SettingKey.AllTopicsInfo
+  | SettingKey.HeadlineTopicId
+  | SettingKey.RemoteSettingsSnapshot
+  | SettingKey.RemoteSeenNewsSnapshot
+>;

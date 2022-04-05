@@ -38,7 +38,7 @@ import { SettingKey } from '@enums/setting-key';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
 import { createDropboxAuthUrl, refreshDropboxTokenIfNeeded } from '@services/dropbox-service';
-import { saveSeenNewsToDropbox, saveSettingsToDropbox } from '@services/dropbox-sync-service';
+import { saveSeenNewsToDropbox } from '@services/dropbox-sync-service';
 import {
   getSettingValues,
   getSettingFromStorage,
@@ -47,6 +47,7 @@ import {
   syncSeenNews,
   loadSeenNewsFromDropbox,
   loadSettingsFromDropbox,
+  uploadSettingsToDropbox,
 } from '@services/setting-service';
 
 const dropboxToken = useSyncSetting(SettingKey.DropboxToken);
@@ -86,7 +87,7 @@ function subscribeOnChangeToSync(): void {
   const syncSettings = useDebounceFn(async () => {
     syncingSettings.value = true;
     if (hasSyncOnce) {
-      await saveSettingsToDropbox(getSettingValues());
+      await uploadSettingsToDropbox(getSettingValues());
     } else {
       await syncSettingValues();
       hasSyncOnce = true;
@@ -136,7 +137,10 @@ async function uploadSetting(): Promise<void> {
   uploadingSettings.value = true;
   const settings = getSettingValues();
   const seenNews = getSettingFromStorage(SettingKey.SeenNewsItems);
-  await Promise.all([saveSettingsToDropbox(settings), seenNews ? saveSeenNewsToDropbox(seenNews) : Promise.resolve()]);
+  await Promise.all([
+    uploadSettingsToDropbox(settings),
+    seenNews ? saveSeenNewsToDropbox(seenNews) : Promise.resolve(),
+  ]);
   uploadingSettings.value = false;
 }
 

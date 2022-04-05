@@ -1,7 +1,9 @@
+import { diff } from 'fast-array-diff';
 import { isNil, evolve, groupBy, sortBy, omit } from 'ramda';
+import { ValuesType } from 'utility-types';
 
 import { EventKey } from '@enums/event-key';
-import { SettingValueType, SettingKey } from '@enums/setting-key';
+import { SettingValueType, SettingKey, AllowBackupSettings } from '@enums/setting-key';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
 import {
@@ -15,15 +17,6 @@ import { distinctArray } from '@utils/array-utils';
 import { deleteNilProperties, isNilOrEmpty } from '@utils/object-utils';
 import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@utils/storage-utils';
 import { NullableProps } from '@utils/type-utils';
-
-type AllowBackupSettings = Omit<
-  SettingValueType,
-  | SettingKey.SeenNewsItems
-  | SettingKey.LanguageAndRegion
-  | SettingKey.LanguageAndRegionLabel
-  | SettingKey.AllTopicsInfo
-  | SettingKey.HeadlineTopicId
->;
 
 export function getSettingFromStorage<K extends SettingKey, T extends SettingValueType[K]>(key: K): T | null {
   return getFromStorage<T>(key);
@@ -145,16 +138,19 @@ export function validateSettings(settingValue: Partial<AllowBackupSettings>): Se
 }
 
 export function mergeSettings(
-  settingValues1: Partial<SettingValueType>,
-  settingValues2: Partial<SettingValueType>,
+  localSettings: Partial<SettingValueType>,
+  remoteSettings: Partial<SettingValueType>,
 ): Partial<SettingValueType> {
+  const settingsSnapshot = getSettingFromStorage(SettingKey.RemoteSettingsSnapshot);
   const mergedSettings: Partial<SettingValueType> =
-    (settingValues1.lastModify || 0) > (settingValues2.lastModify || 0)
-      ? { ...settingValues2, ...settingValues1 }
-      : { ...settingValues1, ...settingValues2 };
-  mergedSettings.hiddenSources = distinctArray(settingValues1.hiddenSources, settingValues2.hiddenSources);
-  mergedSettings.hiddenUrlMatches = distinctArray(settingValues1.hiddenUrlMatches, settingValues2.hiddenUrlMatches);
-  mergedSettings.excludeTerms = distinctArray(settingValues1.excludeTerms, settingValues2.excludeTerms);
+    (localSettings.lastModify || 0) > (remoteSettings.lastModify || 0)
+      ? { ...remoteSettings, ...localSettings }
+      : { ...localSettings, ...remoteSettings };
+
+  const patcher = createArrayDiffPatcher(localSettings, remoteSettings, settingsSnapshot);
+  mergedSettings.hiddenSources = patcher(SettingKey.HiddenSources);
+  mergedSettings.hiddenUrlMatches = patcher(SettingKey.HiddenUrlMatches);
+  mergedSettings.excludeTerms = patcher(SettingKey.ExcludeTerms);
   return mergedSettings;
 }
 
@@ -167,6 +163,28 @@ export function mergeSeenNews(seenNews1: SeenNewsItem[], seenNews2: SeenNewsItem
     const sortedItems = sortBy((seenNews) => seenNews.seenAt, seenNewsItems);
     return sortedItems[sortedItems.length - 1];
   });
+}
+
+function createArrayDiffPatcher(
+  localSettings: Partial<SettingValueType>,
+  remoteSettings: Partial<SettingValueType>,
+  remoteSnapshot: Partial<SettingValueType> | undefined | null,
+) {
+  return <
+    K extends SettingValueType[K] extends Array<unknown> ? SettingKey : never,
+    T extends SettingValueType[K] extends Array<unknown> ? SettingValueType[K] : never,
+    E extends ValuesType<T>,
+  >(
+    key: K,
+  ): E[] => {
+    const local = localSettings[key] as E[];
+    const remote = remoteSettings[key] as E[];
+    const snapshot = remoteSnapshot?.[key] as E[];
+    const arrayDiff = diff<E>(snapshot || [], remote || []);
+    let patchedArray = (local || []).filter((entry) => !arrayDiff.removed.includes(entry));
+    patchedArray = [...patchedArray, ...arrayDiff.added];
+    return distinctArray(patchedArray);
+  };
 }
 
 export async function syncSettingValues(): Promise<void> {
@@ -184,6 +202,9 @@ export async function syncSettingValues(): Promise<void> {
   if (needUploadToRemote) {
     mergedSettings.lastModify = Date.now();
     await saveSettingsToDropbox(mergedSettings);
+    saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, mergedSettings);
+  } else {
+    saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings);
   }
   if (needOverrideToLocal) {
     saveSettingValues(mergedSettings);
@@ -221,6 +242,7 @@ export async function loadSettingsFromDropbox(): Promise<void> {
   if (!remoteSettings) {
     return;
   }
+  saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings);
   const localSettings = getSettingValues();
   delete localSettings.dropboxToken;
 
@@ -237,6 +259,11 @@ export async function loadSeenNewsFromDropbox(): Promise<void> {
   }
   remoteSeenNews = trimSeenNewsItems(remoteSeenNews);
   saveSettingToStorage(SettingKey.SeenNewsItems, remoteSeenNews);
+}
+
+export async function uploadSettingsToDropbox(settings: Partial<SettingValueType>): Promise<void> {
+  await saveSettingsToDropbox(settings);
+  saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, settings);
 }
 
 function settingsToJson(settings: Partial<SettingValueType>): string {
