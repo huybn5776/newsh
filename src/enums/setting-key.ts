@@ -21,7 +21,7 @@ export enum SettingKey {
   NewsTopicsAfterTopStories = 'newsTopicsAfterTopStories',
   DropboxToken = 'dropboxToken',
   AutoSyncWithDropbox = 'autoSyncWithDropbox',
-  LastModify = 'lastModify',
+  LastModifyTimes = 'lastModifyTimes',
   RemoteSettingsSnapshot = 'remoteSettingsSnapshot',
   RemoteSeenNewsSnapshot = 'remoteSeenNewsSnapshot',
 }
@@ -42,7 +42,7 @@ export type SettingValueType = {
   [SettingKey.NewsTopicsAfterTopStories]: string[];
   [SettingKey.DropboxToken]: DropboxTokenInfo;
   [SettingKey.AutoSyncWithDropbox]: boolean;
-  [SettingKey.LastModify]: number;
+  [SettingKey.LastModifyTimes]: Partial<Record<keyof AllowBackupSettings, number>>;
   [SettingKey.RemoteSettingsSnapshot]: Partial<AllowBackupSettings>;
   [SettingKey.RemoteSeenNewsSnapshot]: SeenNewsItem[];
 };

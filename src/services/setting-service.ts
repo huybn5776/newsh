@@ -30,7 +30,9 @@ export function saveSettingToStorage<K extends SettingKey, T extends SettingValu
   type: SettingEventType,
 ): void {
   saveToStorage(key, value);
-  updateLastModify();
+  if (type === SettingEventType.User) {
+    updateLastModifyTimes(key);
+  }
   emitter.emit(key, { type, key, value: value as never });
 }
 
@@ -41,14 +43,14 @@ export function updateSettingFromStorage<K extends SettingKey, T extends Setting
 ): void {
   const { updated, value } = updateFromStorage<T>(key, updater);
   if (updated) {
-    updateLastModify();
+    updateLastModifyTimes(key);
     emitter.emit(key, { type, key, value: value as never });
   }
 }
 
 export function deleteSettingFromStorage(key: SettingKey, type: SettingEventType): void {
   deleteFromStorage(key);
-  updateLastModify();
+  updateLastModifyTimes(key);
   emitter.emit(key, { type, key, value: null });
 }
 
@@ -64,8 +66,37 @@ export function saveOrDelete<K extends SettingKey, T extends SettingValueType[K]
   saveSettingToStorage(key, value, type);
 }
 
-function updateLastModify(): void {
-  saveToStorage(SettingKey.LastModify, Date.now());
+export function saveOrDeleteIfChanged<K extends SettingKey, T extends SettingValueType[K]>(
+  key: K,
+  value: T | null | undefined,
+  type: SettingEventType,
+): void {
+  const orgValue = getSettingFromStorage(key);
+  const isEmpty = isNilOrEmpty(value);
+  const processedValue = isEmpty ? null : value;
+  if ((orgValue == null && processedValue == null) || equal(orgValue, processedValue)) {
+    return;
+  }
+  if (isEmpty) {
+    deleteSettingFromStorage(key, type);
+  } else {
+    saveSettingToStorage(key, value, type);
+  }
+}
+
+function updateLastModifyTimes(key: SettingKey, modifyTime?: number): void {
+  switch (key) {
+    case SettingKey.DropboxToken:
+    case SettingKey.LastModifyTimes:
+    case SettingKey.RemoteSettingsSnapshot:
+    case SettingKey.RemoteSeenNewsSnapshot:
+      break;
+    default:
+      updateFromStorage<SettingValueType[SettingKey.LastModifyTimes]>(SettingKey.LastModifyTimes, (modifyTimes) => ({
+        ...(modifyTimes || {}),
+        [key]: modifyTime ?? Date.now(),
+      }));
+  }
 }
 
 export function getSettingValues(): Partial<AllowBackupSettings> {
@@ -80,7 +111,7 @@ export function getSettingValues(): Partial<AllowBackupSettings> {
     newsTopicsAfterTopStories: getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories),
     dropboxToken: getSettingFromStorage(SettingKey.DropboxToken),
     autoSyncWithDropbox: getSettingFromStorage(SettingKey.AutoSyncWithDropbox),
-    lastModify: getSettingFromStorage(SettingKey.LastModify),
+    lastModifyTimes: getSettingFromStorage(SettingKey.LastModifyTimes),
   };
   return deleteNilProperties(settingValues);
 }
@@ -96,14 +127,14 @@ const allowBackupSettingsObject: { [key in keyof AllowBackupSettings]: true } = 
   [SettingKey.NewsTopicsAfterTopStories]: true,
   [SettingKey.DropboxToken]: true,
   [SettingKey.AutoSyncWithDropbox]: true,
-  [SettingKey.LastModify]: true,
+  [SettingKey.LastModifyTimes]: true,
 };
 export const allowBackupSettingKeys = Object.keys(allowBackupSettingsObject) as SettingKey[];
 
 export function saveSettingValues(setting: Partial<AllowBackupSettings>, type: SettingEventType): void {
   (Object.entries(setting) as [SettingKey, unknown][])
     .filter(([key]) => allowBackupSettingKeys.includes(key))
-    .forEach(([key, value]) => saveSettingToStorage(key, value as SettingValueType[typeof key], type));
+    .forEach(([key, value]) => saveOrDeleteIfChanged(key, value as SettingValueType[typeof key], type));
 }
 
 export function trimSeenNewsItems(seenNewsItems: SeenNewsItem[] | undefined | null): SeenNewsItem[] {
@@ -134,7 +165,7 @@ export function validateSettings(settingValue: Partial<AllowBackupSettings>): Se
     newsTopicsAfterTopStories: validate((v) => Array.isArray(v)),
     dropboxToken: validate((v) => typeof (v as Partial<DropboxTokenInfo>).accessToken === 'string'),
     autoSyncWithDropbox: validate((v) => typeof v === 'boolean'),
-    lastModify: validate((v) => typeof v === 'number'),
+    lastModifyTimes: validate((v) => typeof v === 'object'),
   };
   const errors = evolve(transformations, settingValue);
   return Object.entries(errors)
@@ -147,10 +178,30 @@ export function mergeSettings(
   remoteSettings: Partial<SettingValueType>,
 ): Partial<SettingValueType> {
   const settingsSnapshot = getSettingFromStorage(SettingKey.RemoteSettingsSnapshot);
-  const mergedSettings: Partial<SettingValueType> =
-    (localSettings.lastModify || 0) > (remoteSettings.lastModify || 0)
-      ? { ...remoteSettings, ...localSettings }
-      : { ...localSettings, ...remoteSettings };
+  const remoteLastModifyTimes = remoteSettings.lastModifyTimes || {};
+
+  const mergedSettings: Partial<SettingValueType> = { ...localSettings };
+  const mergedLastModifyTimes = mergedSettings.lastModifyTimes || {};
+  Object.entries(remoteSettings.lastModifyTimes || {})
+    .filter(
+      ([key]) =>
+        ![
+          SettingKey.LastModifyTimes,
+          SettingKey.RemoteSettingsSnapshot,
+          SettingKey.RemoteSeenNewsSnapshot,
+          SettingKey.HiddenSources,
+          SettingKey.HiddenUrlMatches,
+          SettingKey.ExcludeTerms,
+        ].includes(key as SettingKey),
+    )
+    .forEach(([k, remoteModifyTime]) => {
+      const key = k as keyof SettingValueType[SettingKey.LastModifyTimes];
+      const localModifyTime = localSettings.lastModifyTimes?.[key] || 0;
+      if (remoteModifyTime > localModifyTime) {
+        mergedSettings[key] = remoteSettings[key] as never;
+        mergedLastModifyTimes[key] = remoteLastModifyTimes[key] ?? Date.now();
+      }
+    });
 
   const patcher = createArrayDiffPatcher(localSettings, remoteSettings, settingsSnapshot);
   mergedSettings.hiddenSources = patcher(SettingKey.HiddenSources);
@@ -197,26 +248,16 @@ export async function syncSettingValues(): Promise<void> {
   if (!remoteSettings) {
     return;
   }
-  const localSettings = getSettingValues();
-  delete localSettings.dropboxToken;
+  const localSettings = omit([SettingKey.DropboxToken], getSettingValues());
   const mergedSettings = mergeSettings(localSettings, remoteSettings);
+  saveSettingValues(mergedSettings, SettingEventType.Sync);
 
   const needUploadToRemote = !equal(toSettingsCompare(mergedSettings), toSettingsCompare(remoteSettings));
-  const settingsChanged = !equal(toSettingsCompare(mergedSettings), toSettingsCompare(localSettings));
-  const needOverrideToLocal = (remoteSettings.lastModify || 0) > (localSettings.lastModify || 0) && settingsChanged;
   if (needUploadToRemote) {
-    mergedSettings.lastModify = Date.now();
     await saveSettingsToDropbox(mergedSettings);
     saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, mergedSettings, SettingEventType.Sync);
   } else {
     saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings, SettingEventType.Sync);
-  }
-  if (needOverrideToLocal) {
-    saveSettingValues(mergedSettings);
-  } else if (settingsChanged) {
-    saveOrDelete(SettingKey.HiddenSources, mergedSettings.hiddenSources, SettingEventType.Sync);
-    saveOrDelete(SettingKey.HiddenUrlMatches, mergedSettings.hiddenUrlMatches, SettingEventType.Sync);
-    saveOrDelete(SettingKey.ExcludeTerms, mergedSettings.excludeTerms, SettingEventType.Sync);
   }
 }
 
@@ -249,7 +290,6 @@ export async function loadSettingsFromDropbox(): Promise<void> {
   }
   saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings, SettingEventType.Sync);
   const localSettings = getSettingValues();
-  delete localSettings.dropboxToken;
 
   const settingsChanged = !equal(toSettingsCompare(localSettings), toSettingsCompare(remoteSettings));
   if (settingsChanged) {
@@ -267,17 +307,26 @@ export async function loadSeenNewsFromDropbox(): Promise<void> {
 }
 
 export async function uploadSettingsToDropbox(settings: Partial<SettingValueType>): Promise<void> {
-  await saveSettingsToDropbox(settings);
-  saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, settings, SettingEventType.User);
+  const settingsWithoutDropboxToken = omit([SettingKey.DropboxToken], settings);
+  await saveSettingsToDropbox(settingsWithoutDropboxToken);
+  saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, settingsWithoutDropboxToken, SettingEventType.User);
 }
 
 function toSettingsCompare(
   settings: Partial<SettingValueType>,
 ): Omit<
   Partial<SettingValueType>,
-  SettingKey.LastModify | SettingKey.RemoteSettingsSnapshot | SettingKey.RemoteSeenNewsSnapshot
+  SettingKey.LastModifyTimes | SettingKey.RemoteSettingsSnapshot | SettingKey.RemoteSeenNewsSnapshot
 > {
   return deleteNilProperties(
-    omit([SettingKey.LastModify, SettingKey.RemoteSettingsSnapshot, SettingKey.RemoteSeenNewsSnapshot], settings),
+    omit(
+      [
+        SettingKey.DropboxToken,
+        SettingKey.LastModifyTimes,
+        SettingKey.RemoteSettingsSnapshot,
+        SettingKey.RemoteSeenNewsSnapshot,
+      ],
+      settings,
+    ),
   );
 }
