@@ -1,4 +1,5 @@
 import { getMultiTopicNews } from '@api/google-news-api';
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
@@ -14,10 +15,10 @@ export async function prepareNewsInfo(languageAndRegion: string): Promise<void> 
   ).flatMap((topics) => topics);
 
   const allTopicsInfo: NewsTopicInfo[] = topicItems.map((topicItem) => ({ id: topicItem.id, name: topicItem.name }));
-  saveSettingToStorage(SettingKey.AllTopicsInfo, allTopicsInfo);
+  saveSettingToStorage(SettingKey.AllTopicsInfo, allTopicsInfo, SettingEventType.Program);
 
   const [headlineTopic] = topicItems;
-  saveSettingToStorage(SettingKey.HeadlineTopicId, headlineTopic.id);
+  saveSettingToStorage(SettingKey.HeadlineTopicId, headlineTopic.id, SettingEventType.Program);
 }
 
 export function validateIsNewsInfoSettings(): boolean {

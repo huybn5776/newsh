@@ -1,5 +1,6 @@
 import { ref, onUnmounted, Ref } from 'vue';
 
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
 import { updateSettingFromStorage } from '@services/setting-service';
@@ -21,10 +22,14 @@ export function useMarkNewsAsSeen(seenNewsUrlMap: Ref<Record<string, boolean>>):
     }
 
     newsItemIntersectionTimeout.value[newsUrl] = setTimeout(() => {
-      updateSettingFromStorage(SettingKey.SeenNewsItems, (newsItems) => [
-        ...(newsItems?.filter((news) => news.url !== newsUrl) || []),
-        { seenAt: Date.now(), title: newsItem.title, url: newsUrl },
-      ]);
+      updateSettingFromStorage(
+        SettingKey.SeenNewsItems,
+        (newsItems) => [
+          ...(newsItems?.filter((news) => news.url !== newsUrl) || []),
+          { seenAt: Date.now(), title: newsItem.title, url: newsUrl },
+        ],
+        SettingEventType.User,
+      );
       delete newsItemIntersectionTimeout.value[newsUrl];
       hasSeenNewsItemsUrl.value = [...hasSeenNewsItemsUrl.value, newsUrl];
     }, markAsSeenTime);

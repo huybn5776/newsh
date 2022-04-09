@@ -1,6 +1,7 @@
 import { useMessage } from 'naive-ui';
 
 import { useInputDialog } from '@compositions/use-input-dialog';
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingValueType } from '@enums/setting-key';
 import { getSettingValues, validateSettings, saveSettingValues } from '@services/setting-service';
 import { saveDataToJsonFile, selectFile } from '@utils/browser-utils';
@@ -34,7 +35,7 @@ export function useBackupSettings(): {
       showValidationError(errorSettings);
       return;
     }
-    saveSettingValues(settingsValue);
+    saveSettingValues(settingsValue, SettingEventType.Backup);
   }
 
   function editSettingsInJson(): void {
@@ -60,7 +61,7 @@ export function useBackupSettings(): {
           showValidationError(errorProps);
           return false;
         }
-        saveSettingValues(newSettings);
+        saveSettingValues(newSettings, SettingEventType.Backup);
         return true;
       },
     });

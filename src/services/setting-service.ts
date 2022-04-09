@@ -4,6 +4,7 @@ import { isNil, evolve, groupBy, sortBy, omit } from 'ramda';
 import { ValuesType } from 'utility-types';
 
 import { EventKey } from '@enums/event-key';
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingValueType, SettingKey, AllowBackupSettings } from '@enums/setting-key';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
@@ -13,7 +14,7 @@ import {
   getSeenNewsFromDropbox,
   saveSeenNewsToDropbox,
 } from '@services/dropbox-sync-service';
-import { emitter, EventTypes } from '@services/emitter-service';
+import { emitter } from '@services/emitter-service';
 import { distinctArray } from '@utils/array-utils';
 import { deleteNilProperties, isNilOrEmpty } from '@utils/object-utils';
 import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@utils/storage-utils';
@@ -26,38 +27,41 @@ export function getSettingFromStorage<K extends SettingKey, T extends SettingVal
 export function saveSettingToStorage<K extends SettingKey, T extends SettingValueType[K]>(
   key: K,
   value: T | null | undefined,
+  type: SettingEventType,
 ): void {
   saveToStorage(key, value);
   updateLastModify();
-  emitter.emit(key, value as EventTypes[K]);
+  emitter.emit(key, { type, key, value: value as never });
 }
 
 export function updateSettingFromStorage<K extends SettingKey, T extends SettingValueType[K]>(
   key: K,
   updater: (value: T | null) => T | null,
+  type: SettingEventType,
 ): void {
   const { updated, value } = updateFromStorage<T>(key, updater);
   if (updated) {
     updateLastModify();
-    emitter.emit(key, value as EventTypes[K]);
+    emitter.emit(key, { type, key, value: value as never });
   }
 }
 
-export function deleteSettingFromStorage(key: SettingKey): void {
+export function deleteSettingFromStorage(key: SettingKey, type: SettingEventType): void {
   deleteFromStorage(key);
   updateLastModify();
-  emitter.emit(key, null);
+  emitter.emit(key, { type, key, value: null });
 }
 
 export function saveOrDelete<K extends SettingKey, T extends SettingValueType[K]>(
   key: K,
   value: T | null | undefined,
+  type: SettingEventType,
 ): void {
   if (isNilOrEmpty(value)) {
-    deleteSettingFromStorage(key);
+    deleteSettingFromStorage(key, type);
     return;
   }
-  saveSettingToStorage(key, value);
+  saveSettingToStorage(key, value, type);
 }
 
 function updateLastModify(): void {
@@ -96,10 +100,10 @@ const allowBackupSettingsObject: { [key in keyof AllowBackupSettings]: true } = 
 };
 export const allowBackupSettingKeys = Object.keys(allowBackupSettingsObject) as SettingKey[];
 
-export function saveSettingValues(setting: Partial<AllowBackupSettings>): void {
+export function saveSettingValues(setting: Partial<AllowBackupSettings>, type: SettingEventType): void {
   (Object.entries(setting) as [SettingKey, unknown][])
     .filter(([key]) => allowBackupSettingKeys.includes(key))
-    .forEach(([key, value]) => saveSettingToStorage(key, value as SettingValueType[typeof key]));
+    .forEach(([key, value]) => saveSettingToStorage(key, value as SettingValueType[typeof key], type));
 }
 
 export function trimSeenNewsItems(seenNewsItems: SeenNewsItem[] | undefined | null): SeenNewsItem[] {
@@ -203,16 +207,16 @@ export async function syncSettingValues(): Promise<void> {
   if (needUploadToRemote) {
     mergedSettings.lastModify = Date.now();
     await saveSettingsToDropbox(mergedSettings);
-    saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, mergedSettings);
+    saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, mergedSettings, SettingEventType.Sync);
   } else {
-    saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings);
+    saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings, SettingEventType.Sync);
   }
   if (needOverrideToLocal) {
     saveSettingValues(mergedSettings);
   } else if (settingsChanged) {
-    saveOrDelete(SettingKey.HiddenSources, mergedSettings.hiddenSources);
-    saveOrDelete(SettingKey.HiddenUrlMatches, mergedSettings.hiddenUrlMatches);
-    saveOrDelete(SettingKey.ExcludeTerms, mergedSettings.excludeTerms);
+    saveOrDelete(SettingKey.HiddenSources, mergedSettings.hiddenSources, SettingEventType.Sync);
+    saveOrDelete(SettingKey.HiddenUrlMatches, mergedSettings.hiddenUrlMatches, SettingEventType.Sync);
+    saveOrDelete(SettingKey.ExcludeTerms, mergedSettings.excludeTerms, SettingEventType.Sync);
   }
 }
 
@@ -233,7 +237,7 @@ export async function syncSeenNews(): Promise<void> {
     await saveSeenNewsToDropbox(mergedSeenNews);
   }
   if (needToSaveToLocal) {
-    saveSettingToStorage(SettingKey.SeenNewsItems, mergedSeenNews);
+    saveSettingToStorage(SettingKey.SeenNewsItems, mergedSeenNews, SettingEventType.Sync);
     emitter.emit(EventKey.RemoteSeenNews, remoteSeenNews);
   }
 }
@@ -243,13 +247,13 @@ export async function loadSettingsFromDropbox(): Promise<void> {
   if (!remoteSettings) {
     return;
   }
-  saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings);
+  saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings, SettingEventType.Sync);
   const localSettings = getSettingValues();
   delete localSettings.dropboxToken;
 
   const settingsChanged = !equal(toSettingsCompare(localSettings), toSettingsCompare(remoteSettings));
   if (settingsChanged) {
-    saveSettingValues(remoteSettings);
+    saveSettingValues(remoteSettings, SettingEventType.Sync);
   }
 }
 
@@ -259,12 +263,12 @@ export async function loadSeenNewsFromDropbox(): Promise<void> {
     return;
   }
   remoteSeenNews = trimSeenNewsItems(remoteSeenNews);
-  saveSettingToStorage(SettingKey.SeenNewsItems, remoteSeenNews);
+  saveSettingToStorage(SettingKey.SeenNewsItems, remoteSeenNews, SettingEventType.User);
 }
 
 export async function uploadSettingsToDropbox(settings: Partial<SettingValueType>): Promise<void> {
   await saveSettingsToDropbox(settings);
-  saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, settings);
+  saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, settings, SettingEventType.User);
 }
 
 function toSettingsCompare(

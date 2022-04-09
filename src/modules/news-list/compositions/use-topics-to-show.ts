@@ -1,5 +1,6 @@
 import { ref, Ref } from 'vue';
 
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
 
@@ -37,5 +38,5 @@ function saveTopicsToShowSetting(topicsId: string[]): void {
   const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
   const allTopicsId = allTopicsInfo.map((topic) => topic.id);
   const collapsedTopics = allTopicsId.filter((topicId) => !topicsId.includes(topicId));
-  saveSettingToStorage(SettingKey.CollapsedTopics, collapsedTopics);
+  saveSettingToStorage(SettingKey.CollapsedTopics, collapsedTopics, SettingEventType.User);
 }

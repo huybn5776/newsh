@@ -70,6 +70,7 @@ import { NButton, NDynamicTags, NSelect } from 'naive-ui';
 
 import { useBackupSettings } from '@compositions/use-backup-settings';
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
 import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
@@ -94,7 +95,7 @@ watch(
   () => hideSeenNews.value,
   () => {
     if (hideSeenNews.value === false) {
-      deleteSettingFromStorage(SettingKey.SeenNewsItems);
+      deleteSettingFromStorage(SettingKey.SeenNewsItems, SettingEventType.User);
     }
   },
 );

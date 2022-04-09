@@ -3,6 +3,7 @@ import { onMounted, provide, ref } from 'vue';
 import { provideHiddenSeenNewsSettingKey, provideSeenNewsInjectKey } from '@/symbols';
 import { useMitt } from '@compositions/use-mitt';
 import { EventKey } from '@enums/event-key';
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { SeenNewsItem } from '@interfaces/seen-news-item';
 import {
@@ -26,7 +27,7 @@ export function useProvideSeenNews(): void {
 
   onMounted(() => {
     if (hideSeenNewsEnabled) {
-      updateSettingFromStorage(SettingKey.SeenNewsItems, trimSeenNewsItems);
+      updateSettingFromStorage(SettingKey.SeenNewsItems, trimSeenNewsItems, SettingEventType.User);
     }
   });
 

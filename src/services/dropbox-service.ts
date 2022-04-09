@@ -1,5 +1,6 @@
 import { Dropbox, DropboxAuth, files as DropboxFiles } from 'dropbox';
 
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { DropboxApiError } from '@interfaces/dropbox-api-error';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
@@ -93,7 +94,7 @@ export async function refreshDropboxTokenIfNeeded(): Promise<DropboxTokenInfo | 
     accessToken: newToken,
     expiresAt: dbxAuth.getAccessTokenExpiresAt().getTime(),
   };
-  saveSettingToStorage(SettingKey.DropboxToken, updatedTokenInfo);
+  saveSettingToStorage(SettingKey.DropboxToken, updatedTokenInfo, SettingEventType.Sync);
   return updatedTokenInfo;
 }
 

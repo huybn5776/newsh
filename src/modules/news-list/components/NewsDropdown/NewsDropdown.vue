@@ -13,6 +13,7 @@ import { DropdownMixedOption } from 'naive-ui/lib/dropdown/src/interface';
 import { append } from 'ramda';
 
 import { useInputDialog } from '@compositions/use-input-dialog';
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
 import { updateSettingFromStorage } from '@services/setting-service';
@@ -37,13 +38,21 @@ function onDropdownSelect(key: string): void {
 
 function hideSourceByPublication(): void {
   const { publication } = props.news;
-  updateSettingFromStorage(SettingKey.HiddenSources, (hiddenSources) => append(publication, hiddenSources || []));
+  updateSettingFromStorage(
+    SettingKey.HiddenSources,
+    (hiddenSources) => append(publication, hiddenSources || []),
+    SettingEventType.User,
+  );
   message.success(`'${publication}' has been added to the hidden list.`);
 }
 
 function hideSourceByDomain(): void {
   const domain = new URL(props.news.url)?.host;
-  updateSettingFromStorage(SettingKey.HiddenUrlMatches, (hiddenMatches) => append(domain, hiddenMatches || []));
+  updateSettingFromStorage(
+    SettingKey.HiddenUrlMatches,
+    (hiddenMatches) => append(domain, hiddenMatches || []),
+    SettingEventType.User,
+  );
   message.success(`'${domain}' has been added to the hidden list.`);
 }
 
@@ -57,7 +66,7 @@ function addExcludeTerm(): void {
       if (!term) {
         return;
       }
-      updateSettingFromStorage(SettingKey.ExcludeTerms, (terms) => distinctArray(terms, [term]));
+      updateSettingFromStorage(SettingKey.ExcludeTerms, (terms) => distinctArray(terms, [term]), SettingEventType.User);
       message.success(`'${term}' has been added to exclude terms.`);
     },
   });

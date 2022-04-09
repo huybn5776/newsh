@@ -22,6 +22,7 @@ import { onMounted, ref, onUnmounted } from 'vue';
 import { useMessage, useLoadingBar, NSpin } from 'naive-ui';
 import { useRouter, useRoute } from 'vue-router';
 
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { SelectionItem } from '@interfaces/selection-item';
 import RegionSelection from '@modules/setup/components/RegionSelection/RegionSelection.vue';
@@ -92,8 +93,8 @@ async function updateRegionAndNewsInfo(): Promise<void> {
 }
 
 function saveRegionSetting(languageAndRegion: string, label: string | undefined): void {
-  saveSettingToStorage(SettingKey.LanguageAndRegion, languageAndRegion);
-  saveSettingToStorage(SettingKey.LanguageAndRegionLabel, label);
+  saveSettingToStorage(SettingKey.LanguageAndRegion, languageAndRegion, SettingEventType.Program);
+  saveSettingToStorage(SettingKey.LanguageAndRegionLabel, label, SettingEventType.Program);
 }
 </script>
 

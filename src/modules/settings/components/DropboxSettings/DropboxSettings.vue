@@ -34,6 +34,7 @@ import DropboxConnectionState from '@components/DropboxConnectionState/DropboxCo
 import { useCatchDropboxTokenFromUrl } from '@compositions/use-catch-dropbox-token-from-url';
 import { useMitt } from '@compositions/use-mitt';
 import { useSyncSetting, useSyncSettingMapUndefined } from '@compositions/use-sync-setting';
+import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
 import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
@@ -87,7 +88,9 @@ function subscribeOnChangeToSync(): void {
     await syncSettingValues();
     autoSyncingSettings.value = false;
   }, 1500);
-  allowBackupSettingKeys.forEach((key) => onEvent(key, syncSettings));
+  allowBackupSettingKeys.forEach((key) =>
+    onEvent(key, (event) => (event.type === SettingEventType.User ? syncSettings() : null)),
+  );
 }
 
 async function onToggleAutoSync(): Promise<void> {
