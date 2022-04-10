@@ -11,13 +11,13 @@ import { ref, onUnmounted } from 'vue';
 import { NDropdown, useMessage, DialogReactive } from 'naive-ui';
 import { DropdownMixedOption } from 'naive-ui/lib/dropdown/src/interface';
 import { append } from 'ramda';
+import { PickByValue } from 'utility-types';
 
 import { useInputDialog } from '@compositions/use-input-dialog';
 import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey } from '@enums/setting-key';
+import { SettingKey, SettingValueType } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
-import { updateSettingFromStorage } from '@services/setting-service';
-import { distinctArray } from '@utils/array-utils';
+import { getSettingFromStorage, saveSettingToStorage } from '@services/setting-service';
 
 const menuActions: Record<string, Omit<DropdownMixedOption, 'key'> & { action: () => void }> = {
   hideSourceByPublication: { label: 'Hide all news from this publication', action: hideSourceByPublication },
@@ -38,22 +38,12 @@ function onDropdownSelect(key: string): void {
 
 function hideSourceByPublication(): void {
   const { publication } = props.news;
-  updateSettingFromStorage(
-    SettingKey.HiddenSources,
-    (hiddenSources) => append(publication, hiddenSources || []),
-    SettingEventType.User,
-  );
-  message.success(`'${publication}' has been added to the hidden list.`);
+  addToList(SettingKey.HiddenSources, publication);
 }
 
 function hideSourceByDomain(): void {
   const domain = new URL(props.news.url)?.host;
-  updateSettingFromStorage(
-    SettingKey.HiddenUrlMatches,
-    (hiddenMatches) => append(domain, hiddenMatches || []),
-    SettingEventType.User,
-  );
-  message.success(`'${domain}' has been added to the hidden list.`);
+  addToList(SettingKey.HiddenUrlMatches, domain);
 }
 
 function addExcludeTerm(): void {
@@ -67,14 +57,22 @@ function addExcludeTerm(): void {
       if (!trimmedTerm) {
         return;
       }
-      updateSettingFromStorage(
-        SettingKey.ExcludeTerms,
-        (terms) => distinctArray(terms, [trimmedTerm]),
-        SettingEventType.User,
-      );
-      message.success(`'${trimmedTerm}' has been added to exclude terms.`);
+      addToList(SettingKey.ExcludeTerms, trimmedTerm);
     },
   });
+}
+
+function addToList<K extends keyof PickByValue<SettingValueType, string[]>>(key: K, value: string): void {
+  const list = getSettingFromStorage(key);
+  if (list?.includes(value)) {
+    message.error(`'${value}' is already included in the list.`, {
+      duration: 10000,
+      closable: true,
+    });
+    return;
+  }
+  saveSettingToStorage(key, append(value, list || []), SettingEventType.User);
+  message.success(`'${value}' has been added to the list.`);
 }
 
 onUnmounted(() => dialogRef.value?.destroy());
