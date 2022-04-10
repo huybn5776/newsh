@@ -63,11 +63,16 @@ function addExcludeTerm(): void {
     value: props.news.title,
     positiveText: 'Add',
     onValue: (term) => {
-      if (!term) {
+      const trimmedTerm = term.trim();
+      if (!trimmedTerm) {
         return;
       }
-      updateSettingFromStorage(SettingKey.ExcludeTerms, (terms) => distinctArray(terms, [term]), SettingEventType.User);
-      message.success(`'${term}' has been added to exclude terms.`);
+      updateSettingFromStorage(
+        SettingKey.ExcludeTerms,
+        (terms) => distinctArray(terms, [trimmedTerm]),
+        SettingEventType.User,
+      );
+      message.success(`'${trimmedTerm}' has been added to exclude terms.`);
     },
   });
 }
