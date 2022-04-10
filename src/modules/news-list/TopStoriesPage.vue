@@ -42,6 +42,7 @@ import { getSettingFromStorage } from '@services/setting-service';
 const newsTopics = ref<NewsTopicItem[]>([]);
 const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);
 const loadedTopics = ref<Record<string, true>>({});
+const pendingRequest = ref<Promise<NewsTopicItem[]>>();
 
 const newsTopicList = computed(() => {
   let newsTopicItems = newsTopics.value;
@@ -96,7 +97,11 @@ async function loadNews(): Promise<void> {
 async function loadNextTopic(): Promise<void> {
   const newsLoader = newsLoaders.value.shift();
   if (newsLoader) {
-    newsTopics.value = [...newsTopics.value, ...(await newsLoader())];
+    const loadNewsRequest = newsLoader();
+    pendingRequest.value = loadNewsRequest;
+    const newsTopicItems = await loadNewsRequest;
+    pendingRequest.value = undefined;
+    newsTopics.value = [...newsTopics.value, ...newsTopicItems];
     completeLoaded.value = newsLoaders.value.length === 0 && !isLoading.value;
   }
 }
@@ -143,7 +148,7 @@ function getAllNewsUrl(newsTopicItems: NewsTopicItem[]): Set<string> {
   );
 }
 
-function onNewsTopicEnter(id: string): void {
+async function onNewsTopicEnter(id: string): Promise<void> {
   const loadThreshold = 2;
   const noNextTopicToLoad = newsLoaders.value.length === 0;
   if (noNextTopicToLoad) {
@@ -151,7 +156,10 @@ function onNewsTopicEnter(id: string): void {
   }
   const index = newsTopicList.value.findIndex((newsTopic) => newsTopic.id === id);
   if (index + loadThreshold >= newsTopicList.value.length) {
-    loadNextTopic();
+    if (pendingRequest.value) {
+      await pendingRequest.value;
+    }
+    await loadNextTopic();
   }
 }
 
