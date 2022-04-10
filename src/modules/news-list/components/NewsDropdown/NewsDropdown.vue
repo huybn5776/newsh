@@ -6,18 +6,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, h } from 'vue';
 
 import { NDropdown, useMessage, DialogReactive } from 'naive-ui';
 import { DropdownMixedOption } from 'naive-ui/lib/dropdown/src/interface';
 import { append } from 'ramda';
 import { PickByValue } from 'utility-types';
 
+import ActionMessage from '@components/ActionMessage/ActionMessage.vue';
 import { useInputDialog } from '@compositions/use-input-dialog';
 import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey, SettingValueType } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
-import { getSettingFromStorage, saveSettingToStorage } from '@services/setting-service';
+import { getSettingFromStorage, saveSettingToStorage, updateSettingFromStorage } from '@services/setting-service';
 
 const menuActions: Record<string, Omit<DropdownMixedOption, 'key'> & { action: () => void }> = {
   hideSourceByPublication: { label: 'Hide all news from this publication', action: hideSourceByPublication },
@@ -72,7 +73,20 @@ function addToList<K extends keyof PickByValue<SettingValueType, string[]>>(key:
     return;
   }
   saveSettingToStorage(key, append(value, list || []), SettingEventType.User);
-  message.success(`'${value}' has been added to the list.`);
+  const messageReactive = message.info(() =>
+    h(ActionMessage, {
+      content: `'${value}' has been added to the list.`,
+      action: 'Undo',
+      onClick: () => {
+        removeFromList(key, value);
+        messageReactive.destroy();
+      },
+    }),
+  );
+}
+
+function removeFromList<K extends keyof PickByValue<SettingValueType, string[]>>(key: K, value: string): void {
+  updateSettingFromStorage(key, (list) => list?.filter((v) => v !== value) || null, SettingEventType.User);
 }
 
 onUnmounted(() => dialogRef.value?.destroy());
