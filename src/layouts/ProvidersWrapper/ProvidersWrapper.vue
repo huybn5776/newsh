@@ -3,6 +3,7 @@
     <NMessageProvider
       placement="top-right"
       to=".page-content-container"
+      keepAliveOnHover
       :container-style="{ position: 'sticky', order: -1, width: '100%', transform: 'translate(-12px, 12px)' }"
     >
       <NDialogProvider>
