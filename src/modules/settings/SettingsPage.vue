@@ -29,23 +29,9 @@
 
     <div class="setting-section">
       <h3>Hidden news</h3>
-
-      <div class="setting-row">
-        <span>Sources: </span>
-        <NDynamicTags v-model:value="hiddenSources" />
-      </div>
-
-      <div class="setting-row">
-        <span>Url matches: </span>
-        <NDynamicTags v-model:value="hiddenUrlMatches" />
-      </div>
-
-      <div class="setting-row">
-        <span>Terms: </span>
-        <div class="setting-hidden-site-list">
-          <NDynamicTags v-model:value="excludeTerms" />
-        </div>
-      </div>
+      <TagsRow title="Sources" v-model:value="hiddenSources" />
+      <TagsRow title="Url matches" v-model:value="hiddenUrlMatches" />
+      <TagsRow title="Terms" v-model:value="excludeTerms" />
     </div>
 
     <div class="setting-section">
@@ -66,7 +52,7 @@
 <script lang="ts" setup>
 import { watch, ref } from 'vue';
 
-import { NButton, NDynamicTags, NSelect } from 'naive-ui';
+import { NButton, NSelect } from 'naive-ui';
 
 import { useBackupSettings } from '@compositions/use-backup-settings';
 import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
@@ -74,6 +60,7 @@ import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
 import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
+import TagsRow from '@modules/settings/components/TagsRow/TagsRow.vue';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@services/setting-service';
 import { distinctArray } from '@utils/array-utils';
 
