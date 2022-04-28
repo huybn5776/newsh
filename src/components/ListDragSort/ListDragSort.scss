@@ -1,0 +1,40 @@
+.drag-list-item-container {
+  transition: transform .3s;
+
+  .stop-interaction > &,
+  .item-in-dragging > &:not(.dragging-item) {
+    pointer-events: none;
+  }
+
+  &.dragging-item,
+  :not(.list-in-dragging):not(.stop-interaction) > &:hover {
+    > * {
+      background-color: rgba(#474747, .4);
+    }
+  }
+}
+
+.drag-list-item {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  transform-origin: 40px center;
+  transition: transform .3s;
+  user-select: none;
+
+  .dragging-item & {
+    transform: scale(1.05);
+  }
+}
+
+.drag-button {
+  width: 40px;
+  height: 100%;
+  padding: 0;
+  background: url('/src/assets/svg/drag.svg') no-repeat center;
+  border: 0;
+  cursor: ns-resize;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
