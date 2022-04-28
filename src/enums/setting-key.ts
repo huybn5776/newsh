@@ -52,7 +52,6 @@ export type AllowBackupSettings = Omit<
   | SettingKey.SeenNewsItems
   | SettingKey.LanguageAndRegion
   | SettingKey.LanguageAndRegionLabel
-  | SettingKey.AllTopicsInfo
   | SettingKey.HeadlineTopicId
   | SettingKey.RemoteSettingsSnapshot
   | SettingKey.RemoteSeenNewsSnapshot

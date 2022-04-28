@@ -26,6 +26,7 @@ import { useAutoSyncWithDropbox } from '@compositions/use-auto-sync-with-dropbox
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { SettingKey } from '@enums/setting-key';
 import { NewsItem } from '@interfaces/news-item';
+import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import NewsTopics from '@modules/news-list/components/NewsTopics/NewsTopics.vue';
 import NextTopicSelection from '@modules/news-list/components/NextTopicSelection/NextTopicSelection.vue';
@@ -38,6 +39,7 @@ import {
   removeYoutubeNews,
 } from '@modules/news-list/services/news-filter';
 import { getSettingFromStorage } from '@services/setting-service';
+import { isNotNilOrEmpty } from '@utils/object-utils';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
 const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);
@@ -65,9 +67,10 @@ const newsTopicList = computed(() => {
 });
 const completeLoaded = ref(false);
 
+const allNewsTopicInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
 const isMobile = useIsMobile();
 useProvideSeenNews();
-const { getSingleTopicNews, getMultiTopicNews, loadingTopics, isLoading } = useNewsRequest();
+const { getNews, getMultiTopicNews, loadingTopics, isLoading } = useNewsRequest();
 useAutoSyncWithDropbox();
 
 onMounted(async () => {
@@ -81,13 +84,16 @@ async function loadNews(): Promise<void> {
     throw new Error('News info is not ready.');
   }
 
-  const newsTopicsAfterTopStories = getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories);
+  const newsTopicsAfterTopStories = getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories)
+    ?.map((topicId) => allNewsTopicInfo?.find((topic) => topic.id === topicId))
+    .filter(isNotNilOrEmpty);
+
   newsLoaders.value = [
     () => getNonDuplicatedMultiNewsTopic('topStories'),
     () => getNonDuplicatedMultiNewsTopic('worldAndNation'),
     () => getNonDuplicatedMultiNewsTopic('others'),
     ...(newsTopicsAfterTopStories?.map((topic) => async () => {
-      loadedTopics.value = { ...loadedTopics.value, [topic]: true };
+      loadedTopics.value = { ...loadedTopics.value, [topic.id]: true };
       return [await getNonDuplicatedNewsTopic(topic)];
     }) || []),
   ];
@@ -126,8 +132,8 @@ async function getNonDuplicatedMultiNewsTopic(
   });
 }
 
-async function getNonDuplicatedNewsTopic(topicId: string): Promise<NewsTopicItem> {
-  let newsTopicItem = await getSingleTopicNews(topicId);
+async function getNonDuplicatedNewsTopic(topic: NewsTopicInfo): Promise<NewsTopicItem> {
+  let newsTopicItem = await getNews(topic);
   const allNewsUrl = getAllNewsUrl(newsTopics.value);
   newsTopicItem = { ...newsTopicItem, newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.has(news.url)) };
   newsTopicItem.newsItems.forEach((news) => {
@@ -169,7 +175,11 @@ async function loadMore(topicId: string): Promise<void> {
   if (!originalNewsTopicItem) {
     return;
   }
-  const newsItemsToAppend: NewsItem[] = (await getNonDuplicatedNewsTopic(topicId)).newsItems;
+  const topic = allNewsTopicInfo?.find((t) => t.id === topicId);
+  if (!topic) {
+    return;
+  }
+  const newsItemsToAppend: NewsItem[] = (await getNonDuplicatedNewsTopic(topic)).newsItems;
 
   const newTopicItems = [...newsTopics.value];
   newTopicItems[indexToAppend] = {
@@ -181,8 +191,12 @@ async function loadMore(topicId: string): Promise<void> {
 }
 
 async function appendTopic(topicId: string): Promise<void> {
+  const topic = allNewsTopicInfo?.find((t) => t.id === topicId);
+  if (!topic) {
+    return;
+  }
   loadedTopics.value = { ...loadedTopics.value, [topicId]: true };
-  const topicItem = await getNonDuplicatedNewsTopic(topicId);
+  const topicItem = await getNonDuplicatedNewsTopic(topic);
   newsTopics.value = [...newsTopics.value, topicItem];
 }
 </script>

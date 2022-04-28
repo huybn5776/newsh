@@ -1,0 +1,57 @@
+.news-topic-list {
+  width: 100%;
+  padding: 8px 0;
+}
+
+.news-topic-info-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 38px;
+  padding: 4px 0;
+  border-bottom: 1px solid #444;
+}
+
+.news-topic-name-input {
+  width: 100%;
+  height: 100%;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+
+  &:focus {
+    outline-color: dimgray;
+  }
+}
+
+.pencil-icon {
+  position: absolute;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  background-image: url('/src/assets/svg/pencil.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px 12px;
+  opacity: .3;
+
+  :hover > & {
+    opacity: .5;
+  }
+
+  :focus-within > & {
+    opacity: .1;
+  }
+}
+
+.remove-topic-button {
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  background-image: url('/src/assets/svg/close.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px 12px;
+}

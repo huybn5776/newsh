@@ -20,13 +20,14 @@
   }
 }
 
-.setting-select-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
+.setting-select-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .setting-select {
   max-width: 300px;
+  margin-right: auto;
 }
 
 .setting-link {

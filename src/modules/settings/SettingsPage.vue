@@ -10,7 +10,7 @@
         Use space key to expand currently hovered related news.
       </SwitchRow>
 
-      <div class="setting-row setting-select-row">
+      <div class="setting-row">
         <span>News topics after top stories:</span>
         <NSelect
           class="setting-select"
@@ -19,6 +19,10 @@
           :options="allTopicsSelection"
           v-model:value="newsTopicsAfterTopStories"
         />
+        <div class="setting-select-actions">
+          <NButton @click="openAddTopicDialog">Add</NButton>
+          <NButton @click="openManagementDialog">Management</NButton>
+        </div>
       </div>
 
       <div class="setting-row">
@@ -50,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, ref } from 'vue';
+import { watch, ref, computed } from 'vue';
 
 import { NButton, NSelect } from 'naive-ui';
 
@@ -61,12 +65,13 @@ import { SettingKey } from '@enums/setting-key';
 import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
 import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
 import TagsRow from '@modules/settings/components/TagsRow/TagsRow.vue';
+import { useNewsTopicManagement } from '@modules/settings/compositions/use-news-topic-management';
 import { deleteSettingFromStorage, getSettingFromStorage } from '@services/setting-service';
 import { distinctArray } from '@utils/array-utils';
 
-const allTopicsSelection = ref(
-  getSettingFromStorage(SettingKey.AllTopicsInfo)?.map((topic) => ({ label: topic.name, value: topic.id })),
-);
+const allTopicInfo = useSyncSettingMapUndefined(SettingKey.AllTopicsInfo);
+const allTopicsSelection = computed(() => allTopicInfo.value?.map((topic) => ({ label: topic.name, value: topic.id })));
+const { openAddTopicDialog, openManagementDialog } = useNewsTopicManagement();
 
 const filterOutYoutube = useSyncSettingMapUndefined(SettingKey.FilterOutYoutube);
 const newsTopicsAfterTopStories = useSyncSettingMapNullArray(SettingKey.NewsTopicsAfterTopStories);

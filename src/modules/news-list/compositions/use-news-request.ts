@@ -2,14 +2,18 @@ import { ref, computed, watch, Ref, readonly, DeepReadonly, onUnmounted, Compute
 
 import { useLoadingBar } from 'naive-ui';
 
-import { getSingleTopicNews, getMultiTopicNews } from '@api/google-news-api';
+import { getSingleTopicNews, getMultiTopicNews, getSectionTopicNews } from '@api/google-news-api';
+import { NewsTopicType } from '@enums/news-topic-type';
 import { SettingKey } from '@enums/setting-key';
+import { NewsTopicInfo } from '@interfaces/news-topic-info';
 import { NewsTopicItem } from '@interfaces/news-topic-item';
 import { getSettingFromStorage } from '@services/setting-service';
 
 export function useNewsRequest(): {
+  getNews: (topic: NewsTopicInfo) => Promise<NewsTopicItem>;
   getSingleTopicNews: (topic: Parameters<typeof getSingleTopicNews>[0]) => Promise<NewsTopicItem>;
   getMultiTopicNews: (topic: Parameters<typeof getMultiTopicNews>[0]) => Promise<NewsTopicItem[]>;
+  getSectionTopicNews: (topic: Parameters<typeof getSectionTopicNews>[0]) => Promise<NewsTopicItem>;
   loadingTopics: DeepReadonly<Ref<Record<string, true>>>;
   isLoading: ComputedRef<boolean>;
 } {
@@ -62,9 +66,34 @@ export function useNewsRequest(): {
     loadingBar.finish();
   });
 
+  const getSingleTopic = withPushLoadingTopic(withPushPendingRequest(withLanguageAndRegion(getSingleTopicNews)));
+  const getMultiTopic = withPushPendingRequest(withLanguageAndRegion(getMultiTopicNews));
+  const getSectionTopic = withPushPendingRequest(withLanguageAndRegion(getSectionTopicNews));
+  const getNews = async (topic: NewsTopicInfo): Promise<NewsTopicItem> => {
+    const newsTopicItem = await getNewsByType(topic);
+    newsTopicItem.name = topic.name;
+    return newsTopicItem;
+  };
+
+  function getNewsByType(topic: NewsTopicInfo): Promise<NewsTopicItem> {
+    if (!topic.type) {
+      return getSingleTopic(topic.id);
+    }
+    switch (topic.type) {
+      case NewsTopicType.SingleTopic:
+        return getSingleTopic(topic.id);
+      case NewsTopicType.SectionTopic:
+        return getSectionTopic(topic.id);
+      default:
+        return Promise.reject(new Error(`Invalid topic type: '${topic.type}'`));
+    }
+  }
+
   return {
-    getSingleTopicNews: withPushLoadingTopic(withPushPendingRequest(withLanguageAndRegion(getSingleTopicNews))),
-    getMultiTopicNews: withPushPendingRequest(withLanguageAndRegion(getMultiTopicNews)),
+    getNews,
+    getSingleTopicNews: getSingleTopic,
+    getMultiTopicNews: getMultiTopic,
+    getSectionTopicNews: getSectionTopic,
     loadingTopics: readonly(loadingTopics),
     isLoading,
   };
