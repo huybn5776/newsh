@@ -8,6 +8,17 @@
   border-top: 1px solid rgba(white, .1);
 }
 
+.next-topic-button {
+  display: flex;
+  width: 100%;
+
+  &:deep(> .n-button__content) {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .next-topic-header {
   margin: 0 0 16px 0;
 }
