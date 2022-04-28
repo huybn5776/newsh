@@ -1,4 +1,9 @@
-import { getMultiTopicNews } from '@api/google-news-api';
+import * as E from 'fp-ts/Either';
+import * as TE from 'fp-ts/TaskEither';
+import { TaskEither } from 'fp-ts/TaskEither';
+
+import { getMultiTopicNews, getSectionTopicNews, getTopicInfo, getSingleTopicNews } from '@api/google-news-api';
+import { NewsTopicType } from '@enums/news-topic-type';
 import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import { NewsTopicInfo } from '@interfaces/news-topic-info';
@@ -14,7 +19,11 @@ export async function prepareNewsInfo(languageAndRegion: string): Promise<void> 
     ])
   ).flatMap((topics) => topics);
 
-  const allTopicsInfo: NewsTopicInfo[] = topicItems.map((topicItem) => ({ id: topicItem.id, name: topicItem.name }));
+  const allTopicsInfo: NewsTopicInfo[] = topicItems.map((topicItem) => ({
+    id: topicItem.id,
+    name: topicItem.name,
+    type: NewsTopicType.SingleTopic,
+  }));
   saveSettingToStorage(SettingKey.AllTopicsInfo, allTopicsInfo, SettingEventType.Program);
 
   const [headlineTopic] = topicItems;
@@ -33,4 +42,70 @@ export function validateIsNewsInfoSettings(): boolean {
     languageAndRegion.length < 4 ||
     !languageAndRegion.includes(':')
   );
+}
+
+export function getPublicationIdAndSectionIdFromUrl(
+  urlString: string,
+): E.Either<string, { publicationId: string; sectionId: string; region: string | null }> {
+  const url = tryParseUrl(urlString);
+  if (!url) {
+    return E.left('Invalid URL.');
+  }
+  const urlSplits = url.pathname.split('/').filter((s) => s);
+  const [publicationPrefix, publicationId, , sectionId] = urlSplits;
+  if (urlSplits.length < 2 || publicationPrefix !== 'publications') {
+    return E.left(`Publication topic should start with '/publications'.`);
+  }
+  const topicId = sectionId || publicationId;
+  const allTopics = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
+  const existingTopic = allTopics.find((topic) => topic.id === topicId);
+  if (existingTopic) {
+    return E.left(`Topic '${existingTopic.name}' is already exists.`);
+  }
+  const region = url.searchParams.get('ceid');
+  return E.right({ publicationId, sectionId, region });
+}
+
+export function tryGetNewsItem(
+  publicationId: string,
+  sectionId: string,
+  region: string,
+): TaskEither<string, NewsTopicInfo> {
+  return TE.tryCatch(
+    async () =>
+      (sectionId && (await fetchSectionTopicInfo(publicationId, sectionId, region))) ||
+      (publicationId && (await fetchSingleTopicInfo(publicationId, region))) ||
+      Promise.reject(),
+    () => 'Fail to get news from this url.',
+  );
+}
+
+async function fetchSingleTopicInfo(publicationId: string, region: string): Promise<NewsTopicInfo> {
+  const newsTopicItem = await getSingleTopicNews(publicationId, region);
+  return {
+    id: publicationId,
+    type: NewsTopicType.SingleTopic,
+    name: newsTopicItem.name,
+    isCustomTopic: true,
+  };
+}
+
+async function fetchSectionTopicInfo(publicationId: string, sectionId: string, region: string): Promise<NewsTopicInfo> {
+  const sectionTopic = await getSectionTopicNews(sectionId, region);
+  const publicationTopicInfo = await getTopicInfo(publicationId, region);
+  return {
+    id: sectionId,
+    type: NewsTopicType.SectionTopic,
+    name: `${publicationTopicInfo.name} - ${sectionTopic.name}`,
+    sectionName: sectionTopic.name,
+    isCustomTopic: true,
+  };
+}
+
+function tryParseUrl(url: string): URL | null {
+  try {
+    return new URL(url);
+  } catch {
+    return null;
+  }
 }

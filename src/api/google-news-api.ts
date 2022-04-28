@@ -27,6 +27,24 @@ function requestBodyByTopic(topicId: string, languageAndRegion: string): [string
   ];
 }
 
+function topicInfoBody(topicId: string, languageAndRegion: string): string[][] {
+  return [
+    [
+      'YOVgSd',
+      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"${languageAndRegion}",null,480],"${topicId}"]`,
+    ],
+  ];
+}
+
+function sectionRequestBody(topicId: string, languageAndRegion: string): string[][] {
+  return [
+    [
+      'gdtgie',
+      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"${languageAndRegion}"],"${topicId}"]`,
+    ],
+  ];
+}
+
 const multiTopicRequestCode = {
   topStories: 'A3Zed',
   worldAndNation: 'xBjcpf',
@@ -44,14 +62,35 @@ export async function getSingleTopicNews(topicId: string, languageAndRegion: str
     responseArray.find((array: string[]) => array[1] === 'YOVgSd')?.[2] || '[]',
   )[1][1] as NewsObjectRaw;
 
-  const responseType = newsArray[0];
-  if (responseType !== NewsObjectType.SingleTopic) {
-    throw new Error(`Incorrect response type, expect '${topicId}' to have single topics response.`);
-  }
   const newsTopicObject = newsArray as NewsObjectRaw;
   const newsTopicItem = { ...parseNewsTopic(newsTopicObject), isPartial: false };
   newsTopicItem.name = infoArray?.[2] || newsTopicItem.name;
   return newsTopicItem;
+}
+
+export async function getSectionTopicNews(topicId: string, languageAndRegion: string): Promise<NewsTopicItem> {
+  const requestBody = sectionRequestBody(topicId, languageAndRegion);
+  const responseArray = await fetchNews(requestBody);
+  const newsArray = JSON.parse(
+    responseArray.find((array: string[]) => array[1] === 'gdtgie')?.[2] || '[]',
+  )[1][2] as NewsObjectRaw;
+
+  return {
+    id: newsArray[1][1],
+    name: newsArray[2],
+    newsItems: (newsArray[3] as []).map((array) => parseNewsItem(array[3])),
+    isPartial: false,
+  };
+}
+
+export async function getTopicInfo(topicId: string, languageAndRegion: string): Promise<Partial<NewsTopicItem>> {
+  const requestBody = topicInfoBody(topicId, languageAndRegion);
+  const responseArray = await fetchNews(requestBody);
+  const infoArray = JSON.parse(
+    responseArray.find((array: string[]) => array[1] === 'YOVgSd')?.[2] || '[]',
+  )[1][1] as NewsObjectRaw;
+  const topicName: string | undefined = infoArray?.[2];
+  return { name: topicName };
 }
 
 export async function getMultiTopicNews(
