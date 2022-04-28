@@ -1,6 +1,6 @@
-import { ref, h } from 'vue';
+import { ref, h, watch, RendererElement, RendererNode, VNode } from 'vue';
 
-import { useDialog, DialogReactive, DialogOptions, NInput } from 'naive-ui';
+import { useDialog, DialogReactive, DialogOptions, NInput, InputProps } from 'naive-ui';
 
 import { listenForKeyOnce, listenForKey } from '@utils/keyboard-event-utils';
 
@@ -11,7 +11,7 @@ export function useInputDialog(): {
       value: string;
       inputType?: 'text' | 'textarea';
       minRows?: number;
-      beforeClose?: (value: string) => boolean | void;
+      beforeClose?: (value: string) => (boolean | void) | Promise<boolean | void>;
       onValue?: (value: string) => void;
     } & DialogOptions,
   ) => DialogReactive;
@@ -20,13 +20,43 @@ export function useInputDialog(): {
   const dialog = useDialog();
   const dialogRef = ref<DialogReactive>();
   const inputValue = ref<string>('');
+  const loading = ref(false);
+  const isInvalid = ref(false);
+
+  let inputVNode: VNode<RendererNode, RendererElement, InputProps> | undefined;
+
+  watch(
+    () => loading.value,
+    () => {
+      if (dialogRef.value) {
+        dialogRef.value.loading = loading.value;
+      }
+      if (inputVNode?.props) {
+        inputVNode.props.loading = loading.value;
+      }
+    },
+  );
 
   return {
     open: ({ placeholder, value, inputType, minRows, onValue, beforeClose, ...options }) => {
       inputValue.value = value;
 
-      const submit = (): boolean => {
-        if (beforeClose?.(inputValue.value) === false) {
+      const beforeSubmitCheck = async (): Promise<boolean | void> => {
+        const beforeCloseResult = beforeClose?.(inputValue.value);
+        let canClose: boolean | void;
+        if (beforeCloseResult instanceof Promise) {
+          loading.value = true;
+          canClose = await beforeCloseResult;
+          loading.value = false;
+        } else {
+          canClose = beforeCloseResult;
+        }
+        return canClose;
+      };
+
+      const submit = async (): Promise<boolean> => {
+        if ((await beforeSubmitCheck()) === false) {
+          isInvalid.value = true;
           return false;
         }
         removeEnterListener();
@@ -37,9 +67,15 @@ export function useInputDialog(): {
 
       const removeEnterListener = listenForKey(
         (event) => event.key === 'Enter' && (inputType === 'textarea' ? event.metaKey || event.ctrlKey : true),
-        submit,
+        (event) => {
+          event.preventDefault();
+          submit();
+        },
       );
-      const removeEscapeListener = listenForKeyOnce('Escape', () => dialogRef.value?.destroy());
+      const removeEscapeListener = listenForKeyOnce('Escape', () => {
+        removeKeydownListeners();
+        dialogRef.value?.destroy();
+      });
       const removeKeydownListeners = (): void => {
         removeEnterListener();
         removeEscapeListener();
@@ -54,6 +90,8 @@ export function useInputDialog(): {
             style: { marginTop: '8px', maxHeight: `calc(90vh - ${16 + 28 + 8 + 16 + 28 + 20 + 10}px)` },
             type: inputType,
             autosize: inputType === 'textarea' ? { minRows } : false,
+            disabled: loading.value,
+            status: isInvalid.value === true ? 'error' : undefined,
           }),
         negativeText: 'Close',
         positiveText: 'Ok',
