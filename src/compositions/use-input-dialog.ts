@@ -10,6 +10,7 @@ export function useInputDialog(): {
       placeholder: string;
       value: string;
       inputType?: 'text' | 'textarea';
+      minRows?: number;
       beforeClose?: (value: string) => boolean | void;
       onValue?: (value: string) => void;
     } & DialogOptions,
@@ -21,7 +22,7 @@ export function useInputDialog(): {
   const inputValue = ref<string>('');
 
   return {
-    open: ({ placeholder, value, inputType, onValue, beforeClose, ...options }) => {
+    open: ({ placeholder, value, inputType, minRows, onValue, beforeClose, ...options }) => {
       inputValue.value = value;
 
       const submit = (): boolean => {
@@ -52,7 +53,7 @@ export function useInputDialog(): {
             'onUpdate-value': (newValue: string) => (inputValue.value = newValue),
             style: { marginTop: '8px', maxHeight: `calc(90vh - ${16 + 28 + 8 + 16 + 28 + 20 + 10}px)` },
             type: inputType,
-            autosize: inputType === 'textarea',
+            autosize: inputType === 'textarea' ? { minRows } : false,
           }),
         negativeText: 'Close',
         positiveText: 'Ok',
