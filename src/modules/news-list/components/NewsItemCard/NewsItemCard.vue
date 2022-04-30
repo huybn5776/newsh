@@ -8,7 +8,7 @@
         class="news-link main-news-link"
         target="_blank"
         v-intersection="{ enter: () => onNewsEnter(news), leave: () => onNewsLeave(news) }"
-        :class="{ 'seen-news': seenNewsUrlMap[news.url], 'single-news': !hasRelatedNews }"
+        :class="{ 'seen-news': newsItemSeen, 'single-news': !hasRelatedNews }"
       >
         <h3 class="news-title">{{ news.title }}</h3>
         <NewsInfoBar :news="news" />
@@ -27,7 +27,7 @@
             leave: () => onNewsLeave(relatedNews),
           }"
           :href="relatedNews.url"
-          :class="{ 'seen-news': seenNewsUrlMap[relatedNews.url] }"
+          :class="{ 'seen-news': relatedNewsItemSeen[index] }"
         >
           <div class="related-news-container">
             <h4 class="related-news-title">{{ relatedNews.title }}</h4>
@@ -58,6 +58,7 @@ import { NewsItem } from '@interfaces/news-item';
 import Image from '@modules/news-list/components/Image/Image.vue';
 import NewsInfoBar from '@modules/news-list/components/NewsInfoBar/NewsInfoBar.vue';
 import { useMarkNewsAsSeen } from '@modules/news-list/compositions/use-mark-news-as-seen';
+import { isNewsItemExists } from '@modules/news-list/services/news-filter-service';
 import { injectStrict } from '@utils/inject-utils';
 
 const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();
@@ -65,7 +66,7 @@ const emits = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean
 const vIntersection = intersectionDirectiveFactory({ threshold: 1 });
 
 const hideSeenNewsEnabled = inject(provideHiddenSeenNewsSettingKey);
-const seenNewsUrlMap = injectStrict(provideSeenNewsInjectKey);
+const seenNewsIndex = injectStrict(provideSeenNewsInjectKey);
 
 const expanded = ref(props.relatedExpanded || false);
 const expandedDirection = computed<'up' | 'down'>(() => (expanded.value ? 'up' : 'down'));
@@ -75,7 +76,12 @@ const expandable = computed(
   () => hasRelatedNews.value && ((props.news.relatedNewsItems?.length || 0) > 1 || isMobile.value),
 );
 
-const markNewsSeenCallback = useMarkNewsAsSeen(seenNewsUrlMap);
+const newsItemSeen = computed(() => isNewsItemExists(seenNewsIndex.value, props.news));
+const relatedNewsItemSeen = computed(() =>
+  (props.news.relatedNewsItems || []).map((news) => isNewsItemExists(seenNewsIndex.value, news)),
+);
+
+const markNewsSeenCallback = useMarkNewsAsSeen(seenNewsIndex);
 
 watch(
   () => props.relatedExpanded,

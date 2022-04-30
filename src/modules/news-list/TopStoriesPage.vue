@@ -36,8 +36,9 @@ import {
   removeByNewsSource,
   removeByNewsUrlMatch,
   removeByTerms,
+  removeDuplicatedNewsItemOfTopics,
   removeYoutubeNews,
-} from '@modules/news-list/services/news-filter';
+} from '@modules/news-list/services/news-filter-service';
 import { getSettingFromStorage } from '@services/setting-service';
 import { isNotNilOrEmpty } from '@utils/object-utils';
 
@@ -116,42 +117,12 @@ async function getNonDuplicatedMultiNewsTopic(
   topicId: Parameters<typeof getMultiTopicNews>[0],
 ): Promise<NewsTopicItem[]> {
   const newsTopicItems = await getMultiTopicNews(topicId);
-  const allNewsUrl = getAllNewsUrl(newsTopics.value);
-
-  return newsTopicItems.map((newsTopicItem) => {
-    const filteredTopicItem = {
-      ...newsTopicItem,
-      newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.has(news.url)),
-    };
-    newsTopicItem.newsItems.forEach((news) => {
-      // eslint-disable-next-line no-param-reassign
-      news.relatedNewsItems = news.relatedNewsItems?.filter((n) => !allNewsUrl.has(n.url)) || undefined;
-    });
-    getAllNewsUrl([newsTopicItem]).forEach((url) => allNewsUrl.add(url));
-    return filteredTopicItem;
-  });
+  return removeDuplicatedNewsItemOfTopics(newsTopics.value, newsTopicItems);
 }
 
 async function getNonDuplicatedNewsTopic(topic: NewsTopicInfo): Promise<NewsTopicItem> {
-  let newsTopicItem = await getNews(topic);
-  const allNewsUrl = getAllNewsUrl(newsTopics.value);
-  newsTopicItem = { ...newsTopicItem, newsItems: newsTopicItem.newsItems.filter((news) => !allNewsUrl.has(news.url)) };
-  newsTopicItem.newsItems.forEach((news) => {
-    // eslint-disable-next-line no-param-reassign
-    news.relatedNewsItems = news.relatedNewsItems?.filter((n) => !allNewsUrl.has(n.url)) || undefined;
-  });
-  return newsTopicItem;
-}
-
-function getAllNewsUrl(newsTopicItems: NewsTopicItem[]): Set<string> {
-  return new Set<string>(
-    newsTopicItems.flatMap((topic) => [
-      ...topic.newsItems.map((news) => news.url),
-      ...topic.newsItems.flatMap((news) =>
-        ((news.relatedNewsItems || []) as NewsItem[]).map((relatedNews) => relatedNews.url),
-      ),
-    ]),
-  );
+  const newsTopicItem = await getNews(topic);
+  return removeDuplicatedNewsItemOfTopics(newsTopics.value, [newsTopicItem])[0];
 }
 
 async function onNewsTopicEnter(id: string): Promise<void> {

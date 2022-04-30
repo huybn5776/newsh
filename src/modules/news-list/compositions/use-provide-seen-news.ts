@@ -5,7 +5,8 @@ import { useMitt } from '@compositions/use-mitt';
 import { EventKey } from '@enums/event-key';
 import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
-import { SeenNewsItem } from '@interfaces/seen-news-item';
+import { NewsIndex } from '@interfaces/news-index';
+import { createNewsIndex } from '@modules/news-list/services/news-filter-service';
 import {
   trimSeenNewsItems,
   updateSettingFromStorage,
@@ -18,11 +19,11 @@ export function useProvideSeenNews(): void {
 
   const hideSeenNewsEnabled = getSettingFromStorage(SettingKey.HideSeenNews);
   const seenNewsItems = getSettingFromStorage(SettingKey.SeenNewsItems);
-  const seenNewsUrlMap = ref<Record<string, boolean>>(seenNewsItemsToMap(seenNewsItems || []));
+  const seenNewsIndex = ref<NewsIndex>(createNewsIndex(seenNewsItems || []));
 
   onEvent(EventKey.RemoteSeenNews, (items) => {
     const mergedSeenNewsItems = mergeSeenNews(seenNewsItems || [], items);
-    seenNewsUrlMap.value = seenNewsItemsToMap(mergedSeenNewsItems);
+    seenNewsIndex.value = createNewsIndex(mergedSeenNewsItems);
   });
 
   onMounted(() => {
@@ -32,11 +33,5 @@ export function useProvideSeenNews(): void {
   });
 
   provide(provideHiddenSeenNewsSettingKey, hideSeenNewsEnabled);
-  provide(provideSeenNewsInjectKey, seenNewsUrlMap);
-}
-
-function seenNewsItemsToMap(seenNewsItems: SeenNewsItem[]): Record<string, boolean> {
-  const seenUrlMap: Record<string, boolean> = {};
-  seenNewsItems.forEach((newsItem) => (seenUrlMap[newsItem.url] = true));
-  return seenUrlMap;
+  provide(provideSeenNewsInjectKey, seenNewsIndex);
 }

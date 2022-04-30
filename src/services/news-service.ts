@@ -80,6 +80,17 @@ export function tryGetNewsItem(
   );
 }
 
+export function trimNewsTitle(title: string): string {
+  let separatorIndex = title.indexOf('|');
+  if (separatorIndex === -1) {
+    separatorIndex = title.indexOf('｜');
+  }
+  if (separatorIndex === -1) {
+    return title.trim();
+  }
+  return title.substring(0, separatorIndex).trim();
+}
+
 async function fetchSingleTopicInfo(publicationId: string, region: string): Promise<NewsTopicInfo> {
   const newsTopicItem = await getSingleTopicNews(publicationId, region);
   return {
