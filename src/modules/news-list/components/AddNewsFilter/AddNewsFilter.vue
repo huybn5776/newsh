@@ -1,0 +1,69 @@
+<template>
+  <!--suppress JSValidateTypes -->
+  <NRadioGroup v-model:value="selectedFilterType" class="news-filter-type">
+    <NRadio v-for="type in types" :key="type.value" :value="type.value">{{ type.label }}</NRadio>
+  </NRadioGroup>
+  <!--suppress JSValidateTypes -->
+  <NInput class="news-filter-input" v-model:value="filterValue" type="textarea" autosize />
+  <div class="error-message-container" :style="{ visibility: errorMessage ? undefined : 'collapse' }">
+    <i class="error-icon" />
+    <span>{{ errorMessage }}</span>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { watch, onMounted, ref } from 'vue';
+
+import { NRadio, NRadioGroup, NInput } from 'naive-ui';
+
+import { NewsFilterType } from '@enums/news-filter-type';
+import { NewsItem } from '@interfaces/news-item';
+
+const props = defineProps<{ news: NewsItem; type: NewsFilterType; value: string; errorMessage: string }>();
+const emits = defineEmits<{
+  (e: 'update:type', value: NewsFilterType): void;
+  (e: 'update:value', value: string): void;
+}>();
+
+const types: { value: NewsFilterType; label: string }[] = [
+  { value: NewsFilterType.Term, label: 'Exclude term' },
+  { value: NewsFilterType.Domain, label: 'Domain' },
+  { value: NewsFilterType.Publication, label: 'Publication' },
+];
+const selectedFilterType = ref(props.type);
+const filterValue = ref(props.value);
+
+onMounted(updateFilterValue);
+watch(
+  () => selectedFilterType.value,
+  () => {
+    updateFilterValue();
+    emits('update:type', selectedFilterType.value);
+  },
+);
+watch(
+  () => filterValue.value,
+  () => emits('update:value', filterValue.value),
+);
+
+function updateFilterValue(): void {
+  filterValue.value = getFilterValueByType();
+}
+
+function getFilterValueByType(): string {
+  switch (selectedFilterType.value) {
+    case NewsFilterType.Domain:
+      return new URL(props.news.url)?.host;
+    case NewsFilterType.Publication:
+      return props.news.publication;
+    case NewsFilterType.Term:
+      return props.news.title;
+    default:
+      return '';
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@import './AddNewsFilter';
+</style>
