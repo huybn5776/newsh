@@ -1,8 +1,10 @@
 import { ref, h, watch, RendererElement, RendererNode, VNode } from 'vue';
 
 import { useDialog, DialogReactive, DialogOptions, NInput, InputProps } from 'naive-ui';
+import { takeUntil, Subject } from 'rxjs';
 
-import { listenForKeyOnce, listenForKey } from '@utils/keyboard-event-utils';
+import { useHotkey } from '@compositions/use-hotkey';
+import { wrapOnDialogCloseEvents } from '@utils/dialog-utils';
 
 export function useInputDialog(): {
   open: (
@@ -18,10 +20,14 @@ export function useInputDialog(): {
   onConfirm?: (value: string) => void;
 } {
   const dialog = useDialog();
+  const { listenForKey } = useHotkey();
+
   const dialogRef = ref<DialogReactive>();
   const inputValue = ref<string>('');
   const loading = ref(false);
   const isInvalid = ref(false);
+
+  const dialogClosed$$ = new Subject<void>();
 
   let inputVNode: VNode<RendererNode, RendererElement, InputProps> | undefined;
 
@@ -59,27 +65,24 @@ export function useInputDialog(): {
           isInvalid.value = true;
           return false;
         }
-        removeEnterListener();
+        unsubscribeHotkeys();
         onValue?.(inputValue.value);
         dialogRef.value?.destroy();
         return true;
       };
 
-      const removeEnterListener = listenForKey(
+      listenForKey(
         (event) => event.key === 'Enter' && (inputType === 'textarea' ? event.metaKey || event.ctrlKey : true),
-        (event) => {
+      )
+        .pipe(takeUntil(dialogClosed$$))
+        .subscribe((event) => {
           event.preventDefault();
           submit();
-        },
-      );
-      const removeEscapeListener = listenForKeyOnce('Escape', () => {
-        removeKeydownListeners();
-        dialogRef.value?.destroy();
-      });
-      const removeKeydownListeners = (): void => {
-        removeEnterListener();
-        removeEscapeListener();
-      };
+        });
+
+      function unsubscribeHotkeys(): void {
+        dialogClosed$$.next(undefined);
+      }
 
       dialogRef.value = dialog.info({
         content: () =>
@@ -96,11 +99,9 @@ export function useInputDialog(): {
         negativeText: 'Close',
         positiveText: 'Ok',
         onPositiveClick: submit,
-        onNegativeClick: () => removeKeydownListeners(),
-        onMaskClick: () => removeKeydownListeners(),
-        onClose: () => removeKeydownListeners(),
         ...options,
       });
+      wrapOnDialogCloseEvents(dialogRef.value, unsubscribeHotkeys);
       return dialogRef.value;
     },
   };
