@@ -5,7 +5,10 @@
       <h3>General settings</h3>
 
       <SwitchRow v-model:value="filterOutYoutube">Filter out youtube news.</SwitchRow>
-      <SwitchRow v-model:value="hideSeenNews">Gray out the news that seen within two days.</SwitchRow>
+      <SwitchRow v-model:value="hideSeenNews">
+        Gray out the news that seen within days:
+        <SettingDaysInput v-model="hideSeenNewsInDays" :disabled="!hideSeenNews" />
+      </SwitchRow>
       <SwitchRow v-model:value="spaceKeyToExpandRelated">
         Use space key to expand currently hovered related news.
       </SwitchRow>
@@ -63,6 +66,7 @@ import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@composi
 import { SettingEventType } from '@enums/setting-event-type';
 import { SettingKey } from '@enums/setting-key';
 import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
+import SettingDaysInput from '@modules/settings/components/SettingDaysInput/SettingDaysInput.vue';
 import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
 import TagsRow from '@modules/settings/components/TagsRow/TagsRow.vue';
 import { useNewsTopicManagement } from '@modules/settings/compositions/use-news-topic-management';
@@ -77,6 +81,7 @@ const filterOutYoutube = useSyncSettingMapUndefined(SettingKey.FilterOutYoutube)
 const newsTopicsAfterTopStories = useSyncSettingMapNullArray(SettingKey.NewsTopicsAfterTopStories);
 const languageAndRegionLabel = ref(getSettingFromStorage(SettingKey.LanguageAndRegionLabel));
 const hideSeenNews = useSyncSettingMapUndefined(SettingKey.HideSeenNews);
+const hideSeenNewsInDays = useSyncSettingMapUndefined(SettingKey.HideSeenNewsInDays);
 const spaceKeyToExpandRelated = useSyncSettingMapUndefined(SettingKey.SpaceKeyToExpandRelated);
 const hiddenSources = useSyncSettingMapNullArray(SettingKey.HiddenSources, mapArrayValue);
 const hiddenUrlMatches = useSyncSettingMapNullArray(SettingKey.HiddenUrlMatches, mapArrayValue);

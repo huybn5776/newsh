@@ -6,6 +6,7 @@ export enum SettingKey {
   CollapsedTopics = 'collapsedTopics',
   FilterOutYoutube = 'filterOutYoutube',
   HideSeenNews = 'hideSeenNews',
+  HideSeenNewsInDays = 'hideSeenNewsInDays',
   SpaceKeyToExpandRelated = 'spaceKeyToExpandRelated',
   SeenNewsItems = 'seenNewsItems',
   /**
@@ -30,6 +31,7 @@ export type SettingValueType = {
   [SettingKey.CollapsedTopics]: string[];
   [SettingKey.FilterOutYoutube]: boolean;
   [SettingKey.HideSeenNews]: boolean;
+  [SettingKey.HideSeenNewsInDays]: number;
   [SettingKey.SpaceKeyToExpandRelated]: boolean;
   [SettingKey.SeenNewsItems]: SeenNewsItem[];
   [SettingKey.HiddenSources]: string[];

@@ -104,6 +104,7 @@ export function getSettingValues(): Partial<AllowBackupSettings> {
     collapsedTopics: getSettingFromStorage(SettingKey.CollapsedTopics),
     filterOutYoutube: getSettingFromStorage(SettingKey.FilterOutYoutube),
     hideSeenNews: getSettingFromStorage(SettingKey.HideSeenNews),
+    hideSeenNewsInDays: getSettingFromStorage(SettingKey.HideSeenNewsInDays),
     spaceKeyToExpandRelated: getSettingFromStorage(SettingKey.SpaceKeyToExpandRelated),
     hiddenSources: getSettingFromStorage(SettingKey.HiddenSources),
     hiddenUrlMatches: getSettingFromStorage(SettingKey.HiddenUrlMatches),
@@ -121,6 +122,7 @@ const allowBackupSettingsObject: { [key in keyof AllowBackupSettings]: true } = 
   [SettingKey.CollapsedTopics]: true,
   [SettingKey.FilterOutYoutube]: true,
   [SettingKey.HideSeenNews]: true,
+  [SettingKey.HideSeenNewsInDays]: true,
   [SettingKey.SpaceKeyToExpandRelated]: true,
   [SettingKey.HiddenSources]: true,
   [SettingKey.HiddenUrlMatches]: true,
@@ -145,7 +147,9 @@ export function trimSeenNewsItems(seenNewsItems: SeenNewsItem[] | undefined | nu
   }
   const now = Date.now();
   const millisecondsPerDay = 24 * 60 * 60 * 1000;
-  return seenNewsItems?.filter((seenNews) => now - seenNews.seenAt < millisecondsPerDay * 2);
+  const days = getSettingFromStorage(SettingKey.HideSeenNewsInDays);
+  const durationInMilli = (days || 2) * millisecondsPerDay;
+  return seenNewsItems?.filter((seenNews) => now - seenNews.seenAt < durationInMilli);
 }
 
 type SettingEvolve = Record<keyof AllowBackupSettings, (v: unknown) => object | undefined>;
@@ -160,6 +164,7 @@ export function validateSettings(settingValue: Partial<AllowBackupSettings>): Se
     collapsedTopics: validate((v) => Array.isArray(v)),
     filterOutYoutube: validate((v) => typeof v === 'boolean'),
     hideSeenNews: validate((v) => typeof v === 'boolean'),
+    hideSeenNewsInDays: validate((v) => typeof v === 'number'),
     spaceKeyToExpandRelated: validate((v) => typeof v === 'boolean'),
     hiddenSources: validate((v) => Array.isArray(v)),
     hiddenUrlMatches: validate((v) => Array.isArray(v)),
