@@ -1,24 +1,26 @@
 <template>
   <div class="setting-row">
     <span>{{ title }}: </span>
-    <NDynamicTags :value="tagsRef" @update:value="onTagsUpdate" />
+    <NDynamicTags v-model:value="tagsRef" @update:value="onTagsUpdate" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useVModel } from '@vueuse/core';
+import { ref } from 'vue';
+
 import { NDynamicTags, useMessage } from 'naive-ui';
 
 const props = defineProps<{ title: string; value?: string[] }>();
 const emits = defineEmits<{ (e: 'update:value', value: string[]): void }>();
 
 const message = useMessage();
-const tagsRef = useVModel(props, 'value', emits);
+const tagsRef = ref(props.value);
 
 function onTagsUpdate(newTags: string[]): void {
   const isAddingTag = newTags.length > (tagsRef.value?.length || 0);
   if (!isAddingTag) {
     tagsRef.value = newTags;
+    emits('update:value', newTags);
     return;
   }
   const lastIndex = newTags.length - 1;
@@ -28,6 +30,7 @@ function onTagsUpdate(newTags: string[]): void {
     return;
   }
   tagsRef.value = [...newTag].splice(lastIndex, lastIndex, newTag);
+  emits('update:value', newTags);
 }
 </script>
 
