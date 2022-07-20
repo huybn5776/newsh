@@ -23,6 +23,7 @@ export default defineConfig({
     alias: readAliasFromTsConfig(),
   },
   server: {
+    port: 3000,
     proxy: {
       '/news.google.com': {
         target: 'https://news.google.com',
