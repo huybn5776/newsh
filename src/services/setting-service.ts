@@ -1,6 +1,6 @@
 import { diff } from 'fast-array-diff';
 import equal from 'fast-deep-equal';
-import { isNil, evolve, groupBy, sortBy, omit } from 'ramda';
+import { isNil, evolve, groupBy, sortBy, omit, prop } from 'ramda';
 import { ValuesType } from 'utility-types';
 
 import { EventKey } from '@enums/event-key';
@@ -16,7 +16,7 @@ import {
 } from '@services/dropbox-sync-service';
 import { emitter } from '@services/emitter-service';
 import { distinctArray } from '@utils/array-utils';
-import { deleteNilProperties, isNilOrEmpty } from '@utils/object-utils';
+import { deleteNilProperties, isNilOrEmpty, equalOrBothNilOrEmpty } from '@utils/object-utils';
 import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@utils/storage-utils';
 import { NullableProps } from '@utils/type-utils';
 
@@ -113,6 +113,7 @@ export function getSettingValues(): Partial<AllowBackupSettings> {
     newsTopicsAfterTopStories: getSettingFromStorage(SettingKey.NewsTopicsAfterTopStories),
     dropboxToken: getSettingFromStorage(SettingKey.DropboxToken),
     autoSyncWithDropbox: getSettingFromStorage(SettingKey.AutoSyncWithDropbox),
+    syncUpdateNotify: getSettingFromStorage(SettingKey.SyncUpdateNotify),
     lastModifyTimes: getSettingFromStorage(SettingKey.LastModifyTimes),
   };
   return deleteNilProperties(settingValues);
@@ -131,6 +132,7 @@ const allowBackupSettingsObject: { [key in keyof AllowBackupSettings]: true } = 
   [SettingKey.NewsTopicsAfterTopStories]: true,
   [SettingKey.DropboxToken]: true,
   [SettingKey.AutoSyncWithDropbox]: true,
+  [SettingKey.SyncUpdateNotify]: true,
   [SettingKey.LastModifyTimes]: true,
 };
 export const allowBackupSettingKeys = Object.keys(allowBackupSettingsObject) as SettingKey[];
@@ -173,6 +175,7 @@ export function validateSettings(settingValue: Partial<AllowBackupSettings>): Se
     newsTopicsAfterTopStories: validate((v) => Array.isArray(v)),
     dropboxToken: validate((v) => typeof (v as Partial<DropboxTokenInfo>).accessToken === 'string'),
     autoSyncWithDropbox: validate((v) => typeof v === 'boolean'),
+    syncUpdateNotify: validate((v) => typeof v === 'boolean'),
     lastModifyTimes: validate((v) => typeof v === 'object'),
   };
   const errors = evolve(transformations, settingValue);
@@ -251,10 +254,14 @@ function createArrayDiffPatcher(
   };
 }
 
-export async function syncSettingValues(): Promise<void> {
+export async function syncSettingValues(): Promise<{
+  localSettings: Partial<AllowBackupSettings>;
+  mergedSettings: Partial<SettingValueType>;
+  remoteSettings: Partial<SettingValueType>;
+} | null> {
   const remoteSettings = await getSettingValuesFromDropbox();
   if (!remoteSettings) {
-    return;
+    return null;
   }
   const localSettings = omit([SettingKey.DropboxToken], getSettingValues());
   const mergedSettings = mergeSettings(localSettings, remoteSettings);
@@ -267,12 +274,18 @@ export async function syncSettingValues(): Promise<void> {
   } else {
     saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, remoteSettings, SettingEventType.Sync);
   }
+
+  return { localSettings, remoteSettings, mergedSettings };
 }
 
-export async function syncSeenNews(): Promise<void> {
+export async function syncSeenNews(): Promise<{
+  localSeenNews: SeenNewsItem[];
+  remoteSeenNews: SeenNewsItem[];
+  mergedSeenNews: SeenNewsItem[];
+} | null> {
   let remoteSeenNews = await getSeenNewsFromDropbox();
   if (!remoteSeenNews) {
-    return;
+    return null;
   }
   remoteSeenNews = trimSeenNewsItems(remoteSeenNews);
 
@@ -289,6 +302,8 @@ export async function syncSeenNews(): Promise<void> {
     saveSettingToStorage(SettingKey.SeenNewsItems, mergedSeenNews, SettingEventType.Sync);
     emitter.emit(EventKey.RemoteSeenNews, remoteSeenNews);
   }
+
+  return { localSeenNews, remoteSeenNews, mergedSeenNews };
 }
 
 export async function loadSettingsFromDropbox(): Promise<void> {
@@ -318,6 +333,18 @@ export async function uploadSettingsToDropbox(settings: Partial<SettingValueType
   const settingsWithoutDropboxToken = omit([SettingKey.DropboxToken], settings);
   await saveSettingsToDropbox(settingsWithoutDropboxToken);
   saveSettingToStorage(SettingKey.RemoteSettingsSnapshot, settingsWithoutDropboxToken, SettingEventType.User);
+}
+
+export function calcChangedSettings(
+  settings1: Partial<SettingValueType>,
+  settings2: Partial<SettingValueType>,
+): number {
+  return allowBackupSettingKeys.filter((key) => !equalOrBothNilOrEmpty(settings1[key], settings2[key])).length;
+}
+
+export function calcAddedSeenNews(localSeenNews: SeenNewsItem[], remoteSeenNews: SeenNewsItem[]): number {
+  const local = new Set<string>(localSeenNews.map(prop('url')));
+  return remoteSeenNews.filter((seenNews) => !local.has(seenNews.url)).length;
 }
 
 function toSettingsCompare(

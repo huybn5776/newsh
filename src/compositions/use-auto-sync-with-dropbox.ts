@@ -1,7 +1,7 @@
 import { onMounted } from 'vue';
 
 import { useDebounceFn } from '@vueuse/core';
-import { useMessage } from 'naive-ui';
+import { useNotification, useMessage } from 'naive-ui';
 
 import { useMitt } from '@compositions/use-mitt';
 import { SettingKey } from '@enums/setting-key';
@@ -13,7 +13,10 @@ import {
   syncSeenNews,
   getSettingValues,
   uploadSettingsToDropbox,
+  calcChangedSettings,
+  calcAddedSeenNews,
 } from '@services/setting-service';
+import { isNotNilOrEmpty } from '@utils/object-utils';
 
 const settingKeysToUpdateSettings: SettingKey[] = [
   SettingKey.HiddenSources,
@@ -23,6 +26,9 @@ const settingKeysToUpdateSettings: SettingKey[] = [
 
 export function useAutoSyncWithDropbox(): void {
   const message = useMessage();
+  const notification = useNotification();
+  const syncUpdateNotify = getSettingFromStorage(SettingKey.SyncUpdateNotify);
+
   if (!getSettingFromStorage(SettingKey.AutoSyncWithDropbox)) {
     return;
   }
@@ -37,10 +43,35 @@ export function useAutoSyncWithDropbox(): void {
 
   onMounted(async () => {
     await refreshDropboxTokenIfNeeded();
-    await Promise.all([syncSettingValues(), syncSeenNews()]);
+    const [syncSettingsResult, syncSeenNewsResult] = await Promise.all([syncSettingValues(), syncSeenNews()]);
+    if (syncUpdateNotify && (syncSettingsResult || syncSeenNewsResult)) {
+      const updatedSettingsCount = syncSettingsResult
+        ? calcChangedSettings(syncSettingsResult.localSettings, syncSettingsResult.mergedSettings)
+        : 0;
+      const newSeenNewsCount = syncSeenNewsResult
+        ? calcAddedSeenNews(syncSeenNewsResult.localSeenNews, syncSeenNewsResult.mergedSeenNews)
+        : 0;
+      showUpdatedMessage(updatedSettingsCount, newSeenNewsCount);
+    }
     syncSettingsOnChange();
     syncSeenNewsOnChange();
   });
+
+  function showUpdatedMessage(updatedSettingsCount: number, newSeenNewsCount: number): void {
+    const updatedMessage = [
+      updatedSettingsCount ? `${updatedSettingsCount} settings` : '',
+      newSeenNewsCount ? `${newSeenNewsCount} seen news` : '',
+    ]
+      .filter(isNotNilOrEmpty)
+      .join(' and ');
+    if (updatedMessage) {
+      notification.success({
+        title: 'Auto sync completed.',
+        content: `${updatedMessage} updated.`,
+        duration: 5000,
+      });
+    }
+  }
 
   function syncSettingsOnChange(): void {
     settingKeysToUpdateSettings.forEach((key) => onEvent(key, () => uploadSettingsToDropbox(getSettingValues())));

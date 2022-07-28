@@ -1,6 +1,6 @@
 <template>
   <button class="setting-row switch-row" ref="switchRowRef" @click="onSwitchRowClick">
-    <NSwitch v-model:value="checked" :loading="loading" ref="switchRef" />
+    <NSwitch v-model:value="checked" :disabled="disabled" :loading="loading" ref="switchRef" />
     <span><slot /></span>
   </button>
 </template>
@@ -11,7 +11,7 @@ import { ref } from 'vue';
 import { useVModel } from '@vueuse/core';
 import { NSwitch } from 'naive-ui';
 
-const props = defineProps<{ value?: boolean | undefined; loading?: boolean }>();
+const props = defineProps<{ value?: boolean | undefined; loading?: boolean; disabled?: boolean }>();
 const emits = defineEmits<{ (e: 'update:value', value: boolean): void }>();
 
 const checked = useVModel(props, 'value', emits);

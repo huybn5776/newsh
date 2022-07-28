@@ -1,3 +1,4 @@
+import equal from 'fast-deep-equal';
 import * as R from 'ramda';
 
 import { NonNullableProps } from '@utils/type-utils';
@@ -29,4 +30,8 @@ export function isNestedEmpty<T>(value: T): boolean {
     return false;
   }
   return Object.values(value).every((v) => isNilOrEmpty(v) && isNestedEmpty(v));
+}
+
+export function equalOrBothNilOrEmpty(value1: unknown, value2: unknown): boolean {
+  return equal(value1, value2) || (isNilOrEmpty(value1) && isNilOrEmpty(value2));
 }

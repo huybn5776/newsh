@@ -4,6 +4,9 @@
     <SwitchRow v-model:value="autoSyncWithDropbox" :loading="autoSyncingSettings" @update:value="onToggleAutoSync">
       Auto sync setting with Dropbox.
     </SwitchRow>
+    <SwitchRow v-model:value="syncUpdateNotify" :disabled="!autoSyncWithDropbox" @update:value="onToggleAutoSync">
+      Notify when settings are updated during sync.
+    </SwitchRow>
     <div class="setting-row setting-button-row">
       <DropboxConnectionState :dropboxToken="dropboxToken" :loading="dropboxTokenLoading" />
       <NButton v-if="!dropboxToken" @click="connectDropbox">Connect to dropbox</NButton>
@@ -58,6 +61,7 @@ const { onEvent, unsubscribeAllEvents } = useMitt();
 const { loading: loadingDropboxToken } = useCatchDropboxTokenFromUrl(onGotDropboxToken);
 
 const autoSyncWithDropbox = useSyncSettingMapUndefined(SettingKey.AutoSyncWithDropbox);
+const syncUpdateNotify = useSyncSettingMapUndefined(SettingKey.SyncUpdateNotify);
 const refreshingDropboxToken = ref(false);
 const autoSyncingSettings = ref(false);
 const uploadingSettings = ref(false);

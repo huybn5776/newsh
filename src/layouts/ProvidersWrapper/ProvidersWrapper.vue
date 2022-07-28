@@ -8,7 +8,9 @@
     >
       <NDialogProvider>
         <NLoadingBarProvider>
-          <slot />
+          <NNotificationProvider>
+            <slot />
+          </NNotificationProvider>
         </NLoadingBarProvider>
       </NDialogProvider>
     </NMessageProvider>
@@ -16,5 +18,12 @@
 </template>
 
 <script lang="ts" setup>
-import { darkTheme, NConfigProvider, NMessageProvider, NDialogProvider, NLoadingBarProvider } from 'naive-ui';
+import {
+  darkTheme,
+  NConfigProvider,
+  NDialogProvider,
+  NLoadingBarProvider,
+  NMessageProvider,
+  NNotificationProvider,
+} from 'naive-ui';
 </script>
