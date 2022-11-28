@@ -1,14 +1,14 @@
 <template>
   <NCollapse
     class="news-topic-collapse"
-    @item-header-click="onNewsTopicToggleExpand"
     :default-expanded-names="topicsToShow"
+    @item-header-click="onNewsTopicToggleExpand"
   >
     <div v-for="topic of newsTopics" :key="topic.name" class="news-topic-collapse-item-container">
       <router-link
         v-if="showMoreLink"
-        class="more-news-link"
         :to="{ name: 'newsTopic', params: { topicId: topic.id } }"
+        class="more-news-link"
       >
         More
       </router-link>
@@ -16,7 +16,7 @@
       <NCollapseItem class="news-topic-section" :name="topic.id" :data-topic-id="topic.id">
         <template #header>
           <div class="news-topic-header">
-            <h2 class="news-topic-title" v-intersection="{ enter: () => emits('newsTopicEntered', topic.id) }">
+            <h2 v-intersection="{ enter: () => emits('newsTopicEntered', topic.id) }" class="news-topic-title">
               {{ topic.name }}
             </h2>
           </div>

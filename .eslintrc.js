@@ -110,5 +110,6 @@ module.exports = {
         order: ['template', 'script', 'style'],
       },
     ],
+    'vue/attributes-order': 1,
   },
 };
