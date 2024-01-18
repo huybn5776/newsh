@@ -1,9 +1,9 @@
 <template>
   <ListDragSort
+    v-slot:default="{ item }"
     class="news-topic-list"
     :items="allTopicRef"
     @update:items="onSortChanged(asTopicInfoList($event))"
-    v-slot:default="{ item }"
   >
     <div class="news-topic-info-row">
       <input

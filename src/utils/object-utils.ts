@@ -12,17 +12,17 @@ export function isNotNil<T>(value: T | null | undefined): value is T {
   return !R.isNil(value);
 }
 
-export function deleteNilProperties<T>(obj: T): Partial<NonNullableProps<T>> {
+export function deleteNilProperties<T extends object>(obj: T): Partial<NonNullableProps<T>> {
   const newObj = { ...obj };
   (Object.keys(newObj) as (keyof T)[]).forEach((key) => {
-    if (R.isNil(newObj[key]) || isNestedEmpty(newObj[key])) {
+    if (R.isNil(newObj[key]) || isNestedEmpty(newObj[key] as object)) {
       delete newObj[key];
     }
   });
   return newObj;
 }
 
-export function isNestedEmpty<T>(value: T): boolean {
+export function isNestedEmpty<T extends object>(value: T | null | undefined): boolean {
   if (isNilOrEmpty(value)) {
     return true;
   }

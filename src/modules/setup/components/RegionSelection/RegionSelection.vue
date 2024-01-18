@@ -2,10 +2,10 @@
 <template>
   <div class="region-selection">
     <FullSizeSelect
+      v-model="selectedRegion"
       title="Language & region of interest"
       subtitle="See news from the selected language and region pair"
       :items="regionSelections"
-      v-model="selectedRegion"
       @update:modelValue="emits('update:modelValue', $event)"
     />
     <footer class="region-selection-footer">

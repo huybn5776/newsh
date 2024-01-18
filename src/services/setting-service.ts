@@ -222,7 +222,7 @@ export function mergeSettings(
 }
 
 export function mergeSeenNews(seenNews1: SeenNewsItem[], seenNews2: SeenNewsItem[]): SeenNewsItem[] {
-  const seenNewsGroupings = groupBy((seenNews) => seenNews.url, [...seenNews1, ...seenNews2]);
+  const seenNewsGroupings = groupBy(prop('url'), [...seenNews1, ...seenNews2]) as Record<string, SeenNewsItem[]>;
   return Object.entries(seenNewsGroupings).map(([, seenNewsItems]) => {
     if (seenNewsItems.length === 1) {
       return seenNewsItems[0];

@@ -16,11 +16,11 @@
       <div class="setting-row">
         <span>News topics after top stories:</span>
         <NSelect
+          v-model:value="newsTopicsAfterTopStories"
           class="setting-select"
           multiple
           placeholder="Topics"
           :options="allTopicsSelection"
-          v-model:value="newsTopicsAfterTopStories"
         />
         <div class="setting-select-actions">
           <NButton @click="openAddTopicDialog">Add</NButton>
@@ -36,9 +36,9 @@
 
     <div class="setting-section">
       <h3>Hidden news</h3>
-      <TagsRow title="Sources" v-model:value="hiddenSources" />
-      <TagsRow title="Url matches" v-model:value="hiddenUrlMatches" />
-      <TagsRow title="Terms" v-model:value="excludeTerms" />
+      <TagsRow v-model:value="hiddenSources" title="Sources" />
+      <TagsRow v-model:value="hiddenUrlMatches" title="Url matches" />
+      <TagsRow v-model:value="excludeTerms" title="Terms" />
     </div>
 
     <div class="setting-section">

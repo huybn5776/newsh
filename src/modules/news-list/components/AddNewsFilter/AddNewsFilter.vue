@@ -1,10 +1,8 @@
 <template>
-  <!--suppress JSValidateTypes -->
   <NRadioGroup v-model:value="selectedFilterType" class="news-filter-type">
     <NRadio v-for="type in types" :key="type.value" :value="type.value">{{ type.label }}</NRadio>
   </NRadioGroup>
-  <!--suppress JSValidateTypes -->
-  <NInput class="news-filter-input" v-model:value="filterValue" type="textarea" autosize />
+  <NInput v-model:value="filterValue" class="news-filter-input" type="textarea" autosize />
   <div class="error-message-container" :style="{ visibility: errorMessage ? undefined : 'collapse' }">
     <i class="error-icon" />
     <span>{{ errorMessage }}</span>

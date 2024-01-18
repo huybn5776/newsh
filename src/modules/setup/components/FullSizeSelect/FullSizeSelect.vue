@@ -4,15 +4,15 @@
     <p class="full-size-select-subtitle">{{ subtitle }}</p>
     <!--suppress RequiredAttributes -->
     <NInput
+      v-model:value="searchTerm"
       class="region-search-input"
       placeholder="Search for language or region"
       clearable
-      v-model:value="searchTerm"
     />
     <!--suppress RequiredAttributes -->
     <NRadioGroup
-      class="selections-container"
       v-model:value="selectedValue"
+      class="selections-container"
       @update-value="emits('update:modelValue', $event)"
     >
       <template v-for="item of filteredItems" :key="item.key">

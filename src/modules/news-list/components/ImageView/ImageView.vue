@@ -1,5 +1,5 @@
 <template>
-  <img ref="imageElement" width="100" height="100" :src="src" :alt="alt" loading="lazy" v-show="show" />
+  <img v-show="show" ref="imageElement" width="100" height="100" :src="src" :alt="alt" loading="lazy" />
 </template>
 
 <script lang="ts" setup>

@@ -1,6 +1,6 @@
 <template>
-  <button class="setting-row switch-row" ref="switchRowRef" @click="onSwitchRowClick">
-    <NSwitch v-model:value="checked" :disabled="disabled" :loading="loading" ref="switchRef" />
+  <button ref="switchRowRef" class="setting-row switch-row" @click="onSwitchRowClick">
+    <NSwitch ref="switchRef" v-model:value="checked" :disabled="disabled" :loading="loading" />
     <span><slot /></span>
   </button>
 </template>

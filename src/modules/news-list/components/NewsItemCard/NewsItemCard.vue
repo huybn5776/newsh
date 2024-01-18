@@ -1,13 +1,13 @@
 <template>
   <div class="news-item-card">
-    <Image class="news-image" :src="news.image" :alt="news.excerpt" />
+    <ImageView class="news-image" :src="news.image" :alt="news.excerpt" />
 
     <div class="news-item">
       <a
+        v-intersection="{ enter: () => onNewsEnter(news), leave: () => onNewsLeave(news) }"
         :href="news.url"
         class="news-link main-news-link"
         target="_blank"
-        v-intersection="{ enter: () => onNewsEnter(news), leave: () => onNewsLeave(news) }"
         :class="{ 'seen-news': newsItemSeen, 'single-news': !hasRelatedNews }"
       >
         <h3 class="news-title">{{ news.title }}</h3>
@@ -17,15 +17,15 @@
       <div v-if="hasRelatedNews" class="related-news-list">
         <a
           v-for="(relatedNews, index) of news.relatedNewsItems"
-          :key="relatedNews.url"
           v-show="expanded || (!isMobile && index === 0)"
-          class="news-link related-news-link"
-          target="_blank"
+          :key="relatedNews.url"
           v-intersection="{
             disabled: !hideSeenNewsEnabled,
             enter: () => onNewsEnter(relatedNews),
             leave: () => onNewsLeave(relatedNews),
           }"
+          class="news-link related-news-link"
+          target="_blank"
           :href="relatedNews.url"
           :class="{ 'seen-news': relatedNewsItemSeen[index] }"
         >
@@ -55,7 +55,7 @@ import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
 import { useIsMobile } from '@compositions/use-is-mobile';
 import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
 import { NewsItem } from '@interfaces/news-item';
-import Image from '@modules/news-list/components/Image/Image.vue';
+import ImageView from '@modules/news-list/components/ImageView/ImageView.vue';
 import NewsInfoBar from '@modules/news-list/components/NewsInfoBar/NewsInfoBar.vue';
 import { useMarkNewsAsSeen } from '@modules/news-list/compositions/use-mark-news-as-seen';
 import { isNewsItemExists } from '@modules/news-list/services/news-filter-service';

@@ -32,6 +32,6 @@ export function useProvideSeenNews(): void {
     }
   });
 
-  provide(provideHiddenSeenNewsSettingKey, hideSeenNewsEnabled);
+  provide(provideHiddenSeenNewsSettingKey, !!hideSeenNewsEnabled);
   provide(provideSeenNewsInjectKey, seenNewsIndex);
 }

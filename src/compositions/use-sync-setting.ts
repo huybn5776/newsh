@@ -32,14 +32,19 @@ export function useSyncSettingMapNullArray<
   T extends SettingValueType[K] extends Array<unknown> ? SettingValueType[K] : never,
   V extends T,
   RT extends V extends never ? T | undefined : V,
->(key: K, map?: (value: T | undefined) => T | V): Ref<UnwrapRef<RT>> {
+>(key: K, map?: (value: T | V | UnwrapRef<RT> | undefined) => T | V): Ref<UnwrapRef<RT>> {
   let settingValue = getSettingFromStorage<K, T>(key);
   settingValue = settingValue === null ? ([] as Array<unknown> as T & Array<unknown>) : settingValue;
 
-  const refValue = (map ? map(settingValue) : settingValue) as RT;
+  const refValue = (map ? map(settingValue) : settingValue) as unknown as RT;
   const settingRef = ref<RT>(refValue);
 
-  watchWithEvent(key, settingRef, (value) => saveOrDelete<K, T>(key, value, SettingEventType.User), map);
+  watchWithEvent(
+    key,
+    settingRef,
+    (value) => saveOrDelete<K, T>(key, value as unknown as T, SettingEventType.User),
+    map,
+  );
   return settingRef;
 }
 

@@ -1,16 +1,16 @@
 <template>
   <input
+    v-model="days"
     class="setting-row-input"
     type="number"
     placeholder="2"
     maxlength="2"
     min="1"
     max="99"
+    :disabled="disabled"
     @click.stop
     @focus="selectAll"
     @change="onHiddenDaysChange"
-    :disabled="disabled"
-    v-model="days"
   />
 </template>
 
@@ -27,7 +27,7 @@ function selectAll(event: Event): void {
 }
 
 function onHiddenDaysChange(): void {
-  if (!days.value || days.value <= 0) {
+  if (!days.value || (typeof days.value === 'number' && days.value <= 0)) {
     days.value = undefined;
   }
 }
