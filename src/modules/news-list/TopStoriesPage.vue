@@ -38,6 +38,7 @@ import {
   removeByTerms,
   removeDuplicatedNewsItemOfTopics,
   removeYoutubeNews,
+  removeByTitleLength,
 } from '@modules/news-list/services/news-filter-service';
 import { getSettingFromStorage } from '@services/setting-service';
 import { isNotNilOrEmpty } from '@utils/object-utils';
@@ -51,6 +52,11 @@ const newsTopicList = computed(() => {
   let newsTopicItems = newsTopics.value;
   if (getSettingFromStorage(SettingKey.FilterOutYoutube)) {
     newsTopicItems = newsTopicItems.map(removeYoutubeNews());
+  }
+  const hideShortTitleNewsInChars =
+    getSettingFromStorage(SettingKey.HideShortTitleNews) && getSettingFromStorage(SettingKey.HideShortTitleNewsInChars);
+  if (hideShortTitleNewsInChars) {
+    newsTopicItems = newsTopicItems.map(removeByTitleLength(hideShortTitleNewsInChars));
   }
   const hiddenSources = getSettingFromStorage(SettingKey.HiddenSources);
   if (hiddenSources?.length) {

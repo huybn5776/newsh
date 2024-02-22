@@ -3,10 +3,10 @@
     v-model="days"
     class="setting-row-input"
     type="number"
-    placeholder="2"
     maxlength="2"
     min="1"
     max="99"
+    :placeholder="placeholder"
     :disabled="disabled"
     @click.stop
     @focus="selectAll"
@@ -17,7 +17,11 @@
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core';
 
-const props = defineProps<{ modelValue?: number | string | undefined; disabled: boolean | undefined }>();
+const props = defineProps<{
+  modelValue?: number | string | undefined;
+  placeholder: string;
+  disabled: boolean | undefined;
+}>();
 const emits = defineEmits<{ (e: 'update:modelValue', value: number | undefined): void }>();
 
 const days = useVModel(props, 'modelValue', emits);

@@ -8,6 +8,10 @@ export function removeYoutubeNews(): (newsTopicItem: NewsTopicItem) => NewsTopic
   return removeNewsOfTopicBy((news) => news.url.includes('youtube'));
 }
 
+export function removeByTitleLength(titleLength: number): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
+  return removeNewsOfTopicBy((news) => news.title.length < titleLength);
+}
+
 export function removeByNewsSource(sources: string[]): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
   return removeNewsOfTopicBy((news) => sources.includes(news.publication));
 }

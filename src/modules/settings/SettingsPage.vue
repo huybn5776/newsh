@@ -7,7 +7,7 @@
       <SwitchRow v-model:value="filterOutYoutube">Filter out youtube news.</SwitchRow>
       <SwitchRow v-model:value="hideSeenNews">
         Gray out the news that seen within days:
-        <SettingDaysInput v-model="hideSeenNewsInDays" :disabled="!hideSeenNews" />
+        <SettingDaysInput v-model="hideSeenNewsInDays" placeholder="2" :disabled="!hideSeenNews" />
       </SwitchRow>
       <SwitchRow v-model:value="spaceKeyToExpandRelated">
         Use space key to expand currently hovered related news.
@@ -35,7 +35,11 @@
     </div>
 
     <div class="setting-section">
-      <h3>Hidden news</h3>
+      <h3>Hide news rules</h3>
+      <SwitchRow v-model:value="hideShortTitleNews">
+        Title shorter than
+        <SettingDaysInput v-model="hideShortTitleNewsInChars" placeholder="10" :disabled="!hideShortTitleNews" /> chars
+      </SwitchRow>
       <TagsRow v-model:value="hiddenSources" title="Sources" />
       <TagsRow v-model:value="hiddenUrlMatches" title="Url matches" />
       <TagsRow v-model:value="excludeTerms" title="Terms" />
@@ -83,6 +87,8 @@ const languageAndRegionLabel = ref(getSettingFromStorage(SettingKey.LanguageAndR
 const hideSeenNews = useSyncSettingMapUndefined(SettingKey.HideSeenNews);
 const hideSeenNewsInDays = useSyncSettingMapUndefined(SettingKey.HideSeenNewsInDays);
 const spaceKeyToExpandRelated = useSyncSettingMapUndefined(SettingKey.SpaceKeyToExpandRelated);
+const hideShortTitleNews = useSyncSettingMapUndefined(SettingKey.HideShortTitleNews);
+const hideShortTitleNewsInChars = useSyncSettingMapUndefined(SettingKey.HideShortTitleNewsInChars);
 const hiddenSources = useSyncSettingMapNullArray(SettingKey.HiddenSources, mapArrayValue);
 const hiddenUrlMatches = useSyncSettingMapNullArray(SettingKey.HiddenUrlMatches, mapArrayValue);
 const excludeTerms = useSyncSettingMapNullArray(SettingKey.ExcludeTerms, mapArrayValue);

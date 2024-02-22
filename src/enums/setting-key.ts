@@ -9,6 +9,8 @@ export enum SettingKey {
   HideSeenNewsInDays = 'hideSeenNewsInDays',
   SpaceKeyToExpandRelated = 'spaceKeyToExpandRelated',
   SeenNewsItems = 'seenNewsItems',
+  HideShortTitleNews = 'hideShortTitleNews',
+  HideShortTitleNewsInChars = 'hideShortTitleNewsInChars',
   /**
    * publication name
    */
@@ -35,6 +37,8 @@ export type SettingValueType = {
   [SettingKey.HideSeenNewsInDays]: number;
   [SettingKey.SpaceKeyToExpandRelated]: boolean;
   [SettingKey.SeenNewsItems]: SeenNewsItem[];
+  [SettingKey.HideShortTitleNews]: boolean;
+  [SettingKey.HideShortTitleNewsInChars]: number;
   [SettingKey.HiddenSources]: string[];
   [SettingKey.HiddenUrlMatches]: string[];
   [SettingKey.ExcludeTerms]: string[];
