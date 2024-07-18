@@ -4,10 +4,10 @@
 }
 
 .news-topic-info-row {
+  box-sizing: border-box;
   display: flex;
   gap: 4px;
   align-items: center;
-  box-sizing: border-box;
   width: 100%;
   height: 38px;
   padding: 4px 0;

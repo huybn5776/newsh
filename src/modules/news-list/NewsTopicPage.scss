@@ -2,23 +2,23 @@
   display: flex;
   align-items: center;
   margin: 16px 0;
-  color: rgba(white, .9);
   font-size: 24px;
+  color: rgba(white, .9);
 }
 
 .back-icon {
-  display: inline-block;
   box-sizing: border-box;
+  display: inline-block;
   width: 32px;
   height: 32px;
-  margin-left: -8px;
   padding: 8px;
+  margin-left: -8px;
   background: transparent url('/src/assets/svg/chevron-right.svg') no-repeat center;
   background-size: 16px;
   border-radius: 50%;
-  transform: rotate(180deg);
   opacity: .9;
   transition: background-color .2s;
+  transform: rotate(180deg);
 
   &:hover {
     background-color: rgba(white, .1);

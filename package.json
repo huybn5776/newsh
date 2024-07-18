@@ -43,7 +43,6 @@
     "prettier": "^3.2.4",
     "sass": "^1.70.0",
     "stylelint": "^16.1.0",
-    "stylelint-config-rational-order": "^0.1.2",
     "stylelint-config-recess-order": "^4.4.0",
     "stylelint-config-recommended-scss": "^14.0.0",
     "stylelint-order": "^6.0.4",

@@ -22,8 +22,8 @@
   align-self: center;
   width: 36px;
   height: 36px;
-  margin-top: auto;
   padding: 8px;
+  margin-top: auto;
   font-size: 0;
   line-height: 36px;
   background: url('/src/assets/svg/github.svg') no-repeat center;
@@ -32,7 +32,7 @@
   transition: opacity .2s, transform .5s;
 
   &:hover {
-    transform: translateY(-1px);
     opacity: 1;
+    transform: translateY(-1px);
   }
 }

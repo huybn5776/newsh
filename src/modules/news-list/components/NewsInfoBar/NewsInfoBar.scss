@@ -1,7 +1,7 @@
 .news-info-bar-container {
   display: grid;
-  grid-gap: 0 4px;
   grid-template-columns: [youtube-icon] max-content [publication] minmax(auto, max-content) [time] max-content [dropdown] max-content;
+  grid-gap: 0 4px;
   align-items: center;
   font-size: 12px;
   opacity: .7;
@@ -17,8 +17,8 @@
 .news-info-publication {
   grid-column-start: publication;
   overflow-x: hidden;
-  white-space: nowrap;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .news-info-time-ago {

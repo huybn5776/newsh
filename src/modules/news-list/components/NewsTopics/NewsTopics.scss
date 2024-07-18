@@ -31,16 +31,16 @@
   top: 24px;
   right: 16px;
   z-index: 1;
-  color: #8ab4f8;
   font-size: 14px;
+  color: #8ab4f8;
 }
 
 .news-topic-load-all-container {
   display: flex;
   justify-content: center;
   width: 100%;
-  margin: 12px 0 -16px 0;
   padding-top: 16px;
+  margin: 12px 0 -16px 0;
   border-top: 1px solid rgba(white, .1);
 
   &:last-child {
