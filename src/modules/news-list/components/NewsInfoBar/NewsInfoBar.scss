@@ -14,6 +14,12 @@
   background: url('/src/assets/svg/youtube.svg');
 }
 
+.news-info-publication-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
 .news-info-publication {
   grid-column-start: publication;
   overflow-x: hidden;

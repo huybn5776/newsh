@@ -169,6 +169,7 @@ function parseNewsItem(newsNode: NewsObjectRaw): NewsItem {
       title: newsNode[2],
       excerpt: newsNode[3],
       publication: newsNode[10][2],
+      publicationIcon: newsNode[10][3][0],
       timestamp: newsNode[4][0] * 1000,
       url,
       image,

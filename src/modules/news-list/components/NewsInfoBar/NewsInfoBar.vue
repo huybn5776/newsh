@@ -1,6 +1,7 @@
 <template>
   <div class="news-info-bar-container">
     <i v-if="isYoutube" class="youtube-icon" />
+    <img class="news-info-publication-icon" :src="news.publicationIcon" :alt="news.publication" />
     <span class="news-info-publication">{{ news.publication }}．</span>
     <span class="news-info-time-ago">{{ timeAgo }}</span>
     <NewsDropdown class="news-info-dropdown" :news="news" />
