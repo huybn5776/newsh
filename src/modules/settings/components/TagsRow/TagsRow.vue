@@ -11,16 +11,16 @@ import { ref } from 'vue';
 import { NDynamicTags, useMessage } from 'naive-ui';
 
 const props = defineProps<{ title: string; value?: string[] }>();
-const emits = defineEmits<{ (e: 'update:value', value: string[]): void }>();
+const emit = defineEmits<{ (e: 'update:value', value: string[]): void }>();
 
 const message = useMessage();
 const tagsRef = ref(props.value);
 
 function onTagsUpdate(newTags: string[]): void {
-  const isAddingTag = newTags.length > (tagsRef.value?.length || 0);
+  const isAddingTag = newTags.length > (tagsRef.value?.length ?? 0);
   if (!isAddingTag) {
     tagsRef.value = newTags;
-    emits('update:value', newTags);
+    emit('update:value', newTags);
     return;
   }
   const lastIndex = newTags.length - 1;
@@ -29,11 +29,11 @@ function onTagsUpdate(newTags: string[]): void {
     message.error(`'${newTag}' is already exists.`);
     return;
   }
-  tagsRef.value = [...newTag].splice(lastIndex, lastIndex, newTag);
-  emits('update:value', newTags);
+  tagsRef.value = newTag.split('').splice(lastIndex, lastIndex, newTag);
+  emit('update:value', newTags);
 }
 </script>
 
 <style lang="scss" scoped>
-@import '../../settings';
+@forward '../../settings';
 </style>

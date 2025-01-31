@@ -36,12 +36,12 @@ import { ref, computed, watch } from 'vue';
 import { clamp } from 'ramda';
 import { merge, fromEvent, tap, map, distinctUntilChanged, takeUntil, take } from 'rxjs';
 
-import { useInverseRef } from '@compositions/use-inverse-ref';
-import { useUntilDestroyed } from '@compositions/use-until-destroyed';
-import { useValueSample } from '@compositions/use-value-sample';
+import { useInverseRef } from '@/compositions/use-inverse-ref';
+import { useUntilDestroyed } from '@/compositions/use-until-destroyed';
+import { useValueSample } from '@/compositions/use-value-sample';
 
 const props = defineProps<{ items: { id: string; movable?: boolean }[] }>();
-const emits = defineEmits<{
+const emit = defineEmits<{
   (e: 'dragging', value: boolean): void;
   (e: 'update:items', value: { id: string }[]): void;
 }>();
@@ -56,12 +56,12 @@ const draggingItemIndex = ref<number>();
 const items = computed(() => props.items);
 const delayedItems = useValueSample(items, useInverseRef(dropTransitioning));
 
-watch(isDragging, () => emits('dragging', isDragging.value));
+watch(isDragging, () => emit('dragging', isDragging.value));
 
 function subscribeForDragMove(startEvent: MouseEvent | TouchEvent, itemIndex: number): void {
   const targetElement = startEvent.target as HTMLElement;
-  const itemElement = targetElement.parentElement as HTMLElement;
-  const draggableContainerElement = itemElement.parentElement as HTMLElement;
+  const itemElement = targetElement.parentElement!;
+  const draggableContainerElement = itemElement.parentElement!;
 
   const itemHeight = draggableContainerElement.offsetHeight;
   const minBoundOfItemIndex = -itemIndex * itemHeight - itemHeight * 0.1;
@@ -154,7 +154,7 @@ function emitItemUpdate(offsets: number[]): void {
     const limitedIndex = clamp(0, props.items.length - 1, indexAfterApplyOffset);
     newItems[limitedIndex] = item;
   });
-  emits('update:items', newItems);
+  emit('update:items', newItems);
 }
 
 function transitionListAfterDragMove(
@@ -182,5 +182,5 @@ function transitionListAfterDragMove(
 </script>
 
 <style lang="scss" scoped>
-@import './ListDragSort';
+@forward './ListDragSort';
 </style>

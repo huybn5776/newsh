@@ -5,13 +5,13 @@ import { pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/TaskEither';
 import { useMessage, useDialog } from 'naive-ui';
 
-import { useInputDialog } from '@compositions/use-input-dialog';
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey } from '@enums/setting-key';
-import { NewsTopicInfo } from '@interfaces/news-topic-info';
-import NewsTopicManagement from '@modules/settings/components/NewsTopicManagement/NewsTopicManagement.vue';
-import { getPublicationIdAndSectionIdFromUrl, tryGetNewsItem } from '@services/news-service';
-import { getSettingFromStorage, saveSettingToStorage } from '@services/setting-service';
+import { useInputDialog } from '@/compositions/use-input-dialog';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingKey } from '@/enums/setting-key';
+import { NewsTopicInfo } from '@/interfaces/news-topic-info';
+import NewsTopicManagement from '@/modules/settings/components/NewsTopicManagement/NewsTopicManagement.vue';
+import { getPublicationIdAndSectionIdFromUrl, tryGetNewsItem } from '@/services/news-service';
+import { getSettingFromStorage, saveSettingToStorage } from '@/services/setting-service';
 
 export function useNewsTopicManagement(): { openAddTopicDialog: () => void; openManagementDialog: () => void } {
   const message = useMessage();
@@ -33,7 +33,7 @@ export function useNewsTopicManagement(): { openAddTopicDialog: () => void; open
   }
 
   function openManagementDialog(): void {
-    topicInfoList.value = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
+    topicInfoList.value = getSettingFromStorage(SettingKey.AllTopicsInfo) ?? [];
     dialog.info({
       title: 'News topic management',
       content: () =>
@@ -65,7 +65,7 @@ export function useNewsTopicManagement(): { openAddTopicDialog: () => void; open
     }
     const newsTopicInfo = topicInfoEither.right;
     message.success(`'${newsTopicInfo.name}' has been added successfully.`);
-    let allTopics = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
+    let allTopics = getSettingFromStorage(SettingKey.AllTopicsInfo) ?? [];
     allTopics = [...allTopics, newsTopicInfo];
     saveSettingToStorage(SettingKey.AllTopicsInfo, allTopics, SettingEventType.User);
     return true;

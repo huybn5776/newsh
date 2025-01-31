@@ -1,10 +1,10 @@
 import { useMessage } from 'naive-ui';
 
-import { useInputDialog } from '@compositions/use-input-dialog';
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingValueType } from '@enums/setting-key';
-import { getSettingValues, validateSettings, saveSettingValues } from '@services/setting-service';
-import { saveDataToJsonFile, selectFile } from '@utils/browser-utils';
+import { useInputDialog } from '@/compositions/use-input-dialog';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingValueType } from '@/enums/setting-key';
+import { getSettingValues, validateSettings, saveSettingValues } from '@/services/setting-service';
+import { saveDataToJsonFile, selectFile } from '@/utils/browser-utils';
 
 export function useBackupSettings(): {
   downloadSettings: () => void;

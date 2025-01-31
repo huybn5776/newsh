@@ -3,30 +3,30 @@ import equal from 'fast-deep-equal';
 import { isNil, evolve, groupBy, sortBy, omit, prop } from 'ramda';
 import { ValuesType } from 'utility-types';
 
-import { EventKey } from '@enums/event-key';
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingValueType, SettingKey, AllowBackupSettings } from '@enums/setting-key';
-import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
-import { SeenNewsItem } from '@interfaces/seen-news-item';
+import { EventKey } from '@/enums/event-key';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingValueType, SettingKey, AllowBackupSettings } from '@/enums/setting-key';
+import { DropboxTokenInfo } from '@/interfaces/dropbox-token-info';
+import { SeenNewsItem } from '@/interfaces/seen-news-item';
 import {
   getSettingValuesFromDropbox,
   saveSettingsToDropbox,
   getSeenNewsFromDropbox,
   saveSeenNewsToDropbox,
-} from '@services/dropbox-sync-service';
-import { emitter } from '@services/emitter-service';
-import { distinctArray } from '@utils/array-utils';
-import { deleteNilProperties, isNilOrEmpty, equalOrBothNilOrEmpty } from '@utils/object-utils';
-import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@utils/storage-utils';
-import { NullableProps } from '@utils/type-utils';
+} from '@/services/dropbox-sync-service';
+import { emitter } from '@/services/emitter-service';
+import { distinctArray } from '@/utils/array-utils';
+import { deleteNilProperties, isNilOrEmpty, equalOrBothNilOrEmpty } from '@/utils/object-utils';
+import { saveToStorage, getFromStorage, updateFromStorage, deleteFromStorage } from '@/utils/storage-utils';
+import { NullableProps } from '@/utils/type-utils';
 
-export function getSettingFromStorage<K extends SettingKey, T extends SettingValueType[K]>(key: K): T | null {
-  return getFromStorage<T>(key);
+export function getSettingFromStorage<K extends SettingKey>(key: K): SettingValueType[K] | null {
+  return getFromStorage<SettingValueType[K]>(key);
 }
 
-export function saveSettingToStorage<K extends SettingKey, T extends SettingValueType[K]>(
+export function saveSettingToStorage<K extends SettingKey>(
   key: K,
-  value: T | null | undefined,
+  value: SettingValueType[K] | null | undefined,
   type: SettingEventType,
 ): void {
   saveToStorage(key, value);
@@ -36,7 +36,7 @@ export function saveSettingToStorage<K extends SettingKey, T extends SettingValu
   emitter.emit(key, { type, key, value: value as never });
 }
 
-export function updateSettingFromStorage<K extends SettingKey, T extends SettingValueType[K]>(
+export function updateSettingFromStorage<K extends SettingKey, T extends SettingValueType[K] & object>(
   key: K,
   updater: (value: T | null) => T | null,
   type: SettingEventType,
@@ -54,9 +54,9 @@ export function deleteSettingFromStorage(key: SettingKey, type: SettingEventType
   emitter.emit(key, { type, key, value: null });
 }
 
-export function saveOrDelete<K extends SettingKey, T extends SettingValueType[K]>(
+export function saveOrDelete<K extends SettingKey>(
   key: K,
-  value: T | null | undefined,
+  value: SettingValueType[K] | null | undefined,
   type: SettingEventType,
 ): void {
   if (isNilOrEmpty(value)) {
@@ -66,9 +66,9 @@ export function saveOrDelete<K extends SettingKey, T extends SettingValueType[K]
   saveSettingToStorage(key, value, type);
 }
 
-export function saveOrDeleteIfChanged<K extends SettingKey, T extends SettingValueType[K]>(
+export function saveOrDeleteIfChanged<K extends SettingKey>(
   key: K,
-  value: T | null | undefined,
+  value: SettingValueType[K] | null | undefined,
   type: SettingEventType,
 ): void {
   const orgValue = getSettingFromStorage(key);
@@ -93,7 +93,7 @@ function updateLastModifyTimes(key: SettingKey, modifyTime?: number): void {
       break;
     default:
       updateFromStorage<SettingValueType[SettingKey.LastModifyTimes]>(SettingKey.LastModifyTimes, (modifyTimes) => ({
-        ...(modifyTimes || {}),
+        ...(modifyTimes ?? {}),
         [key]: modifyTime ?? Date.now(),
       }));
   }
@@ -154,7 +154,7 @@ export function trimSeenNewsItems(seenNewsItems: SeenNewsItem[] | undefined | nu
   const now = Date.now();
   const millisecondsPerDay = 24 * 60 * 60 * 1000;
   const days = getSettingFromStorage(SettingKey.HideSeenNewsInDays);
-  const durationInMilli = (days || 2) * millisecondsPerDay;
+  const durationInMilli = (days ?? 2) * millisecondsPerDay;
   return seenNewsItems?.filter((seenNews) => now - seenNews.seenAt < durationInMilli);
 }
 
@@ -195,11 +195,11 @@ export function mergeSettings(
   remoteSettings: Partial<SettingValueType>,
 ): Partial<SettingValueType> {
   const settingsSnapshot = getSettingFromStorage(SettingKey.RemoteSettingsSnapshot);
-  const remoteLastModifyTimes = remoteSettings.lastModifyTimes || {};
+  const remoteLastModifyTimes = remoteSettings.lastModifyTimes ?? {};
 
   const mergedSettings: Partial<SettingValueType> = { ...localSettings };
-  const mergedLastModifyTimes = mergedSettings.lastModifyTimes || {};
-  Object.entries(remoteSettings.lastModifyTimes || {})
+  const mergedLastModifyTimes = mergedSettings.lastModifyTimes ?? {};
+  Object.entries(remoteSettings.lastModifyTimes ?? {})
     .filter(
       ([key]) =>
         ![
@@ -213,7 +213,7 @@ export function mergeSettings(
     )
     .forEach(([k, remoteModifyTime]) => {
       const key = k as keyof SettingValueType[SettingKey.LastModifyTimes];
-      const localModifyTime = localSettings.lastModifyTimes?.[key] || 0;
+      const localModifyTime = localSettings.lastModifyTimes?.[key] ?? 0;
       if (remoteModifyTime > localModifyTime) {
         mergedSettings[key] = remoteSettings[key] as never;
         mergedLastModifyTimes[key] = remoteLastModifyTimes[key] ?? Date.now();
@@ -244,8 +244,8 @@ function createArrayDiffPatcher(
   remoteSnapshot: Partial<SettingValueType> | undefined | null,
 ) {
   return <
-    K extends SettingValueType[K] extends Array<unknown> ? SettingKey : never,
-    T extends SettingValueType[K] extends Array<unknown> ? SettingValueType[K] : never,
+    K extends SettingValueType[K] extends unknown[] ? SettingKey : never,
+    T extends SettingValueType[K] extends unknown[] ? SettingValueType[K] : never,
     E extends ValuesType<T>,
   >(
     key: K,
@@ -295,7 +295,7 @@ export async function syncSeenNews(): Promise<{
   }
   remoteSeenNews = trimSeenNewsItems(remoteSeenNews);
 
-  let localSeenNews = getSettingFromStorage(SettingKey.SeenNewsItems) || [];
+  let localSeenNews = getSettingFromStorage(SettingKey.SeenNewsItems) ?? [];
   localSeenNews = trimSeenNewsItems(localSeenNews);
   const mergedSeenNews = mergeSeenNews(localSeenNews, remoteSeenNews);
 

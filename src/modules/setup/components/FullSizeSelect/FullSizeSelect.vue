@@ -13,7 +13,7 @@
     <NRadioGroup
       v-model:value="selectedValue"
       class="selections-container"
-      @update-value="emits('update:modelValue', $event)"
+      @updateValue="emit('update:modelValue', $event)"
     >
       <template v-for="item of filteredItems" :key="item.key">
         <p v-if="item.type === 'separator'" class="selection-separator">{{ item.label }}</p>
@@ -31,11 +31,11 @@ import { ref, computed } from 'vue';
 
 import { NInput, NRadio, NRadioGroup } from 'naive-ui';
 
-import { useDebounce } from '@compositions/use-debounce';
-import { SelectionItem } from '@interfaces/selection-item';
+import { useDebounce } from '@/compositions/use-debounce';
+import { SelectionItem } from '@/interfaces/selection-item';
 
 const props = defineProps<{ modelValue?: string; items: SelectionItem[]; title: string; subtitle: string }>();
-const emits = defineEmits<{ (e: 'update:modelValue', value: string): void }>();
+const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>();
 
 const selectedValue = ref(props.modelValue);
 const searchTerm = ref('');
@@ -53,5 +53,5 @@ const filteredItems = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import './FullSizeSelect';
+@forward './FullSizeSelect';
 </style>

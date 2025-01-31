@@ -1,6 +1,6 @@
 <template>
   <ListDragSort
-    v-slot:default="{ item }"
+    v-slot="{ item }"
     class="news-topic-list"
     :items="allTopicRef"
     @update:items="onSortChanged(asTopicInfoList($event))"
@@ -28,14 +28,14 @@
 import { useVModel } from '@vueuse/core';
 import { NButton } from 'naive-ui';
 
-import ListDragSort from '@components/ListDragSort/ListDragSort.vue';
-import { NewsTopicInfo } from '@interfaces/news-topic-info';
+import ListDragSort from '@/components/ListDragSort/ListDragSort.vue';
+import { NewsTopicInfo } from '@/interfaces/news-topic-info';
 
 const props = defineProps<{ topicInfoList: NewsTopicInfo[] }>();
-const emits = defineEmits<{
+const emit = defineEmits<{
   (e: 'update:topicInfoList', value: NewsTopicInfo[]): void;
 }>();
-const allTopicRef = useVModel(props, 'topicInfoList', emits);
+const allTopicRef = useVModel(props, 'topicInfoList', emit);
 
 function onSortChanged(topicInfoList: NewsTopicInfo[]): void {
   allTopicRef.value = topicInfoList;
@@ -64,5 +64,5 @@ function asTopicInfo(item: object): NewsTopicInfo {
 </script>
 
 <style lang="scss" scoped>
-@import './NewsTopicManagement';
+@forward './NewsTopicManagement';
 </style>

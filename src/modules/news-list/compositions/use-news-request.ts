@@ -2,12 +2,12 @@ import { ref, computed, watch, Ref, readonly, DeepReadonly, onUnmounted, Compute
 
 import { useLoadingBar } from 'naive-ui';
 
-import { getSingleTopicNews, getMultiTopicNews, getSectionTopicNews } from '@api/google-news-api';
-import { NewsTopicType } from '@enums/news-topic-type';
-import { SettingKey } from '@enums/setting-key';
-import { NewsTopicInfo } from '@interfaces/news-topic-info';
-import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { getSettingFromStorage } from '@services/setting-service';
+import { getSingleTopicNews, getMultiTopicNews, getSectionTopicNews } from '@/api/google-news-api';
+import { NewsTopicType } from '@/enums/news-topic-type';
+import { SettingKey } from '@/enums/setting-key';
+import { NewsTopicInfo } from '@/interfaces/news-topic-info';
+import { NewsTopicItem } from '@/interfaces/news-topic-item';
+import { getSettingFromStorage } from '@/services/setting-service';
 
 export function useNewsRequest(): {
   getNews: (topic: NewsTopicInfo) => Promise<NewsTopicItem>;
@@ -30,7 +30,7 @@ export function useNewsRequest(): {
 
   const loadingBar = useLoadingBar();
 
-  function withPushPendingRequest<T extends Array<unknown>, U extends Promise<unknown>>(
+  function withPushPendingRequest<T extends unknown[], U extends Promise<unknown>>(
     fn: (...args: T) => U,
   ): (...args: T) => U {
     return (...args: T) => {

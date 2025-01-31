@@ -65,17 +65,17 @@ import { watch, ref, computed } from 'vue';
 
 import { NButton, NSelect } from 'naive-ui';
 
-import { useBackupSettings } from '@compositions/use-backup-settings';
-import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@compositions/use-sync-setting';
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey } from '@enums/setting-key';
-import DropboxSettings from '@modules/settings/components/DropboxSettings/DropboxSettings.vue';
-import SettingDaysInput from '@modules/settings/components/SettingDaysInput/SettingDaysInput.vue';
-import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
-import TagsRow from '@modules/settings/components/TagsRow/TagsRow.vue';
-import { useNewsTopicManagement } from '@modules/settings/compositions/use-news-topic-management';
-import { deleteSettingFromStorage, getSettingFromStorage } from '@services/setting-service';
-import { distinctArray } from '@utils/array-utils';
+import { useBackupSettings } from '@/compositions/use-backup-settings';
+import { useSyncSettingMapUndefined, useSyncSettingMapNullArray } from '@/compositions/use-sync-setting';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingKey } from '@/enums/setting-key';
+import DropboxSettings from '@/modules/settings/components/DropboxSettings/DropboxSettings.vue';
+import SettingDaysInput from '@/modules/settings/components/SettingDaysInput/SettingDaysInput.vue';
+import SwitchRow from '@/modules/settings/components/SwitchRow/SwitchRow.vue';
+import TagsRow from '@/modules/settings/components/TagsRow/TagsRow.vue';
+import { useNewsTopicManagement } from '@/modules/settings/compositions/use-news-topic-management';
+import { deleteSettingFromStorage, getSettingFromStorage } from '@/services/setting-service';
+import { distinctArray } from '@/utils/array-utils';
 
 const allTopicInfo = useSyncSettingMapUndefined(SettingKey.AllTopicsInfo);
 const allTopicsSelection = computed(() => allTopicInfo.value?.map((topic) => ({ label: topic.name, value: topic.id })));
@@ -109,6 +109,6 @@ function mapArrayValue(array: string[] | undefined): string[] {
 </script>
 
 <style lang="scss" scoped>
-@import './SettingsPage';
-@import './settings';
+@forward './SettingsPage';
+@forward './settings';
 </style>

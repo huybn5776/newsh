@@ -33,16 +33,16 @@ import { useDebounceFn } from '@vueuse/core';
 import { NButton } from 'naive-ui';
 import { useRoute } from 'vue-router';
 
-import DropboxConnectionState from '@components/DropboxConnectionState/DropboxConnectionState.vue';
-import { useCatchDropboxTokenFromUrl } from '@compositions/use-catch-dropbox-token-from-url';
-import { useMitt } from '@compositions/use-mitt';
-import { useSyncSetting, useSyncSettingMapUndefined } from '@compositions/use-sync-setting';
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey } from '@enums/setting-key';
-import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
-import SwitchRow from '@modules/settings/components/SwitchRow/SwitchRow.vue';
-import { createDropboxAuthUrl, refreshDropboxTokenIfNeeded } from '@services/dropbox-service';
-import { saveSeenNewsToDropbox } from '@services/dropbox-sync-service';
+import DropboxConnectionState from '@/components/DropboxConnectionState/DropboxConnectionState.vue';
+import { useCatchDropboxTokenFromUrl } from '@/compositions/use-catch-dropbox-token-from-url';
+import { useMitt } from '@/compositions/use-mitt';
+import { useSyncSetting, useSyncSettingMapUndefined } from '@/compositions/use-sync-setting';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingKey } from '@/enums/setting-key';
+import { DropboxTokenInfo } from '@/interfaces/dropbox-token-info';
+import SwitchRow from '@/modules/settings/components/SwitchRow/SwitchRow.vue';
+import { createDropboxAuthUrl, refreshDropboxTokenIfNeeded } from '@/services/dropbox-service';
+import { saveSeenNewsToDropbox } from '@/services/dropbox-sync-service';
 import {
   getSettingValues,
   getSettingFromStorage,
@@ -52,7 +52,7 @@ import {
   loadSeenNewsFromDropbox,
   loadSettingsFromDropbox,
   uploadSettingsToDropbox,
-} from '@services/setting-service';
+} from '@/services/setting-service';
 
 const dropboxToken = useSyncSetting(SettingKey.DropboxToken);
 
@@ -73,10 +73,10 @@ const dropboxLoading = computed(
   () => dropboxTokenLoading.value || uploadingSettings.value || downloadingSettings.value || syncingSettings.value,
 );
 
-onMounted(async () => {
+onMounted(() => {
   if (dropboxToken.value) {
     refreshingDropboxToken.value = true;
-    const newTokenInfo = await refreshDropboxTokenIfNeeded();
+    const newTokenInfo = refreshDropboxTokenIfNeeded();
     refreshingDropboxToken.value = false;
     if (newTokenInfo) {
       dropboxToken.value = newTokenInfo;
@@ -104,7 +104,7 @@ async function onToggleAutoSync(): Promise<void> {
   }
   if (dropboxToken.value) {
     refreshingDropboxToken.value = true;
-    await refreshDropboxTokenIfNeeded();
+    refreshDropboxTokenIfNeeded();
     refreshingDropboxToken.value = false;
     subscribeOnChangeToSync();
   } else {
@@ -158,5 +158,5 @@ async function syncSettingsWithDropbox(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-@import '../../settings';
+@forward '../../settings';
 </style>

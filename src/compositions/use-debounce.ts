@@ -9,7 +9,7 @@ export function useDebounce<T>(
   valueRef: Ref<T>,
   { debounceTime = 200, immediatelyClear = false }: UseDebounceConfig,
 ): DeepReadonly<Ref<UnwrapRef<T>>> {
-  const debouncedRef = ref(valueRef.value);
+  const debouncedRef = ref(valueRef.value) as Ref<UnwrapRef<T>>;
   const timeout = ref<NodeJS.Timeout>();
 
   watch(valueRef, (newValue) => {

@@ -10,7 +10,7 @@ export function isMobile(): boolean {
       )
     )
       check = true;
-  })(navigator.userAgent || navigator.vendor);
+  })(navigator.userAgent);
   return check;
 }
 
@@ -55,6 +55,7 @@ export function readBlobAsText(file: Blob): Promise<string> {
     const reader = new FileReader();
     reader.readAsText(file, 'UTF-8');
     reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       resolve(readerEvent.target?.result?.toString() || '');
     };
   });

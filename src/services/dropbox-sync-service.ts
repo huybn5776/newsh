@@ -1,9 +1,9 @@
 import { files as DropboxFiles } from 'dropbox/types/dropbox_types';
 import { omit } from 'ramda';
 
-import { SettingValueType, SettingKey } from '@enums/setting-key';
-import { SeenNewsItem } from '@interfaces/seen-news-item';
-import { getJsonFromDropbox, saveJsonToDropbox } from '@services/dropbox-service';
+import { SettingValueType, SettingKey } from '@/enums/setting-key';
+import { SeenNewsItem } from '@/interfaces/seen-news-item';
+import { getJsonFromDropbox, saveJsonToDropbox } from '@/services/dropbox-service';
 
 const settingValuesFilename = 'settings.json';
 const seenNewsFilename = 'seenNews.json';
@@ -21,6 +21,6 @@ export function saveSettingsToDropbox(settings: Partial<SettingValueType>): Prom
   return saveJsonToDropbox(settingValuesFilename, settingsWithoutToken);
 }
 
-export function saveSeenNewsToDropbox(seenNews: SeenNewsItem[]): Promise<DropboxFiles.FileMetadata | void> {
+export function saveSeenNewsToDropbox(seenNews: SeenNewsItem[]): Promise<DropboxFiles.FileMetadata> {
   return saveJsonToDropbox(seenNewsFilename, seenNews);
 }

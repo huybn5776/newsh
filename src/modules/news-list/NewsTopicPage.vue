@@ -8,7 +8,7 @@
       v-for="(news, newsIndex) of newsTopic?.newsItems"
       :key="news.url"
       :news="news"
-      :related-expanded="!isMobile && newsIndex === 0"
+      :relatedExpanded="!isMobile && newsIndex === 0"
     />
     <DotsLoader v-if="isLoading" />
     <NextTopicSelection
@@ -25,18 +25,18 @@ import { ref, onMounted, watch } from 'vue';
 
 import { useRoute, useRouter } from 'vue-router';
 
-import DotsLoader from '@components/DotsLoader/DotsLoader.vue';
-import { useAutoSyncWithDropbox } from '@compositions/use-auto-sync-with-dropbox';
-import { useIsMobile } from '@compositions/use-is-mobile';
-import { SettingKey } from '@enums/setting-key';
-import { NewsTopicItem } from '@interfaces/news-topic-item';
-import NewsItemCard from '@modules/news-list/components/NewsItemCard/NewsItemCard.vue';
-import NextTopicSelection from '@modules/news-list/components/NextTopicSelection/NextTopicSelection.vue';
-import { useNewsRequest } from '@modules/news-list/compositions/use-news-request';
-import { useProvideSeenNews } from '@modules/news-list/compositions/use-provide-seen-news';
-import { getSettingFromStorage } from '@services/setting-service';
+import DotsLoader from '@/components/DotsLoader/DotsLoader.vue';
+import { useAutoSyncWithDropbox } from '@/compositions/use-auto-sync-with-dropbox';
+import { useIsMobile } from '@/compositions/use-is-mobile';
+import { SettingKey } from '@/enums/setting-key';
+import { NewsTopicItem } from '@/interfaces/news-topic-item';
+import NewsItemCard from '@/modules/news-list/components/NewsItemCard/NewsItemCard.vue';
+import NextTopicSelection from '@/modules/news-list/components/NextTopicSelection/NextTopicSelection.vue';
+import { useNewsRequest } from '@/modules/news-list/compositions/use-news-request';
+import { useProvideSeenNews } from '@/modules/news-list/compositions/use-provide-seen-news';
+import { getSettingFromStorage } from '@/services/setting-service';
 
-const allTopicsInfo = ref(getSettingFromStorage(SettingKey.AllTopicsInfo) || []);
+const allTopicsInfo = ref(getSettingFromStorage(SettingKey.AllTopicsInfo) ?? []);
 const newsTopicName = ref<string>();
 const newsTopic = ref<NewsTopicItem>();
 
@@ -69,5 +69,5 @@ function goToTopic(topicId: string): void {
 </script>
 
 <style lang="scss" scoped>
-@import './NewsTopicPage';
+@forward './NewsTopicPage';
 </style>

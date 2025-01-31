@@ -10,9 +10,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-import { NewsItem } from '@interfaces/news-item';
-import NewsDropdown from '@modules/news-list/components/NewsDropdown/NewsDropdown.vue';
-import { formatToTimeAgo } from '@utils/time-ago';
+import { NewsItem } from '@/interfaces/news-item';
+import NewsDropdown from '@/modules/news-list/components/NewsDropdown/NewsDropdown.vue';
+import { formatToTimeAgo } from '@/utils/time-ago';
 
 const props = defineProps<{ news: NewsItem }>();
 
@@ -21,5 +21,5 @@ const timeAgo = computed(() => formatToTimeAgo(props.news.timestamp));
 </script>
 
 <style lang="scss" scoped>
-@import './NewsInfoBar';
+@forward './NewsInfoBar';
 </style>

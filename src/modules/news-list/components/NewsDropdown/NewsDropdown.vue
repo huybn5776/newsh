@@ -11,8 +11,8 @@ import { h } from 'vue';
 import { NDropdown } from 'naive-ui';
 import { DropdownMixedOption } from 'naive-ui/lib/dropdown/src/interface';
 
-import { NewsItem } from '@interfaces/news-item';
-import { useAddNewsFilterDialog } from '@modules/news-list/compositions/use-add-news-filter-dialog';
+import { NewsItem } from '@/interfaces/news-item';
+import { useAddNewsFilterDialog } from '@/modules/news-list/compositions/use-add-news-filter-dialog';
 
 const menuActions: Record<string, Omit<DropdownMixedOption, 'key'> & { action: () => void }> = {
   hideNews: {
@@ -37,5 +37,5 @@ function onDropdownSelect(key: string): void {
 </script>
 
 <style lang="scss" scoped>
-@import './NewsDropdown';
+@forward './NewsDropdown';
 </style>

@@ -6,6 +6,7 @@
     maxlength="2"
     min="1"
     max="99"
+    aria-label="days"
     :placeholder="placeholder"
     :disabled="disabled"
     @click.stop
@@ -22,9 +23,9 @@ const props = defineProps<{
   placeholder: string;
   disabled: boolean | undefined;
 }>();
-const emits = defineEmits<{ (e: 'update:modelValue', value: number | undefined): void }>();
+const emit = defineEmits<{ (e: 'update:modelValue', value: number | undefined): void }>();
 
-const days = useVModel(props, 'modelValue', emits);
+const days = useVModel(props, 'modelValue', emit);
 
 function selectAll(event: Event): void {
   (event.target as HTMLInputElement).select();
@@ -38,5 +39,5 @@ function onHiddenDaysChange(): void {
 </script>
 
 <style lang="scss" scoped>
-@import './SettingDaysInput';
+@forward './SettingDaysInput';
 </style>

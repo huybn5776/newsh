@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-import { NewsItem } from '@interfaces/news-item';
-import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { RegionItem } from '@interfaces/region-item';
+import { NewsItem } from '@/interfaces/news-item';
+import { NewsTopicItem } from '@/interfaces/news-topic-item';
+import { RegionItem } from '@/interfaces/region-item';
 
 enum NewsObjectType {
   MultiNewsGroup = 2,
@@ -55,14 +55,13 @@ type NewsObjectRaw = [number] & [unknown, NewsObjectRaw | NewsObjectRaw[] | stri
 
 export async function getSingleTopicNews(topicId: string, languageAndRegion: string): Promise<NewsTopicItem> {
   const responseArray = await fetchNews(requestBodyByTopic(topicId, languageAndRegion));
-  const newsArray = JSON.parse(
-    responseArray.find((array: string[]) => array[1] === 'Ntv0se')?.[2] || '[]',
+  const newsTopicObject = JSON.parse(
+    responseArray.find((array: string[]) => array[1] === 'Ntv0se')?.[2] ?? '[]',
   )[1][2] as NewsObjectRaw;
   const infoArray = JSON.parse(
-    responseArray.find((array: string[]) => array[1] === 'YOVgSd')?.[2] || '[]',
+    responseArray.find((array: string[]) => array[1] === 'YOVgSd')?.[2] ?? '[]',
   )[1][1] as NewsObjectRaw;
 
-  const newsTopicObject = newsArray as NewsObjectRaw;
   const newsTopicItem = { ...parseNewsTopic(newsTopicObject), isPartial: false };
   newsTopicItem.name = infoArray?.[2] || newsTopicItem.name;
   return newsTopicItem;
@@ -72,7 +71,7 @@ export async function getSectionTopicNews(topicId: string, languageAndRegion: st
   const requestBody = sectionRequestBody(topicId, languageAndRegion);
   const responseArray = await fetchNews(requestBody);
   const newsArray = JSON.parse(
-    responseArray.find((array: string[]) => array[1] === 'gdtgie')?.[2] || '[]',
+    responseArray.find((array: string[]) => array[1] === 'gdtgie')?.[2] ?? '[]',
   )[1][2] as NewsObjectRaw;
 
   return {
@@ -87,7 +86,7 @@ export async function getTopicInfo(topicId: string, languageAndRegion: string): 
   const requestBody = topicInfoBody(topicId, languageAndRegion);
   const responseArray = await fetchNews(requestBody);
   const infoArray = JSON.parse(
-    responseArray.find((array: string[]) => array[1] === 'YOVgSd')?.[2] || '[]',
+    responseArray.find((array: string[]) => array[1] === 'YOVgSd')?.[2] ?? '[]',
   )[1][1] as NewsObjectRaw;
   const topicName: string | undefined = infoArray?.[2];
   return { name: topicName };

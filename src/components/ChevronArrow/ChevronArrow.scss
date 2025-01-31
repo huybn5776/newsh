@@ -6,20 +6,22 @@
   height: 32px;
   padding: 10px;
   cursor: pointer;
+  background: inherit;
+  border: 0;
 
   @keyframes blink-left {
     from,
     90%,
     94% {
-      clip-path: ellipse(6% 6% at 30% 22%);
       opacity: 1;
+      clip-path: ellipse(6% 6% at 30% 22%);
     }
 
     92%,
     96%,
     to {
-      clip-path: ellipse(7% 2% at 30% 22%);
       opacity: 1;
+      clip-path: ellipse(7% 2% at 30% 22%);
     }
   }
 
@@ -27,15 +29,15 @@
     from,
     90%,
     94% {
-      clip-path: ellipse(6% 6% at 70% 22%);
       opacity: 1;
+      clip-path: ellipse(6% 6% at 70% 22%);
     }
 
     92%,
     96%,
     to {
-      clip-path: ellipse(7% 2% at 70% 22%);
       opacity: 1;
+      clip-path: ellipse(7% 2% at 70% 22%);
     }
   }
 

@@ -2,8 +2,8 @@ import { onMounted, ref, Ref } from 'vue';
 
 import { useRoute, useRouter } from 'vue-router';
 
-import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
-import { getAuthCodeFromUrl, getDropboxTokenFromAuthCode, setTokenIntoDropboxAuth } from '@services/dropbox-service';
+import { DropboxTokenInfo } from '@/interfaces/dropbox-token-info';
+import { getAuthCodeFromUrl, getDropboxTokenFromAuthCode, setTokenIntoDropboxAuth } from '@/services/dropbox-service';
 
 export function useCatchDropboxTokenFromUrl(onToken: (token: DropboxTokenInfo) => void): { loading: Ref<boolean> } {
   const route = useRoute();

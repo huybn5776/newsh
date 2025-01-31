@@ -12,5 +12,5 @@ export function useValueSample<T>(source: Ref<UnwrapRef<T>>, open: Ref<boolean>)
     }
   }
 
-  return sampleResult;
+  return sampleResult as Ref<UnwrapRef<T>>;
 }

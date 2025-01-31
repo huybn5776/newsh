@@ -21,17 +21,17 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
 
-import DotsLoader from '@components/DotsLoader/DotsLoader.vue';
-import { useAutoSyncWithDropbox } from '@compositions/use-auto-sync-with-dropbox';
-import { useIsMobile } from '@compositions/use-is-mobile';
-import { SettingKey } from '@enums/setting-key';
-import { NewsItem } from '@interfaces/news-item';
-import { NewsTopicInfo } from '@interfaces/news-topic-info';
-import { NewsTopicItem } from '@interfaces/news-topic-item';
-import NewsTopics from '@modules/news-list/components/NewsTopics/NewsTopics.vue';
-import NextTopicSelection from '@modules/news-list/components/NextTopicSelection/NextTopicSelection.vue';
-import { useNewsRequest } from '@modules/news-list/compositions/use-news-request';
-import { useProvideSeenNews } from '@modules/news-list/compositions/use-provide-seen-news';
+import DotsLoader from '@/components/DotsLoader/DotsLoader.vue';
+import { useAutoSyncWithDropbox } from '@/compositions/use-auto-sync-with-dropbox';
+import { useIsMobile } from '@/compositions/use-is-mobile';
+import { SettingKey } from '@/enums/setting-key';
+import { NewsItem } from '@/interfaces/news-item';
+import { NewsTopicInfo } from '@/interfaces/news-topic-info';
+import { NewsTopicItem } from '@/interfaces/news-topic-item';
+import NewsTopics from '@/modules/news-list/components/NewsTopics/NewsTopics.vue';
+import NextTopicSelection from '@/modules/news-list/components/NextTopicSelection/NextTopicSelection.vue';
+import { useNewsRequest } from '@/modules/news-list/compositions/use-news-request';
+import { useProvideSeenNews } from '@/modules/news-list/compositions/use-provide-seen-news';
 import {
   removeByNewsSource,
   removeByNewsUrlMatch,
@@ -39,9 +39,9 @@ import {
   removeDuplicatedNewsItemOfTopics,
   removeYoutubeNews,
   removeByTitleLength,
-} from '@modules/news-list/services/news-filter-service';
-import { getSettingFromStorage } from '@services/setting-service';
-import { isNotNilOrEmpty } from '@utils/object-utils';
+} from '@/modules/news-list/services/news-filter-service';
+import { getSettingFromStorage } from '@/services/setting-service';
+import { isNotNilOrEmpty } from '@/utils/object-utils';
 
 const newsTopics = ref<NewsTopicItem[]>([]);
 const newsLoaders = ref<(() => Promise<NewsTopicItem[]>)[]>([]);
@@ -102,7 +102,7 @@ async function loadNews(): Promise<void> {
     ...(newsTopicsAfterTopStories?.map((topic) => async () => {
       loadedTopics.value = { ...loadedTopics.value, [topic.id]: true };
       return [await getNonDuplicatedNewsTopic(topic)];
-    }) || []),
+    }) ?? []),
   ];
   await loadNextTopic();
 }

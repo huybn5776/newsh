@@ -1,6 +1,6 @@
 import { onUnmounted } from 'vue';
 
-import { emitter, EventTypes } from '@services/emitter-service';
+import { emitter, EventTypes } from '@/services/emitter-service';
 
 export function useMitt(): { emitter: typeof emitter; onEvent: typeof onEvent; unsubscribeAllEvents: () => void } {
   let unsubscribeFunctions: (() => void)[] = [];

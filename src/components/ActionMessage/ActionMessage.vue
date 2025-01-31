@@ -1,7 +1,7 @@
 <template>
   <div class="action-message-container">
     {{ content }}
-    <NButton color="#8ab4f8" quaternary @click="emits('click')">{{ action }}</NButton>
+    <NButton color="#8ab4f8" quaternary @click="emit('click')">{{ action }}</NButton>
   </div>
 </template>
 
@@ -9,9 +9,9 @@
 import { NButton } from 'naive-ui';
 
 defineProps<{ content: string; action: string }>();
-const emits = defineEmits<{ (e: 'click'): void }>();
+const emit = defineEmits<{ (e: 'click'): void }>();
 </script>
 
 <style lang="scss" scoped>
-@import './ActionMessage';
+@forward './ActionMessage';
 </style>

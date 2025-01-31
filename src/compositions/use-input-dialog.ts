@@ -3,8 +3,8 @@ import { ref, h, watch, RendererElement, RendererNode, VNode } from 'vue';
 import { useDialog, DialogReactive, DialogOptions, NInput, InputProps } from 'naive-ui';
 import { takeUntil, Subject } from 'rxjs';
 
-import { useHotkey } from '@compositions/use-hotkey';
-import { wrapOnDialogCloseEvents } from '@utils/dialog-utils';
+import { useHotkey } from '@/compositions/use-hotkey';
+import { wrapOnDialogCloseEvents } from '@/utils/dialog-utils';
 
 export function useInputDialog(): {
   open: (
@@ -13,7 +13,7 @@ export function useInputDialog(): {
       value: string;
       inputType?: 'text' | 'textarea';
       minRows?: number;
-      beforeClose?: (value: string) => (boolean | void) | Promise<boolean | void>;
+      beforeClose?: (value: string) => (boolean | undefined) | Promise<boolean | undefined>;
       onValue?: (value: string) => void;
     } & DialogOptions,
   ) => DialogReactive;
@@ -47,9 +47,9 @@ export function useInputDialog(): {
     open: ({ placeholder, value, inputType, minRows, onValue, beforeClose, ...options }) => {
       inputValue.value = value;
 
-      const beforeSubmitCheck = async (): Promise<boolean | void> => {
+      const beforeSubmitCheck = async (): Promise<boolean | undefined> => {
         const beforeCloseResult = beforeClose?.(inputValue.value);
-        let canClose: boolean | void;
+        let canClose: boolean | undefined;
         if (beforeCloseResult instanceof Promise) {
           loading.value = true;
           canClose = await beforeCloseResult;
@@ -94,7 +94,7 @@ export function useInputDialog(): {
             type: inputType,
             autosize: inputType === 'textarea' ? { minRows } : false,
             disabled: loading.value,
-            status: isInvalid.value === true ? 'error' : undefined,
+            status: isInvalid.value ? 'error' : undefined,
           }),
         negativeText: 'Close',
         positiveText: 'Ok',

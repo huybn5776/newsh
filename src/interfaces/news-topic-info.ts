@@ -1,4 +1,4 @@
-import { NewsTopicType } from '@enums/news-topic-type';
+import { NewsTopicType } from '@/enums/news-topic-type';
 
 export interface NewsTopicInfo {
   id: string;

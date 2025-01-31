@@ -1,6 +1,6 @@
 import { Observable, fromEvent, filter } from 'rxjs';
 
-import { useUntilDestroyed } from '@compositions/use-until-destroyed';
+import { useUntilDestroyed } from '@/compositions/use-until-destroyed';
 
 export function useHotkey(): {
   listenForKey: (match: string | ((event: KeyboardEvent) => boolean)) => Observable<KeyboardEvent>;

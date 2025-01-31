@@ -1,7 +1,7 @@
 <template>
-  <div class="chevron-arrow-container" @click="toggleDirection">
+  <button class="chevron-arrow-container" @click="toggleDirection">
     <i class="chevron-arrow" :class="direction"></i>
-  </div>
+  </button>
 </template>
 
 <script lang="ts" setup>
@@ -13,7 +13,7 @@ const props = defineProps({
     default: () => 'down',
   },
 });
-const emits = defineEmits<{ (direction: 'update:direction', value: 'up' | 'down'): void }>();
+const emit = defineEmits<{ (direction: 'update:direction', value: 'up' | 'down'): void }>();
 
 const direction = ref(props.direction);
 
@@ -24,10 +24,10 @@ watch(
 
 function toggleDirection(): void {
   direction.value = direction.value === 'up' ? 'down' : 'up';
-  emits('update:direction', direction.value);
+  emit('update:direction', direction.value);
 }
 </script>
 
 <style lang="scss" scoped>
-@import './ChevronArrow';
+@forward './ChevronArrow';
 </style>

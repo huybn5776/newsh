@@ -1,4 +1,4 @@
-import { SeenNewsItem } from '@interfaces/seen-news-item';
+import { SeenNewsItem } from '@/interfaces/seen-news-item';
 
 export enum EventKey {
   RemoteSeenNews = 'remoteSeenNews',

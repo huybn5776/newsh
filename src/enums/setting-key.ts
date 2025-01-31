@@ -1,6 +1,6 @@
-import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
-import { NewsTopicInfo } from '@interfaces/news-topic-info';
-import { SeenNewsItem } from '@interfaces/seen-news-item';
+import { DropboxTokenInfo } from '@/interfaces/dropbox-token-info';
+import { NewsTopicInfo } from '@/interfaces/news-topic-info';
+import { SeenNewsItem } from '@/interfaces/seen-news-item';
 
 export enum SettingKey {
   CollapsedTopics = 'collapsedTopics',

@@ -5,5 +5,5 @@
 </template>
 
 <style lang="scss" scoped>
-@import './DotsLoader';
+@forward './DotsLoader';
 </style>

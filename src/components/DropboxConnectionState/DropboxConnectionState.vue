@@ -8,7 +8,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
+import { DropboxTokenInfo } from '@/interfaces/dropbox-token-info';
 
 const props = defineProps<{ dropboxToken: DropboxTokenInfo | null; loading?: boolean }>();
 

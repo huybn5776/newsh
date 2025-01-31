@@ -50,19 +50,19 @@
 <script lang="ts" setup>
 import { ref, computed, inject, watch } from 'vue';
 
+import ChevronArrow from '@/components/ChevronArrow/ChevronArrow.vue';
+import { useIsMobile } from '@/compositions/use-is-mobile';
+import { intersectionDirectiveFactory } from '@/directives/IntersectionDirective';
+import { NewsItem } from '@/interfaces/news-item';
+import ImageView from '@/modules/news-list/components/ImageView/ImageView.vue';
+import NewsInfoBar from '@/modules/news-list/components/NewsInfoBar/NewsInfoBar.vue';
+import { useMarkNewsAsSeen } from '@/modules/news-list/compositions/use-mark-news-as-seen';
+import { isNewsItemExists } from '@/modules/news-list/services/news-filter-service';
 import { provideSeenNewsInjectKey, provideHiddenSeenNewsSettingKey } from '@/symbols';
-import ChevronArrow from '@components/ChevronArrow/ChevronArrow.vue';
-import { useIsMobile } from '@compositions/use-is-mobile';
-import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
-import { NewsItem } from '@interfaces/news-item';
-import ImageView from '@modules/news-list/components/ImageView/ImageView.vue';
-import NewsInfoBar from '@modules/news-list/components/NewsInfoBar/NewsInfoBar.vue';
-import { useMarkNewsAsSeen } from '@modules/news-list/compositions/use-mark-news-as-seen';
-import { isNewsItemExists } from '@modules/news-list/services/news-filter-service';
-import { injectStrict } from '@utils/inject-utils';
+import { injectStrict } from '@/utils/inject-utils';
 
 const props = defineProps<{ news: NewsItem; relatedExpanded?: boolean }>();
-const emits = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean): void }>();
+const emit = defineEmits<{ (direction: 'update:relatedExpanded', value: boolean): void }>();
 const vIntersection = intersectionDirectiveFactory({ threshold: 1 });
 
 const hideSeenNewsEnabled = inject(provideHiddenSeenNewsSettingKey);
@@ -73,12 +73,12 @@ const expandedDirection = computed<'up' | 'down'>(() => (expanded.value ? 'up' :
 const hasRelatedNews = computed(() => props.news.relatedNewsItems?.length);
 const isMobile = useIsMobile();
 const expandable = computed(
-  () => hasRelatedNews.value && ((props.news.relatedNewsItems?.length || 0) > 1 || isMobile.value),
+  () => hasRelatedNews.value && ((props.news.relatedNewsItems?.length ?? 0) > 1 || isMobile.value),
 );
 
 const newsItemSeen = computed(() => isNewsItemExists(seenNewsIndex.value, props.news));
 const relatedNewsItemSeen = computed(() =>
-  (props.news.relatedNewsItems || []).map((news) => isNewsItemExists(seenNewsIndex.value, news)),
+  (props.news.relatedNewsItems ?? []).map((news) => isNewsItemExists(seenNewsIndex.value, news)),
 );
 
 const markNewsSeenCallback = useMarkNewsAsSeen(seenNewsIndex);
@@ -98,10 +98,10 @@ function onNewsLeave(newsItem: NewsItem): void {
 
 function onExpandDirectionChange(direction: 'up' | 'down'): void {
   expanded.value = direction === 'up';
-  emits('update:relatedExpanded', expanded.value);
+  emit('update:relatedExpanded', expanded.value);
 }
 </script>
 
 <style lang="scss" scoped>
-@import './NewsItemCard';
+@forward './NewsItemCard';
 </style>

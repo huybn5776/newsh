@@ -12,9 +12,9 @@ import { useVModel } from '@vueuse/core';
 import { NSwitch } from 'naive-ui';
 
 const props = defineProps<{ value?: boolean | undefined; loading?: boolean; disabled?: boolean }>();
-const emits = defineEmits<{ (e: 'update:value', value: boolean): void }>();
+const emit = defineEmits<{ (e: 'update:value', value: boolean): void }>();
 
-const checked = useVModel(props, 'value', emits);
+const checked = useVModel(props, 'value', emit);
 const switchRowRef = ref<HTMLElement>();
 
 function onSwitchRowClick(event: MouseEvent): void {
@@ -37,6 +37,6 @@ function isClickOnSwitch(event: MouseEvent): boolean {
 </script>
 
 <style lang="scss" scoped>
-@import './SwitchRow';
-@import '../../settings';
+@forward './SwitchRow';
+@forward '../../settings';
 </style>

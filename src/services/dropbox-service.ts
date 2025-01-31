@@ -1,11 +1,11 @@
 import { Dropbox, DropboxAuth, files as DropboxFiles } from 'dropbox';
 
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey } from '@enums/setting-key';
-import { DropboxApiError } from '@interfaces/dropbox-api-error';
-import { DropboxTokenInfo } from '@interfaces/dropbox-token-info';
-import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
-import { readBlobAsJson } from '@utils/browser-utils';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingKey } from '@/enums/setting-key';
+import { DropboxApiError } from '@/interfaces/dropbox-api-error';
+import { DropboxTokenInfo } from '@/interfaces/dropbox-token-info';
+import { saveSettingToStorage, getSettingFromStorage } from '@/services/setting-service';
+import { readBlobAsJson } from '@/utils/browser-utils';
 
 export type DropboxFile = DropboxFiles.FileMetadata & { fileBlob: Blob };
 
@@ -51,7 +51,7 @@ export async function createDropboxAuthUrl(redirectUri: string): Promise<string>
 export async function getDropboxTokenFromAuthCode(redirectUri: string, authCode: string): Promise<DropboxTokenInfo> {
   const dbxAuth = getDropboxAuth();
   const codeVerifier = window.sessionStorage.getItem('dropboxCodeVerifier');
-  dbxAuth.setCodeVerifier(codeVerifier as string);
+  dbxAuth.setCodeVerifier(codeVerifier!);
   const response = await dbxAuth.getAccessTokenFromCode(redirectUri, authCode);
   const result = response.result as Record<string, string>;
 
@@ -59,12 +59,12 @@ export async function getDropboxTokenFromAuthCode(redirectUri: string, authCode:
   expiresAt.setSeconds(expiresAt.getSeconds() + +result.expires_in);
 
   return {
-    accessToken: result.access_token as string,
-    accountId: result.account_id as string,
+    accessToken: result.access_token,
+    accountId: result.account_id,
     expiresAt: expiresAt.getTime(),
     refreshToken: result.refresh_token,
     scope: result.scope.split(' '),
-    tokenType: result.token_type as string,
+    tokenType: result.token_type,
     uid: result.uid,
   };
 }
@@ -80,17 +80,17 @@ export function getAuthCodeFromUrl(): string | null {
   return new URLSearchParams(window.location.search).get('code');
 }
 
-export async function refreshDropboxTokenIfNeeded(): Promise<DropboxTokenInfo | null> {
+export function refreshDropboxTokenIfNeeded(): DropboxTokenInfo | null {
   const dbxAuth = getDropboxAuth();
   const orgToken = dbxAuth.getAccessToken();
-  await dbxAuth.checkAndRefreshAccessToken();
+  dbxAuth.checkAndRefreshAccessToken();
   const newToken = dbxAuth.getAccessToken();
   if (orgToken === newToken) {
     return null;
   }
 
   const updatedTokenInfo: DropboxTokenInfo = {
-    ...(getSettingFromStorage(SettingKey.DropboxToken) as DropboxTokenInfo),
+    ...getSettingFromStorage(SettingKey.DropboxToken)!,
     accessToken: newToken,
     expiresAt: dbxAuth.getAccessTokenExpiresAt().getTime(),
   };

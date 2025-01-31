@@ -1,8 +1,8 @@
-import { NewsIndex } from '@interfaces/news-index';
-import { NewsItem } from '@interfaces/news-item';
-import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { SeenNewsItem } from '@interfaces/seen-news-item';
-import { trimNewsTitle } from '@services/news-service';
+import { NewsIndex } from '@/interfaces/news-index';
+import { NewsItem } from '@/interfaces/news-item';
+import { NewsTopicItem } from '@/interfaces/news-topic-item';
+import { SeenNewsItem } from '@/interfaces/seen-news-item';
+import { trimNewsTitle } from '@/services/news-service';
 
 export function removeYoutubeNews(): (newsTopicItem: NewsTopicItem) => NewsTopicItem {
   return removeNewsOfTopicBy((news) => news.url.includes('youtube'));
@@ -43,7 +43,7 @@ export function removeDuplicatedNewsItemOfTopics(
 
   return newsTopicItems.map((newsTopicItem, index) => {
     const newsRemover = removeNewsItemBy((news) => isNewsItemExists(newsIndex, news));
-    const newsItems = newsTopicItem.newsItems.flatMap((newsItem) => newsRemover(newsItem) || []);
+    const newsItems = newsTopicItem.newsItems.flatMap((newsItem) => newsRemover(newsItem) ?? []);
     const allNewsItemsOfTopic = getAllNewsItemFromTopics([newsTopicItem]);
     const hasNext = index !== newsTopicItems.length - 1;
     if (hasNext) {
@@ -78,7 +78,7 @@ function removeNewsOfTopicBy(
 function getAllNewsItemFromTopics(newsTopicItems: NewsTopicItem[]): NewsItem[] {
   return newsTopicItems.flatMap((topic) => [
     ...topic.newsItems,
-    ...topic.newsItems.flatMap((news) => (news.relatedNewsItems || []) as NewsItem[]),
+    ...topic.newsItems.flatMap((news) => news.relatedNewsItems ?? []),
   ]);
 }
 

@@ -6,5 +6,5 @@
 </template>
 
 <style lang="scss" scoped>
-@import './NavBar';
+@forward './NavBar';
 </style>

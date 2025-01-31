@@ -2,13 +2,13 @@ import * as E from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import { TaskEither } from 'fp-ts/TaskEither';
 
-import { getMultiTopicNews, getSectionTopicNews, getTopicInfo, getSingleTopicNews } from '@api/google-news-api';
-import { NewsTopicType } from '@enums/news-topic-type';
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey } from '@enums/setting-key';
-import { NewsTopicInfo } from '@interfaces/news-topic-info';
-import { NewsTopicItem } from '@interfaces/news-topic-item';
-import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
+import { getMultiTopicNews, getSectionTopicNews, getTopicInfo, getSingleTopicNews } from '@/api/google-news-api';
+import { NewsTopicType } from '@/enums/news-topic-type';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingKey } from '@/enums/setting-key';
+import { NewsTopicInfo } from '@/interfaces/news-topic-info';
+import { NewsTopicItem } from '@/interfaces/news-topic-item';
+import { saveSettingToStorage, getSettingFromStorage } from '@/services/setting-service';
 
 export async function prepareNewsInfo(languageAndRegion: string): Promise<void> {
   const topicItems: NewsTopicItem[] = (
@@ -57,7 +57,7 @@ export function getPublicationIdAndSectionIdFromUrl(
     return E.left(`Publication topic should start with '/publications'.`);
   }
   const topicId = sectionId || publicationId;
-  const allTopics = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
+  const allTopics = getSettingFromStorage(SettingKey.AllTopicsInfo) ?? [];
   const existingTopic = allTopics.find((topic) => topic.id === topicId);
   if (existingTopic) {
     return E.left(`Topic '${existingTopic.name}' is already exists.`);
@@ -75,7 +75,7 @@ export function tryGetNewsItem(
     async () =>
       (sectionId && (await fetchSectionTopicInfo(publicationId, sectionId, region))) ||
       (publicationId && (await fetchSingleTopicInfo(publicationId, region))) ||
-      Promise.reject(),
+      Promise.reject(new Error('Fail to get news from this url.')),
     () => 'Fail to get news from this url.',
   );
 }

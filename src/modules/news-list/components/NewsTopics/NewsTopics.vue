@@ -1,8 +1,8 @@
 <template>
   <NCollapse
     class="news-topic-collapse"
-    :default-expanded-names="topicsToShow"
-    @item-header-click="onNewsTopicToggleExpand"
+    :defaultExpandedNames="topicsToShow"
+    @itemHeaderClick="onNewsTopicToggleExpand"
   >
     <div v-for="topic of newsTopics" :key="topic.name" class="news-topic-collapse-item-container">
       <router-link
@@ -16,7 +16,7 @@
       <NCollapseItem class="news-topic-section" :name="topic.id" :data-topic-id="topic.id">
         <template #header>
           <div class="news-topic-header">
-            <h2 v-intersection="{ enter: () => emits('newsTopicEntered', topic.id) }" class="news-topic-title">
+            <h2 v-intersection="{ enter: () => emit('newsTopicEntered', topic.id) }" class="news-topic-title">
               {{ topic.name }}
             </h2>
           </div>
@@ -25,12 +25,12 @@
           v-for="news of topic.newsItems"
           :key="news.url"
           :news="news"
-          :related-expanded="expandedNews[`${topic.id}-${news.url}`]"
+          :relatedExpanded="expandedNews[`${topic.id}-${news.url}`]"
           :data-url="news.url"
           @update:relatedExpanded="onNewsExpandChanged(topic.id, news.url, $event)"
         />
         <div v-if="showMoreLink && topic.isPartial" class="news-topic-load-all-container">
-          <NButton :disabled="loadingTopics[topic.id]" @click="emits('loadMore', topic.id)">
+          <NButton :disabled="loadingTopics[topic.id]" @click="emit('loadMore', topic.id)">
             Load all news of this topic
           </NButton>
         </div>
@@ -44,13 +44,13 @@ import { ref, onMounted, watch } from 'vue';
 
 import { NButton, NCollapse, NCollapseItem } from 'naive-ui';
 
-import { intersectionDirectiveFactory } from '@directives/IntersectionDirective';
-import { SettingKey } from '@enums/setting-key';
-import { NewsTopicItem } from '@interfaces/news-topic-item';
-import NewsItemCard from '@modules/news-list/components/NewsItemCard/NewsItemCard.vue';
-import { useTopicsToShow } from '@modules/news-list/compositions/use-topics-to-show';
-import { getSettingFromStorage } from '@services/setting-service';
-import { listenForKeyUntilUnmounted } from '@utils/keyboard-event-utils';
+import { intersectionDirectiveFactory } from '@/directives/IntersectionDirective';
+import { SettingKey } from '@/enums/setting-key';
+import { NewsTopicItem } from '@/interfaces/news-topic-item';
+import NewsItemCard from '@/modules/news-list/components/NewsItemCard/NewsItemCard.vue';
+import { useTopicsToShow } from '@/modules/news-list/compositions/use-topics-to-show';
+import { getSettingFromStorage } from '@/services/setting-service';
+import { listenForKeyUntilUnmounted } from '@/utils/keyboard-event-utils';
 
 const vIntersection = intersectionDirectiveFactory();
 const { topicsToShow, addTopicToShow, deleteTopicToShow } = useTopicsToShow();
@@ -69,7 +69,7 @@ const props = defineProps<{
   expandFirstNews: boolean;
   loadingTopics: Record<string, true>;
 }>();
-const emits = defineEmits<{
+const emit = defineEmits<{
   (e: 'newsTopicEntered', id: string): void;
   (e: 'loadMore', id: string): void;
 }>();
@@ -129,5 +129,5 @@ function onNewsExpandChanged(topicId: string, newsUrl: string, expanded: boolean
 </script>
 
 <style lang="scss" scoped>
-@import './NewsTopics';
+@forward './NewsTopics';
 </style>

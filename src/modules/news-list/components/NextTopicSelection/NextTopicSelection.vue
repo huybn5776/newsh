@@ -8,7 +8,7 @@
         :key="topic.id"
         class="next-topic-button"
         :disabled="disabledTopics[topic.id]"
-        @click="emits('topicClick', topic.id)"
+        @click="emit('topicClick', topic.id)"
       >
         {{ topic.name }}
       </NButton>
@@ -19,15 +19,15 @@
 <script lang="ts" setup>
 import { NButton } from 'naive-ui';
 
-import { SettingKey } from '@enums/setting-key';
-import { getSettingFromStorage } from '@services/setting-service';
+import { SettingKey } from '@/enums/setting-key';
+import { getSettingFromStorage } from '@/services/setting-service';
 
 defineProps<{ title: string; disabledTopics: Record<string, true> }>();
-const emits = defineEmits<{ (e: 'topicClick', value: string): void }>();
+const emit = defineEmits<{ (e: 'topicClick', value: string): void }>();
 
 const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
 </script>
 
 <style lang="scss" scoped>
-@import './NextTopicSelection';
+@forward './NextTopicSelection';
 </style>

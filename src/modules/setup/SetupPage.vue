@@ -7,7 +7,7 @@
     <RegionSelection
       v-else
       v-model="selectedRegion"
-      :region-selections="regionSelections"
+      :regionSelections="regionSelections"
       :cancelable="cancelable"
       :disableOkButton="loading"
       @negativeClick="toNextPage"
@@ -22,13 +22,13 @@ import { onMounted, ref, onUnmounted } from 'vue';
 import { useMessage, useLoadingBar, NSpin } from 'naive-ui';
 import { useRouter, useRoute } from 'vue-router';
 
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey } from '@enums/setting-key';
-import { SelectionItem } from '@interfaces/selection-item';
-import RegionSelection from '@modules/setup/components/RegionSelection/RegionSelection.vue';
-import { prepareNewsInfo } from '@services/news-service';
-import { getRegionSelections } from '@services/region-service';
-import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingKey } from '@/enums/setting-key';
+import { SelectionItem } from '@/interfaces/selection-item';
+import RegionSelection from '@/modules/setup/components/RegionSelection/RegionSelection.vue';
+import { prepareNewsInfo } from '@/services/news-service';
+import { getRegionSelections } from '@/services/region-service';
+import { saveSettingToStorage, getSettingFromStorage } from '@/services/setting-service';
 
 const showSetupLoader = ref(true);
 const selectedRegion = ref<string>();
@@ -99,5 +99,5 @@ function saveRegionSetting(languageAndRegion: string, label: string | undefined)
 </script>
 
 <style lang="scss" scoped>
-@import './SetupPage';
+@forward './SetupPage';
 </style>

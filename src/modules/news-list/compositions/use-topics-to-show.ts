@@ -1,8 +1,8 @@
 import { ref, Ref } from 'vue';
 
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey } from '@enums/setting-key';
-import { saveSettingToStorage, getSettingFromStorage } from '@services/setting-service';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingKey } from '@/enums/setting-key';
+import { saveSettingToStorage, getSettingFromStorage } from '@/services/setting-service';
 
 export function useTopicsToShow(): {
   topicsToShow: Ref<string[]>;
@@ -25,7 +25,7 @@ export function useTopicsToShow(): {
 }
 
 function getTopicsToShow(): string[] {
-  const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
+  const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) ?? [];
   const allTopicsId = allTopicsInfo.map((topic) => topic.id);
   const collapsedTopics = getSettingFromStorage(SettingKey.CollapsedTopics);
   if (!collapsedTopics?.length) {
@@ -35,7 +35,7 @@ function getTopicsToShow(): string[] {
 }
 
 function saveTopicsToShowSetting(topicsId: string[]): void {
-  const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) || [];
+  const allTopicsInfo = getSettingFromStorage(SettingKey.AllTopicsInfo) ?? [];
   const allTopicsId = allTopicsInfo.map((topic) => topic.id);
   const collapsedTopics = allTopicsId.filter((topicId) => !topicsId.includes(topicId));
   saveSettingToStorage(SettingKey.CollapsedTopics, collapsedTopics, SettingEventType.User);

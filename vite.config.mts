@@ -14,6 +14,7 @@ function readAliasFromTsConfig(): Alias[] {
     const replacement = path.resolve(__dirname, toPath);
     aliases.push({ find, replacement });
     return aliases;
+    // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
   }, [] as Alias[]);
 }
 

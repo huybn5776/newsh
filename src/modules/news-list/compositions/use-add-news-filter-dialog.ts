@@ -5,15 +5,15 @@ import { append } from 'ramda';
 import { Subscription, Subject, takeUntil } from 'rxjs';
 import { PickByValue } from 'utility-types';
 
-import ActionMessage from '@components/ActionMessage/ActionMessage.vue';
-import { useHotkey } from '@compositions/use-hotkey';
-import { NewsFilterType } from '@enums/news-filter-type';
-import { SettingEventType } from '@enums/setting-event-type';
-import { SettingKey, SettingValueType } from '@enums/setting-key';
-import { NewsItem } from '@interfaces/news-item';
-import AddNewsFilter from '@modules/news-list/components/AddNewsFilter/AddNewsFilter.vue';
-import { saveSettingToStorage, getSettingFromStorage, updateSettingFromStorage } from '@services/setting-service';
-import { wrapOnDialogCloseEvents } from '@utils/dialog-utils';
+import ActionMessage from '@/components/ActionMessage/ActionMessage.vue';
+import { useHotkey } from '@/compositions/use-hotkey';
+import { NewsFilterType } from '@/enums/news-filter-type';
+import { SettingEventType } from '@/enums/setting-event-type';
+import { SettingKey, SettingValueType } from '@/enums/setting-key';
+import { NewsItem } from '@/interfaces/news-item';
+import AddNewsFilter from '@/modules/news-list/components/AddNewsFilter/AddNewsFilter.vue';
+import { saveSettingToStorage, getSettingFromStorage, updateSettingFromStorage } from '@/services/setting-service';
+import { wrapOnDialogCloseEvents } from '@/utils/dialog-utils';
 
 export function useAddNewsFilterDialog(): { openAddNewsFilterDialog: (newsItem: NewsItem) => void } {
   const message = useMessage();
@@ -84,7 +84,7 @@ export function useAddNewsFilterDialog(): { openAddNewsFilterDialog: (newsItem: 
     }
   }
 
-  function addToList<K extends keyof PickByValue<SettingValueType, string[]>>(key: K, value: string): boolean {
+  function addToList(key: keyof PickByValue<SettingValueType, string[]>, value: string): boolean {
     errorMessage.value = '';
     if (!value) {
       return false;
@@ -94,7 +94,7 @@ export function useAddNewsFilterDialog(): { openAddNewsFilterDialog: (newsItem: 
       errorMessage.value = `'${value}' is already included in the list.`;
       return false;
     }
-    saveSettingToStorage(key, append(value, list || []), SettingEventType.User);
+    saveSettingToStorage(key, append(value, list ?? []), SettingEventType.User);
     const messageReactive = message.info(() =>
       h(ActionMessage, {
         content: `'${value}' has been added to the list.`,
@@ -109,8 +109,8 @@ export function useAddNewsFilterDialog(): { openAddNewsFilterDialog: (newsItem: 
     return true;
   }
 
-  function removeFromList<K extends keyof PickByValue<SettingValueType, string[]>>(key: K, value: string): void {
-    updateSettingFromStorage(key, (list) => list?.filter((v) => v !== value) || null, SettingEventType.User);
+  function removeFromList(key: keyof PickByValue<SettingValueType, string[]>, value: string): void {
+    updateSettingFromStorage(key, (list) => list?.filter((v) => v !== value) ?? null, SettingEventType.User);
   }
 
   function closeDialog(): void {

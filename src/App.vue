@@ -10,10 +10,10 @@
 </template>
 
 <script lang="ts" setup>
-import ProvidersWrapper from '@layouts/ProvidersWrapper/ProvidersWrapper.vue';
-import SiteHeader from '@layouts/SiteHeader/SiteHeader.vue';
+import ProvidersWrapper from '@/layouts/ProvidersWrapper/ProvidersWrapper.vue';
+import SiteHeader from '@/layouts/SiteHeader/SiteHeader.vue';
 </script>
 
 <style lang="scss">
-@import './App';
+@forward './App';
 </style>

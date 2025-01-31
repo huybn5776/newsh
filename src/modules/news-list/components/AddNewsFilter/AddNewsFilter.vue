@@ -1,6 +1,6 @@
 <template>
   <NRadioGroup v-model:value="selectedFilterType" class="news-filter-type">
-    <NRadio v-for="type in types" :key="type.value" :value="type.value">{{ type.label }}</NRadio>
+    <NRadio v-for="t in types" :key="t.value" :value="t.value">{{ t.label }}</NRadio>
   </NRadioGroup>
   <NInput v-model:value="filterValue" class="news-filter-input" type="textarea" autosize />
   <div class="error-message-container" :style="{ visibility: errorMessage ? undefined : 'collapse' }">
@@ -14,11 +14,11 @@ import { watch, onMounted, ref } from 'vue';
 
 import { NRadio, NRadioGroup, NInput } from 'naive-ui';
 
-import { NewsFilterType } from '@enums/news-filter-type';
-import { NewsItem } from '@interfaces/news-item';
+import { NewsFilterType } from '@/enums/news-filter-type';
+import { NewsItem } from '@/interfaces/news-item';
 
 const props = defineProps<{ news: NewsItem; type: NewsFilterType; value: string; errorMessage: string }>();
-const emits = defineEmits<{
+const emit = defineEmits<{
   (e: 'update:type', value: NewsFilterType): void;
   (e: 'update:value', value: string): void;
 }>();
@@ -36,12 +36,12 @@ watch(
   () => selectedFilterType.value,
   () => {
     updateFilterValue();
-    emits('update:type', selectedFilterType.value);
+    emit('update:type', selectedFilterType.value);
   },
 );
 watch(
   () => filterValue.value,
-  () => emits('update:value', filterValue.value),
+  () => emit('update:value', filterValue.value),
 );
 
 function updateFilterValue(): void {
@@ -63,5 +63,5 @@ function getFilterValueByType(): string {
 </script>
 
 <style lang="scss" scoped>
-@import './AddNewsFilter';
+@forward './AddNewsFilter';
 </style>

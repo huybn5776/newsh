@@ -1,13 +1,14 @@
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 export function getFromStorage<T>(key: string): T | null {
   const value = localStorage.getItem(key);
   return value !== null ? JSON.parse(value) : null;
 }
 
-export function saveToStorage<T>(key: string, value: T | null): void {
+export function saveToStorage(key: string, value: unknown | null): void {
   localStorage.setItem(key.toString(), JSON.stringify(value));
 }
 
-export function updateFromStorage<T>(
+export function updateFromStorage<T extends object>(
   key: string,
   updater: (value: T | null) => T | null,
 ): { updated: boolean; value: T | null } {

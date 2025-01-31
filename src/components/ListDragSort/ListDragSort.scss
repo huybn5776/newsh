@@ -18,8 +18,8 @@
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
   user-select: none;
-  transition: transform .3s;
   transform-origin: 40px center;
+  transition: transform .3s;
 
   .dragging-item & {
     transform: scale(1.05);

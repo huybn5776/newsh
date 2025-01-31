@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal';
 import * as R from 'ramda';
 
-import { NonNullableProps } from '@utils/type-utils';
+import { NonNullableProps } from '@/utils/type-utils';
 
 export const isNilOrEmpty = R.either(R.isEmpty, R.isNil) as (value: unknown) => value is null | undefined;
 export function isNotNilOrEmpty<T>(value: T | null | undefined): value is T {
@@ -22,7 +22,7 @@ export function deleteNilProperties<T extends object>(obj: T): Partial<NonNullab
   return newObj;
 }
 
-export function isNestedEmpty<T extends object>(value: T | null | undefined): boolean {
+export function isNestedEmpty(value: object | null | undefined): boolean {
   if (isNilOrEmpty(value)) {
     return true;
   }

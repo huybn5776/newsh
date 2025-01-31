@@ -3,10 +3,10 @@ import { onMounted } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import { useNotification, useMessage } from 'naive-ui';
 
-import { useMitt } from '@compositions/use-mitt';
-import { SettingKey } from '@enums/setting-key';
-import { refreshDropboxTokenIfNeeded } from '@services/dropbox-service';
-import { saveSeenNewsToDropbox } from '@services/dropbox-sync-service';
+import { useMitt } from '@/compositions/use-mitt';
+import { SettingKey } from '@/enums/setting-key';
+import { refreshDropboxTokenIfNeeded } from '@/services/dropbox-service';
+import { saveSeenNewsToDropbox } from '@/services/dropbox-sync-service';
 import {
   getSettingFromStorage,
   syncSettingValues,
@@ -15,8 +15,8 @@ import {
   uploadSettingsToDropbox,
   calcChangedSettings,
   calcAddedSeenNews,
-} from '@services/setting-service';
-import { isNotNilOrEmpty } from '@utils/object-utils';
+} from '@/services/setting-service';
+import { isNotNilOrEmpty } from '@/utils/object-utils';
 
 const settingKeysToUpdateSettings: SettingKey[] = [
   SettingKey.HiddenSources,
@@ -42,7 +42,7 @@ export function useAutoSyncWithDropbox(): void {
   const { onEvent } = useMitt();
 
   onMounted(async () => {
-    await refreshDropboxTokenIfNeeded();
+    refreshDropboxTokenIfNeeded();
     const [syncSettingsResult, syncSeenNewsResult] = await Promise.all([syncSettingValues(), syncSeenNews()]);
     if (syncUpdateNotify && (syncSettingsResult || syncSeenNewsResult)) {
       const updatedSettingsCount = syncSettingsResult
@@ -79,7 +79,7 @@ export function useAutoSyncWithDropbox(): void {
 
   function syncSeenNewsOnChange(): void {
     const debouncedSyncSeenNewsOnChange = useDebounceFn(() => {
-      saveSeenNewsToDropbox(getSettingFromStorage(SettingKey.SeenNewsItems) || []);
+      saveSeenNewsToDropbox(getSettingFromStorage(SettingKey.SeenNewsItems) ?? []);
     }, 10000);
     onEvent(SettingKey.SeenNewsItems, () => {
       debouncedSyncSeenNewsOnChange();

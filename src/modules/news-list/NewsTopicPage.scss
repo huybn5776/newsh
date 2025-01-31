@@ -17,8 +17,8 @@
   background-size: 16px;
   border-radius: 50%;
   opacity: .9;
-  transition: background-color .2s;
   transform: rotate(180deg);
+  transition: background-color .2s;
 
   &:hover {
     background-color: rgba(white, .1);

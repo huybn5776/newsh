@@ -1,9 +1,9 @@
 import * as R from 'ramda';
 
-import { getUserCountry } from '@api/geolocaiton-api';
-import { getRegionList } from '@api/google-news-api';
-import { RegionItem } from '@interfaces/region-item';
-import { SelectionItem } from '@interfaces/selection-item';
+import { getUserCountry } from '@/api/geolocaiton-api';
+import { getRegionList } from '@/api/google-news-api';
+import { RegionItem } from '@/interfaces/region-item';
+import { SelectionItem } from '@/interfaces/selection-item';
 
 export async function getRegionSelections(): Promise<{
   selections: SelectionItem[];
