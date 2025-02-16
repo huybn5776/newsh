@@ -1,6 +1,6 @@
 <template>
   <button class="chevron-arrow-container" @click="toggleDirection">
-    <i class="chevron-arrow" :class="direction"></i>
+    <i class="chevron-arrow" :class="direction" />
   </button>
 </template>
 

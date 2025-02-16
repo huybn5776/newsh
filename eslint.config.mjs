@@ -101,7 +101,18 @@ export default typescriptEslint.config(
       '@typescript-eslint/unified-signatures': 0,
 
       'vue/attribute-hyphenation': [2, 'never'],
+      'vue/html-closing-bracket-newline': 0,
+      'vue/html-indent': 0,
+      'vue/html-self-closing': [
+        1,
+        {
+          html: { void: 'any', normal: 'always', component: 'always' },
+          svg: 'always',
+          math: 'always',
+        },
+      ],
       'vue/max-attributes-per-line': 0,
+      'vue/singleline-html-element-content-newline': 0,
       'vue/v-on-event-hyphenation': [2, 'never'],
       'vuejs-accessibility/anchor-has-content': 0,
       'vuejs-accessibility/heading-has-content': 0,

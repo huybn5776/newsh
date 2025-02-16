@@ -1,6 +1,6 @@
 <template>
   <div class="dots-loader-container">
-    <div class="dots-loader"></div>
+    <div class="dots-loader" />
   </div>
 </template>
 
