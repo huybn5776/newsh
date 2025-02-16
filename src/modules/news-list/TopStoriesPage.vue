@@ -12,7 +12,7 @@
     <NextTopicSelection
       v-if="completeLoaded"
       title="Next topic to show"
-      :disabledTopics="loadedTopics"
+      :disabledTopics="disabledTopics"
       @topicClick="appendTopic"
     />
   </div>
@@ -72,6 +72,7 @@ const newsTopicList = computed(() => {
   }
   return newsTopicItems;
 });
+const disabledTopics = computed<Record<string, true>>(() => ({ ...loadingTopics.value, ...loadedTopics.value }));
 const completeLoaded = ref(false);
 
 const allNewsTopicInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
@@ -172,8 +173,10 @@ async function appendTopic(topicId: string): Promise<void> {
   if (!topic) {
     return;
   }
-  loadedTopics.value = { ...loadedTopics.value, [topicId]: true };
   const topicItem = await getNonDuplicatedNewsTopic(topic);
+  if (topicItem.newsItems.length) {
+    loadedTopics.value = { ...loadedTopics.value, [topicId]: true };
+  }
   newsTopics.value = [...newsTopics.value, topicItem];
 }
 </script>

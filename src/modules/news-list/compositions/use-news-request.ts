@@ -1,6 +1,7 @@
 import { ref, computed, watch, Ref, readonly, DeepReadonly, onUnmounted, ComputedRef } from 'vue';
 
-import { useLoadingBar } from 'naive-ui';
+import { useMessage, useLoadingBar } from 'naive-ui';
+import { omit } from 'ramda';
 
 import { getSingleTopicNews, getMultiTopicNews, getSectionTopicNews } from '@/api/google-news-api';
 import { NewsTopicType } from '@/enums/news-topic-type';
@@ -17,9 +18,9 @@ export function useNewsRequest(): {
   loadingTopics: DeepReadonly<Ref<Record<string, true>>>;
   isLoading: ComputedRef<boolean>;
 } {
-  const pendingRequests = ref<Promise<unknown>[]>([]);
+  const message = useMessage();
   const loadingTopics = ref<Record<string, true>>({} as Record<string, true>);
-  const isLoading = computed(() => !!pendingRequests.value.length);
+  const isLoading = computed(() => !!Object.keys(loadingTopics.value).length);
   const languageAndRegion = computed(() => {
     const value = getSettingFromStorage(SettingKey.LanguageAndRegion);
     if (!value) {
@@ -30,24 +31,13 @@ export function useNewsRequest(): {
 
   const loadingBar = useLoadingBar();
 
-  function withPushPendingRequest<T extends unknown[], U extends Promise<unknown>>(
-    fn: (...args: T) => U,
-  ): (...args: T) => U {
-    return (...args: T) => {
-      const request = fn(...args);
-      pendingRequests.value = [...pendingRequests.value, request];
-      request.then(() => (pendingRequests.value = pendingRequests.value.filter((req) => req !== request)));
-      return request;
-    };
-  }
-
-  function withPushLoadingTopic<U extends Promise<unknown>>(
-    fn: (newsTopicId: string) => U,
-  ): (newsTopicId: string) => U {
-    return (newsTopicId: string) => {
+  function withPushLoadingTopic<T extends string, U extends Promise<unknown>>(
+    fn: (newsTopicId: T) => U,
+  ): (newsTopicId: T) => U {
+    return (newsTopicId: T) => {
       const request = fn(newsTopicId);
       loadingTopics.value = { ...loadingTopics.value, [newsTopicId]: true };
-      request.then(() => delete loadingTopics.value[newsTopicId]);
+      request.then(() => (loadingTopics.value = omit([newsTopicId], loadingTopics.value)));
       return request;
     };
   }
@@ -66,11 +56,21 @@ export function useNewsRequest(): {
     loadingBar.finish();
   });
 
-  const getSingleTopic = withPushLoadingTopic(withPushPendingRequest(withLanguageAndRegion(getSingleTopicNews)));
-  const getMultiTopic = withPushPendingRequest(withLanguageAndRegion(getMultiTopicNews));
-  const getSectionTopic = withPushPendingRequest(withLanguageAndRegion(getSectionTopicNews));
+  const getSingleTopic = withPushLoadingTopic(withLanguageAndRegion(getSingleTopicNews));
+  const getMultiTopic = withPushLoadingTopic(withLanguageAndRegion(getMultiTopicNews));
+  const getSectionTopic = withPushLoadingTopic(withLanguageAndRegion(getSectionTopicNews));
   const getNews = async (topic: NewsTopicInfo): Promise<NewsTopicItem> => {
-    const newsTopicItem = await getNewsByType(topic);
+    const newsTopicItem = await getNewsByType(topic).catch((e) => {
+      console.error(e);
+      message.error(`Fail to load topic '${topic.name}'.`);
+      loadingTopics.value = omit([topic.id], loadingTopics.value);
+      return {
+        id: topic.id,
+        name: topic.name,
+        newsItems: [],
+        isPartial: topic.type !== NewsTopicType.SectionTopic,
+      };
+    });
     newsTopicItem.name = topic.name;
     return newsTopicItem;
   };
