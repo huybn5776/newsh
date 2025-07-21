@@ -45,13 +45,99 @@ function sectionRequestBody(topicId: string, languageAndRegion: string): string[
   ];
 }
 
-const multiTopicRequestCode = {
-  topStories: 'A3Zed',
-  worldAndNation: 'xBjcpf',
-  others: 'N0vcJe',
+export enum NewsRequestTypes {
+  TopStories = 'topStories',
+  Recommended = 'recommended',
+  AllTopics = 'allTopics',
+}
+
+const topicRequestCode: Record<NewsRequestTypes, NewsRequestContent> = {
+  [NewsRequestTypes.TopStories]: { id: 'Giukpf', contentType: 'gbreq' },
+  [NewsRequestTypes.Recommended]: { id: 'HOnZud', contentType: 'ghfypsreq' },
+  [NewsRequestTypes.AllTopics]: { id: 'i6owq', contentType: 'ghncsreq' },
 };
 
+interface NewsRequestContent {
+  id: string;
+  contentType: string;
+}
+
 type NewsObjectRaw = [number] & [unknown, NewsObjectRaw | NewsObjectRaw[] | string];
+
+function createRequestBody(request: NewsRequestContent, languageAndRegion: string): [string, string][] {
+  return [
+    [
+      request.id,
+      `["${request.contentType}",[["zh-TW","TW",["FINANCE_TOP_INDICES","WEB_TEST_1_0_0"],null,null,1,1,"${languageAndRegion}"]]]`,
+    ],
+  ];
+}
+
+export async function getTopStoriesNews(languageAndRegion: string): Promise<NewsTopicItem[]> {
+  const responseArray = await fetchNews(createRequestBody(topicRequestCode.topStories, languageAndRegion));
+  const newsTopicOuterObject = JSON.parse(responseArray[0][2]);
+
+  const topNewsObject = newsTopicOuterObject[1][3];
+  const featuredNewsObject = newsTopicOuterObject[1][5];
+
+  const topNewsObjectItems: [] = topNewsObject[1];
+  const topNewsItems: NewsItem[] = topNewsObjectItems.map((newsObjectItem) => {
+    const newsObject = newsObjectItem[0]?.[0] || newsObjectItem[1];
+    const newsItem = parseNewsItem(newsObject);
+    const hasSubNewsObjects = !!newsObjectItem[0]?.[0] && !!(newsObjectItem[0]?.[1] as [])?.length;
+    if (hasSubNewsObjects) {
+      newsItem.relatedNewsItems = (newsObjectItem[0][1] as []).map((item) => parseNewsItem(item[0]));
+    }
+    return newsItem;
+  });
+
+  const featuredNewsObjectItems: [] = featuredNewsObject[1];
+  const featuredNewsItems: NewsItem[] = featuredNewsObjectItems.map((newsObjectItem) =>
+    parseNewsItem(newsObjectItem[0]),
+  );
+
+  return [
+    {
+      id: (topNewsObject[2][1] as string).split('/')[1],
+      name: topNewsObject[0][1],
+      newsItems: [...topNewsItems, ...featuredNewsItems],
+      isPartial: false,
+    },
+  ];
+}
+
+export async function getRecommendedNews(languageAndRegion: string): Promise<NewsTopicItem> {
+  const responseArray = await fetchNews(createRequestBody(topicRequestCode.recommended, languageAndRegion));
+  const newsTopicOuterObject = JSON.parse(responseArray[0][2]);
+  const newsTopicObject = newsTopicOuterObject[1];
+  const newsObjectItems: [] = newsTopicObject[2];
+  const newsItems: NewsItem[] = newsObjectItems.map((newsObjectItem) => parseNewsItem(newsObjectItem[0]));
+  return {
+    id: 'for_you',
+    name: newsTopicObject[0],
+    newsItems,
+    isPartial: false,
+  };
+}
+
+export async function getAllTopicsNews(languageAndRegion: string): Promise<NewsTopicItem[]> {
+  const responseArray = await fetchNews(createRequestBody(topicRequestCode.allTopics, languageAndRegion));
+  const newsTopicOuterObject = JSON.parse(responseArray[0][2]);
+  const newsTopicObjects: [] = newsTopicOuterObject[1][1];
+
+  return newsTopicObjects.map((topicObject) => {
+    const newsObjects: [] = topicObject[1];
+    const newsItems = newsObjects.flatMap((newsObject) => {
+      return newsObject[0]?.[0] === NewsObjectType.SingleNews ? [parseNewsItem(newsObject[0])] : [];
+    });
+    return {
+      id: (topicObject[2][1] as string).split('/')[1],
+      name: topicObject[0],
+      newsItems,
+      isPartial: true,
+    };
+  });
+}
 
 export async function getSingleTopicNews(topicId: string, languageAndRegion: string): Promise<NewsTopicItem> {
   const responseArray = await fetchNews(requestBodyByTopic(topicId, languageAndRegion));
@@ -90,29 +176,6 @@ export async function getTopicInfo(topicId: string, languageAndRegion: string): 
   )[1][1] as NewsObjectRaw;
   const topicName: string | undefined = infoArray?.[2];
   return { name: topicName };
-}
-
-export async function getMultiTopicNews(
-  topic: keyof typeof multiTopicRequestCode,
-  languageAndRegion: string,
-): Promise<NewsTopicItem[]> {
-  const requestCode = multiTopicRequestCode[topic];
-  const requestBody = [
-    [
-      requestCode,
-      `["waareq",["zh-TW","TW",["SPORTS_FULL_COVERAGE","WEB_TEST_1_0_0"],null,[],1,1,"${languageAndRegion}",null,480]]`,
-    ],
-  ];
-  const responseArray = await fetchNews(requestBody);
-  const newsObjects = JSON.parse(responseArray[0][2])[1][2];
-  const responseType = newsObjects[0];
-  if (responseType !== NewsObjectType.MultiTopics) {
-    throw new Error(`Incorrect response type, expect ${topic} to have multi topics response.`);
-  }
-  const newsTopicObjects = (newsObjects[3] as NewsObjectRaw[]).map(
-    (newsObject: NewsObjectRaw) => newsObject[2],
-  ) as NewsObjectRaw[];
-  return newsTopicObjects.map((newsTopicObject) => ({ ...parseNewsTopic(newsTopicObject), isPartial: true }));
 }
 
 async function fetchNews(requestBody: unknown): Promise<NewsObjectRaw[]> {

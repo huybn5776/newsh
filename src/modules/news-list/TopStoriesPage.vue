@@ -78,7 +78,7 @@ const completeLoaded = ref(false);
 const allNewsTopicInfo = getSettingFromStorage(SettingKey.AllTopicsInfo);
 const isMobile = useIsMobile();
 useProvideSeenNews();
-const { getNews, getMultiTopicNews, loadingTopics, isLoading } = useNewsRequest();
+const { getNews, getTopStoriesNews, getRecommendedNews, getAllTopicsNews, loadingTopics, isLoading } = useNewsRequest();
 useAutoSyncWithDropbox();
 
 onMounted(async () => {
@@ -97,9 +97,9 @@ async function loadNews(): Promise<void> {
     .filter(isNotNilOrEmpty);
 
   newsLoaders.value = [
-    () => getNonDuplicatedMultiNewsTopic('topStories'),
-    () => getNonDuplicatedMultiNewsTopic('worldAndNation'),
-    () => getNonDuplicatedMultiNewsTopic('others'),
+    () => getNonDuplicatedTopStories(),
+    () => getNonDuplicatedRecommends(),
+    () => getNonDuplicatedAllTopic(),
     ...(newsTopicsAfterTopStories?.map((topic) => async () => {
       loadedTopics.value = { ...loadedTopics.value, [topic.id]: true };
       return [await getNonDuplicatedNewsTopic(topic)];
@@ -120,10 +120,18 @@ async function loadNextTopic(): Promise<void> {
   }
 }
 
-async function getNonDuplicatedMultiNewsTopic(
-  topicId: Parameters<typeof getMultiTopicNews>[0],
-): Promise<NewsTopicItem[]> {
-  const newsTopicItems = await getMultiTopicNews(topicId);
+async function getNonDuplicatedTopStories(): Promise<NewsTopicItem[]> {
+  const newsTopicItems = await getTopStoriesNews();
+  return removeDuplicatedNewsItemOfTopics(newsTopics.value, newsTopicItems);
+}
+
+async function getNonDuplicatedRecommends(): Promise<NewsTopicItem[]> {
+  const newsTopicItems = await getRecommendedNews();
+  return removeDuplicatedNewsItemOfTopics(newsTopics.value, [newsTopicItems]);
+}
+
+async function getNonDuplicatedAllTopic(): Promise<NewsTopicItem[]> {
+  const newsTopicItems = await getAllTopicsNews();
   return removeDuplicatedNewsItemOfTopics(newsTopics.value, newsTopicItems);
 }
 

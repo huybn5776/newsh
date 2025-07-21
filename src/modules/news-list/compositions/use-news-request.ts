@@ -3,7 +3,14 @@ import { ref, computed, watch, Ref, readonly, DeepReadonly, onUnmounted, Compute
 import { useMessage, useLoadingBar } from 'naive-ui';
 import { omit } from 'ramda';
 
-import { getSingleTopicNews, getMultiTopicNews, getSectionTopicNews } from '@/api/google-news-api';
+import {
+  getSingleTopicNews,
+  getSectionTopicNews,
+  getTopStoriesNews,
+  getRecommendedNews,
+  getAllTopicsNews,
+  NewsRequestTypes,
+} from '@/api/google-news-api';
 import { NewsTopicType } from '@/enums/news-topic-type';
 import { SettingKey } from '@/enums/setting-key';
 import { NewsTopicInfo } from '@/interfaces/news-topic-info';
@@ -13,8 +20,10 @@ import { getSettingFromStorage } from '@/services/setting-service';
 export function useNewsRequest(): {
   getNews: (topic: NewsTopicInfo) => Promise<NewsTopicItem>;
   getSingleTopicNews: (topic: Parameters<typeof getSingleTopicNews>[0]) => Promise<NewsTopicItem>;
-  getMultiTopicNews: (topic: Parameters<typeof getMultiTopicNews>[0]) => Promise<NewsTopicItem[]>;
   getSectionTopicNews: (topic: Parameters<typeof getSectionTopicNews>[0]) => Promise<NewsTopicItem>;
+  getTopStoriesNews: () => Promise<NewsTopicItem[]>;
+  getRecommendedNews: () => Promise<NewsTopicItem>;
+  getAllTopicsNews: () => Promise<NewsTopicItem[]>;
   loadingTopics: DeepReadonly<Ref<Record<string, true>>>;
   isLoading: ComputedRef<boolean>;
 } {
@@ -42,11 +51,26 @@ export function useNewsRequest(): {
     };
   }
 
+  function withPushLoadingTopicOfType<U extends Promise<unknown>>(requestType: NewsRequestTypes, fn: () => U): () => U {
+    return () => {
+      const request = fn();
+      loadingTopics.value = { ...loadingTopics.value, [requestType]: true };
+      request.then(() => (loadingTopics.value = omit([requestType], loadingTopics.value)));
+      return request;
+    };
+  }
+
   function withLanguageAndRegion<U extends Promise<unknown>, T extends string>(
     fn: (topic: T, languageAndRegion: string) => U,
   ): (topic: T) => U {
     return (topic: T) => {
       return fn(topic, languageAndRegion.value);
+    };
+  }
+
+  function withLanguageAndRegionNoTopicId<U extends Promise<unknown>>(fn: (languageAndRegion: string) => U): () => U {
+    return () => {
+      return fn(languageAndRegion.value);
     };
   }
 
@@ -57,8 +81,20 @@ export function useNewsRequest(): {
   });
 
   const getSingleTopic = withPushLoadingTopic(withLanguageAndRegion(getSingleTopicNews));
-  const getMultiTopic = withPushLoadingTopic(withLanguageAndRegion(getMultiTopicNews));
   const getSectionTopic = withPushLoadingTopic(withLanguageAndRegion(getSectionTopicNews));
+  const getTopStories = withPushLoadingTopicOfType(
+    NewsRequestTypes.TopStories,
+    withLanguageAndRegionNoTopicId(getTopStoriesNews),
+  );
+  const getRecommended = withPushLoadingTopicOfType(
+    NewsRequestTypes.Recommended,
+    withLanguageAndRegionNoTopicId(getRecommendedNews),
+  );
+  const getAllTopics = withPushLoadingTopicOfType(
+    NewsRequestTypes.AllTopics,
+    withLanguageAndRegionNoTopicId(getAllTopicsNews),
+  );
+
   const getNews = async (topic: NewsTopicInfo): Promise<NewsTopicItem> => {
     const newsTopicItem = await getNewsByType(topic).catch((e) => {
       console.error(e);
@@ -92,8 +128,10 @@ export function useNewsRequest(): {
   return {
     getNews,
     getSingleTopicNews: getSingleTopic,
-    getMultiTopicNews: getMultiTopic,
     getSectionTopicNews: getSectionTopic,
+    getTopStoriesNews: getTopStories,
+    getRecommendedNews: getRecommended,
+    getAllTopicsNews: getAllTopics,
     loadingTopics: readonly(loadingTopics),
     isLoading,
   };

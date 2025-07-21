@@ -2,7 +2,14 @@ import * as E from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import { TaskEither } from 'fp-ts/TaskEither';
 
-import { getMultiTopicNews, getSectionTopicNews, getTopicInfo, getSingleTopicNews } from '@/api/google-news-api';
+import {
+  getSectionTopicNews,
+  getTopicInfo,
+  getSingleTopicNews,
+  getTopStoriesNews,
+  getRecommendedNews,
+  getAllTopicsNews,
+} from '@/api/google-news-api';
 import { NewsTopicType } from '@/enums/news-topic-type';
 import { SettingEventType } from '@/enums/setting-event-type';
 import { SettingKey } from '@/enums/setting-key';
@@ -13,9 +20,9 @@ import { saveSettingToStorage, getSettingFromStorage } from '@/services/setting-
 export async function prepareNewsInfo(languageAndRegion: string): Promise<void> {
   const topicItems: NewsTopicItem[] = (
     await Promise.all([
-      await getMultiTopicNews('topStories', languageAndRegion),
-      await getMultiTopicNews('worldAndNation', languageAndRegion),
-      await getMultiTopicNews('others', languageAndRegion),
+      getTopStoriesNews(languageAndRegion),
+      getRecommendedNews(languageAndRegion),
+      getAllTopicsNews(languageAndRegion),
     ])
   ).flatMap((topics) => topics);
 
