@@ -113,10 +113,17 @@ async function loadNextTopic(): Promise<void> {
   if (newsLoader) {
     const loadNewsRequest = newsLoader();
     pendingRequest.value = loadNewsRequest;
-    const newsTopicItems = await loadNewsRequest;
-    pendingRequest.value = undefined;
-    newsTopics.value = [...newsTopics.value, ...newsTopicItems];
-    completeLoaded.value = newsLoaders.value.length === 0 && !isLoading.value;
+    try {
+      const newsTopicItems = await loadNewsRequest;
+      pendingRequest.value = undefined;
+      newsTopics.value = [...newsTopics.value, ...newsTopicItems];
+      completeLoaded.value = newsLoaders.value.length === 0 && !isLoading.value;
+    } catch (e) {
+      console.error(e);
+      pendingRequest.value = undefined;
+      completeLoaded.value = newsLoaders.value.length === 0 && !isLoading.value;
+      loadNextTopic();
+    }
   }
 }
 

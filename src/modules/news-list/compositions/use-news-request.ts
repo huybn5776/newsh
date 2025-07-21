@@ -46,7 +46,12 @@ export function useNewsRequest(): {
     return (newsTopicId: T) => {
       const request = fn(newsTopicId);
       loadingTopics.value = { ...loadingTopics.value, [newsTopicId]: true };
-      request.then(() => (loadingTopics.value = omit([newsTopicId], loadingTopics.value)));
+      request
+        .then(() => (loadingTopics.value = omit([newsTopicId], loadingTopics.value)))
+        .catch(() => {
+          message.error(`Fail to load topic of id '${newsTopicId}'.`);
+          loadingTopics.value = omit([newsTopicId], loadingTopics.value);
+        });
       return request;
     };
   }
@@ -55,7 +60,12 @@ export function useNewsRequest(): {
     return () => {
       const request = fn();
       loadingTopics.value = { ...loadingTopics.value, [requestType]: true };
-      request.then(() => (loadingTopics.value = omit([requestType], loadingTopics.value)));
+      request
+        .then(() => (loadingTopics.value = omit([requestType], loadingTopics.value)))
+        .catch(() => {
+          message.error(`Fail to load topic of type '${requestType}'.`);
+          loadingTopics.value = omit([requestType], loadingTopics.value);
+        });
       return request;
     };
   }
